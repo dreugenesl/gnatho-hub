@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17181C">
+<meta name="description" content="Stelmakh LAB — замовлення-наряд. Реєстрація клініки та формування наряду онлайн.">
+<title>Stelmakh LAB — Замовлення-наряд</title>
+</head>
+<body>
+<style>
+  :root{
+    --paper:#FCFCFD; --raise:#FFFFFF; --head:#17181C; --head-ink:#F2F3F5;
+    --ink:#1E2025; --strong:#2A2D33; --muted:#787D87; --faint:#A8ACB5;
+    --line:#E4E6EB; --line-2:#D4D8DF; --field:#FFFFFF;
+    --accent:#1E2025; --accent-ink:#FCFCFD;
+    --blue:#7D96BD; --blue-strong:#5F7BA6; --blue-soft:#EBF0F7;
+    --ok:#2E7D5B; --err:#B4462F;
+    --shadow:0 1px 2px rgba(23,24,28,.05),0 10px 34px -20px rgba(23,24,28,.22);
+    --radius:2px;
+    --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#141519; --raise:#1C1E23; --head:#0E0F12; --head-ink:#ECEDF0;
+      --ink:#E8E9EC; --strong:#F1F2F4; --muted:#969BA5; --faint:#6E727C;
+      --line:#282B32; --line-2:#363A43; --field:#1F2127;
+      --accent:#ECEDF0; --accent-ink:#141519;
+      --blue:#8CA3C6; --blue-strong:#9FB4D4; --blue-soft:#232A36;
+      --ok:#5FB88C; --err:#D9765E;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 36px -20px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#FCFCFD; --raise:#FFFFFF; --head:#17181C; --head-ink:#F2F3F5;
+    --ink:#1E2025; --strong:#2A2D33; --muted:#787D87; --faint:#A8ACB5;
+    --line:#E4E6EB; --line-2:#D4D8DF; --field:#FFFFFF;
+    --accent:#1E2025; --accent-ink:#FCFCFD;
+    --blue:#7D96BD; --blue-strong:#5F7BA6; --blue-soft:#EBF0F7;
+    --ok:#2E7D5B; --err:#B4462F;
+    --shadow:0 1px 2px rgba(23,24,28,.05),0 10px 34px -20px rgba(23,24,28,.22);
+  }
+  :root[data-theme="dark"]{
+    --paper:#141519; --raise:#1C1E23; --head:#0E0F12; --head-ink:#ECEDF0;
+    --ink:#E8E9EC; --strong:#F1F2F4; --muted:#969BA5; --faint:#6E727C;
+    --line:#282B32; --line-2:#363A43; --field:#1F2127;
+    --accent:#ECEDF0; --accent-ink:#141519;
+    --blue:#8CA3C6; --blue-strong:#9FB4D4; --blue-soft:#232A36;
+    --ok:#5FB88C; --err:#D9765E;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 36px -20px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;}
+  ::selection{background:var(--blue-soft);}
+  .wrap{max-width:920px; margin:0 auto; padding:0 0 96px;}
+
+  /* ── Masthead (dark bar like the PDF) ── */
+  .masthead{color:var(--head-ink); background:var(--head);
+    padding:clamp(26px,4vw,40px) clamp(18px,4vw,40px); min-height:110px;
+    display:flex; gap:22px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:15px; min-width:0;}
+  .logo{width:40px; height:40px; flex:none;}
+  .brand-txt .wm{font-size:clamp(20px,3.6vw,26px); font-weight:600; letter-spacing:.02em; line-height:1;}
+  .brand-txt .wm sup{font-size:.42em; letter-spacing:.22em; font-weight:600; margin-left:3px; vertical-align:super;}
+  .brand-txt .sub{font-size:10px; letter-spacing:.4em; text-transform:uppercase;
+    color:#9FA4AE; margin-top:7px;}
+  .head-right{text-align:right; font-size:11.5px; line-height:1.7; color:#BCC0C8; letter-spacing:.01em;}
+  .head-right .no{display:inline-flex; align-items:center; gap:8px; margin-bottom:8px;
+    color:var(--head-ink); font-size:12px; letter-spacing:.14em; text-transform:uppercase;}
+  .head-right .no input{width:120px; background:transparent; border:0; border-bottom:1px solid #4c5058;
+    color:var(--blue); font-family:inherit; font-size:13px; font-weight:600; letter-spacing:.04em;
+    padding:2px 4px; text-align:right;}
+  .head-right a{color:#BCC0C8; text-decoration:none;} .head-right a:hover{color:#fff;}
+
+  .body{padding:clamp(18px,4vw,36px) clamp(18px,4vw,40px);}
+  .view[hidden]{display:none;}
+
+  /* nav tabs */
+  .tabs{display:flex; padding:0 clamp(18px,4vw,40px); border-bottom:1px solid var(--line); background:var(--paper);}
+  .tab{background:transparent; border:0; padding:15px 2px; margin-right:26px; font-family:inherit;
+    font-size:13.5px; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; letter-spacing:.02em;}
+  .tab:hover{color:var(--ink);}
+  .tab.on{color:var(--ink); border-bottom-color:var(--blue); font-weight:600;}
+  .tab:focus-visible{outline:2px solid var(--blue); outline-offset:-4px;}
+
+  /* registered-clinic banner */
+  .banner{margin:16px clamp(18px,4vw,40px) 0; padding:10px 14px; border:1px solid var(--line-2);
+    border-left:2px solid var(--blue); border-radius:2px; font-size:13px; color:var(--muted);
+    background:var(--raise); display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  .banner b{color:var(--strong);}
+  .banner button{background:transparent; border:0; color:var(--blue-strong); font-size:12.5px; cursor:pointer;
+    text-decoration:underline; font-family:inherit; padding:0;}
+
+  /* ── generic form bits ── */
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:14px 34px; margin-bottom:2px;}
+  @media (max-width:620px){ .row{grid-template-columns:1fr;} }
+  .f{display:flex; align-items:baseline; gap:10px; padding:7px 0;}
+  .f label{font-size:12.5px; color:var(--muted); flex:none; min-width:96px;}
+  .f.wide label{min-width:126px;}
+  .f input, .f select{flex:1; min-width:0; font-family:inherit; font-size:14px; color:var(--ink);
+    background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:5px 2px;
+    transition:border-color .15s ease;}
+  .f input:focus, .f select:focus{outline:none; border-color:var(--blue);}
+  select{appearance:none;}
+
+  h3.block{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-strong);
+    font-weight:600; margin:30px 0 4px;}
+  .block-note{font-size:12px; color:var(--faint); margin:0 0 14px;}
+  .divider{height:1px; background:var(--line); margin:26px 0;}
+
+  /* materials-return two columns of small labelled lines */
+  .mat-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 34px;}
+  @media (max-width:620px){ .mat-grid{grid-template-columns:1fr;} }
+
+  /* colors triple row */
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px 30px;}
+  @media (max-width:680px){ .row3{grid-template-columns:1fr;} }
+  .col-f label{display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--blue-strong); font-weight:600; margin-bottom:2px;}
+  .col-f input{width:100%; font-family:inherit; font-size:14px; color:var(--ink);
+    background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:6px 2px;
+    transition:border-color .15s ease;}
+  .col-f input:focus{outline:none; border-color:var(--blue);}
+
+  /* tooth chart */
+  .teeth{background:var(--raise); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 10px 12px; box-shadow:var(--shadow); overflow-x:auto;}
+  .teeth-row{display:flex; gap:3px; justify-content:center; min-width:560px;}
+  .teeth-row+.teeth-row{margin-top:8px;}
+  .tooth{flex:1; max-width:48px; min-width:26px; border:1px solid var(--line-2); background:var(--field);
+    border-radius:3px; padding:5px 0 4px; cursor:pointer; text-align:center; user-select:none;
+    transition:.13s ease; color:var(--muted); font-size:10.5px; font-variant-numeric:tabular-nums;}
+  .tooth:hover{border-color:var(--blue);}
+  .tooth svg{display:block; width:20px; height:22px; margin:0 auto 3px;
+    stroke:var(--faint); fill:none; stroke-width:1.2; transition:.13s ease;}
+  .tooth.on{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+  .tooth.on svg{stroke:var(--blue);}
+  .tooth:focus-visible{outline:2px solid var(--blue); outline-offset:1px;}
+  .teeth-sel{margin-top:12px; font-size:12.5px; color:var(--muted); text-align:center; min-height:1.2em;}
+  .teeth-sel b{color:var(--strong); font-variant-numeric:tabular-nums;}
+
+  /* services two columns; each = checkbox + label + note line */
+  .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 30px;}
+  @media (max-width:680px){ .svc-grid{grid-template-columns:1fr;} }
+  .svc{display:flex; align-items:center; gap:9px; padding:6px 0; border-bottom:1px solid var(--line);}
+  .svc:hover{border-color:var(--line-2);}
+  .svc .box{width:15px; height:15px; flex:none; border:1px solid var(--line-2); border-radius:3px;
+    display:grid; place-items:center; cursor:pointer; transition:.13s ease; background:var(--field);}
+  .svc .box svg{width:9px; height:9px; opacity:0; transition:opacity .12s ease; color:var(--accent-ink);}
+  .svc.on .box{background:var(--accent); border-color:var(--accent);}
+  .svc.on .box svg{opacity:1;}
+  .svc .name{font-size:13px; color:var(--strong); flex:1; cursor:pointer; line-height:1.25;}
+  .svc .note{width:84px; flex:none; font-family:inherit; font-size:12px; color:var(--ink);
+    background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:3px 2px; text-align:right;}
+  .svc .note::placeholder{color:var(--faint);} .svc .note:focus{outline:none; border-color:var(--blue);}
+  .svc input[type=checkbox]{position:absolute; opacity:0; width:0; height:0;}
+
+  textarea{width:100%; font-family:inherit; font-size:14px; color:var(--ink); background:var(--field);
+    border:1px solid var(--line-2); border-radius:var(--radius); padding:11px 12px; min-height:76px;
+    resize:vertical; line-height:1.5; transition:border-color .15s ease;}
+  textarea:focus{outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft);}
+
+  .signrow{display:grid; grid-template-columns:repeat(3,1fr); gap:26px; margin-top:34px;}
+  @media (max-width:620px){ .signrow{grid-template-columns:1fr;} }
+  .sign{border-top:1px solid var(--line-2); padding-top:9px; font-size:11.5px; color:var(--muted);
+    text-align:center; letter-spacing:.02em;}
+
+  .actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; align-items:center;}
+  button{font-family:inherit; cursor:pointer; border-radius:var(--radius); transition:.15s ease; border:1px solid transparent;}
+  .btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);
+    padding:14px 26px; font-size:14.5px; font-weight:600; letter-spacing:.03em; flex:1 1 auto; min-width:210px;}
+  .btn-primary:hover{opacity:.9;} .btn-primary:active{transform:translateY(1px);}
+  .btn-ghost{background:transparent; color:var(--strong); border-color:var(--line-2); padding:14px 20px; font-size:14px; font-weight:500;}
+  .btn-ghost:hover{border-color:var(--muted);}
+  button:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+  .toast{margin-top:16px; font-size:13.5px; padding:12px 15px; border-radius:var(--radius);
+    border:1px solid var(--line-2); background:var(--raise); color:var(--muted); display:none;}
+  .toast.show{display:block;} .toast.ok{border-color:var(--ok); color:var(--ok);} .toast.err{border-color:var(--err); color:var(--err);}
+
+  footer{padding:22px clamp(18px,4vw,40px) 0; color:var(--muted); font-size:12px; line-height:1.7; border-top:1px solid var(--line); margin-top:8px;}
+  footer .fine{color:var(--faint); font-size:11px; margin-top:8px;}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+  @media print{
+    body{background:#fff;} .wrap{max-width:100%;}
+    .masthead{background:#17181C !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .tabs,.actions,.toast,.block-note,footer .fine,#clinicBanner{display:none;}
+    .teeth,textarea,.svc .note,.f input{box-shadow:none;}
+  }
+</style>
+
+<div class="wrap">
+  <div class="masthead">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M12 4 C24 9 30 14 30 20 C30 26 24 31 12 36 C17 30 20 25 20 20 C20 15 17 10 12 4 Z" fill="#F2F3F5"/>
+        <path d="M12 4 C17 10 20 15 20 20 C20 25 17 30 12 36 C15 29 16 24 16 20 C16 16 15 11 12 4 Z" fill="#7D96BD"/>
+      </svg>
+      <div class="brand-txt">
+        <div class="wm">Stelmakh<sup>LAB</sup></div>
+        <div class="sub">Create Aesthetics</div>
+      </div>
+    </div>
+    <div class="head-right">
+      <div class="no">Наряд № <input type="text" id="oid" spellcheck="false"></div>
+      <div>вул. В. Липківського, 37 В, оф. 1001, м. Київ, Україна, 03035</div>
+      <div>+38 067 807 21 22 · +38 050 807 21 55</div>
+      <div><a href="mailto:admin@stelmakhlab.com">admin@stelmakhlab.com</a></div>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button type="button" class="tab on" data-view="order">Наряд</button>
+    <button type="button" class="tab" data-view="register">Реєстрація клініки</button>
+  </nav>
+
+  <div id="clinicBanner" class="banner" hidden></div>
+
+  <form id="form" class="body view" data-view="order" novalidate>
+    <!-- clinic / patient -->
+    <div class="row">
+      <div class="f"><label>Клініка *</label><input type="text" id="clinic" autocomplete="organization"></div>
+      <div class="f"><label>Телефон</label><input type="tel" id="phone" autocomplete="tel"></div>
+      <div class="f"><label>Лікар *</label><input type="text" id="doctor"></div>
+      <div class="f"><label>Email</label><input type="email" id="cemail" autocomplete="email"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="row">
+      <div class="f wide"><label>ПІБ пацієнта *</label><input type="text" id="patient"></div>
+      <div class="f"><label>Дата доставки</label><input type="date" id="due"></div>
+      <div class="f wide"><label>Вік</label><input type="number" id="age" min="0" max="120"></div>
+      <div class="f"><label>Технік</label><input type="text" id="tech"></div>
+      <div class="f wide"><label>Дата замовлення</label><input type="date" id="odate"></div>
+      <div class="f"><label>Час</label><input type="text" id="otime" placeholder="—"></div>
+    </div>
+
+    <!-- materials to return -->
+    <h3 class="block">Матеріали клієнта, які необхідно повернути</h3>
+    <div class="mat-grid">
+      <div class="f wide"><label>Відбиткова ложка</label><input type="text" id="matTray" placeholder="—"></div>
+      <div class="f wide"><label>Абатменти</label><input type="text" id="matAbut" placeholder="—"></div>
+      <div class="f wide"><label>Суппорт лиц. дуги</label><input type="text" id="matBow" placeholder="—"></div>
+      <div class="f wide"><label>Аналоги</label><input type="text" id="matAnal" placeholder="—"></div>
+      <div class="f wide"><label>Трансфери</label><input type="text" id="matTrans" placeholder="—"></div>
+      <div class="f wide"><label>Інше</label><input type="text" id="matOther" placeholder="—"></div>
+    </div>
+
+    <h3 class="block">Матеріали Stelmakh Lab, які необхідно повернути</h3>
+    <div class="f wide" style="padding-top:0"><label style="min-width:0"></label><input type="text" id="matLab" placeholder="—"></div>
+
+    <!-- tooth chart -->
+    <h3 class="block">Зубна формула</h3>
+    <p class="block-note">Позначте зуби, яких стосується робота.</p>
+    <div class="teeth" id="teeth">
+      <div class="teeth-row" id="teethU"></div>
+      <div class="teeth-row" id="teethL"></div>
+      <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
+    </div>
+
+    <!-- restoration colors -->
+    <h3 class="block">Параметри реставрації</h3>
+    <div class="row3">
+      <div class="col-f"><label>Колір реставрації</label><input type="text" id="shade" placeholder="напр. A2"></div>
+      <div class="col-f"><label>Імплант система</label><input type="text" id="implant" placeholder="—"></div>
+      <div class="col-f"><label>Колір культі</label><input type="text" id="stump" placeholder="—"></div>
+    </div>
+
+    <!-- services -->
+    <h3 class="block">Види робіт</h3>
+    <p class="block-note">Позначте потрібні роботи; праворуч — номери зубів або кількість.</p>
+    <div class="svc-grid" id="svcGrid"></div>
+
+    <!-- important -->
+    <h3 class="block">Важливо для техніка</h3>
+    <textarea id="notes" placeholder="Побажання, деталі роботи…"></textarea>
+
+    <div class="signrow">
+      <div class="sign">Підпис лікаря</div>
+      <div class="sign">Вихідний контроль</div>
+      <div class="sign">Дата</div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
+      <button type="button" class="btn-ghost" id="download">Завантажити наряд</button>
+      <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+  </form>
+
+  <section id="viewRegister" class="body view" data-view="register" hidden>
+    <h3 class="block">Реєстрація клініки</h3>
+    <p class="block-note">Клініка, що починає співпрацю, реєструється один раз. Далі ці дані автоматично підставляються в кожен наряд на цьому пристрої.</p>
+    <div class="row">
+      <div class="f"><label>Клініка *</label><input type="text" id="rClinic" autocomplete="organization"></div>
+      <div class="f"><label>Телефон</label><input type="tel" id="rPhone" autocomplete="tel"></div>
+      <div class="f"><label>Лікар *</label><input type="text" id="rDoctor"></div>
+      <div class="f"><label>Імейл</label><input type="email" id="rEmail" autocomplete="email"></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn-primary" id="rSave">Зберегти реєстрацію</button>
+      <button type="button" class="btn-ghost" id="rClear">Очистити</button>
+    </div>
+    <div class="toast" id="rToast" role="status"></div>
+  </section>
+
+  <footer>
+    <div><b>Stelmakh LAB</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
+    <p class="fine">«Надіслати» відкриє вашу пошту з готовим листом на лабораторію. Скани та зліпки надсилайте вкладенням або звичним каналом.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  if(typeof NodeList!=="undefined" && NodeList.prototype && !NodeList.prototype.forEach)
+    NodeList.prototype.forEach=Array.prototype.forEach;
+  var $=function(s,r){return (r||document).querySelector(s);};
+  var LAB_EMAIL="admin@stelmakhlab.com";
+  var CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 6.2 5 8.6 9.6 3.5"/></svg>';
+
+  // order number + dates
+  var now=new Date(); function pad(n){return (n<10?"0":"")+n;}
+  var oid="SL-"+String(now.getFullYear()).slice(2)+pad(now.getMonth()+1)+pad(now.getDate())+"-"+pad(now.getHours())+pad(now.getMinutes());
+  $("#oid").value=oid;
+  $("#odate").value=now.getFullYear()+"-"+pad(now.getMonth()+1)+"-"+pad(now.getDate());
+  $("#otime").value=pad(now.getHours())+":"+pad(now.getMinutes());
+  var d7=new Date(now.getTime()+7*864e5);
+  $("#due").value=d7.getFullYear()+"-"+pad(d7.getMonth()+1)+"-"+pad(d7.getDate());
+
+  // ── tooth chart (FDI) ─────────────────────────────────────────────────────
+  // occlusal-view glyphs per tooth type: 1-2 incisor, 3 canine, 4-5 premolar, 6-8 molar
+  var GLYPH={
+    incisor:'<path d="M9 3 C13 1.5 15 1.5 15 5 L15 19 C15 22.5 13 22.5 9 21 C7 17 7 7 9 3 Z" transform="translate(0.5 0)"/>',
+    canine:'<path d="M12 2 C16 5 17 9 17 12 C17 16 15 20 12 22 C9 20 7 16 7 12 C7 9 8 5 12 2 Z"/>',
+    premolar:'<path d="M12 3 C17 3 19 7 19 12 C19 17 17 21 12 21 C7 21 5 17 5 12 C5 7 7 3 12 3 Z"/><path d="M9 12 Q12 10.5 15 12"/>',
+    molar:'<path d="M6 5 C8 3 16 3 18 5 C20 7 20 17 18 19 C16 21 8 21 6 19 C4 17 4 7 6 5 Z"/><path d="M8 12 Q12 10 16 12 M12 7 L12 11"/>'
+  };
+  function toothType(fdi){
+    var p=fdi%10;
+    return p<=2?"incisor":p===3?"canine":p<=5?"premolar":"molar";
+  }
+  var UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+  var LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+  var selTeeth={};
+  function renderTeethSel(){
+    var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
+    $("#teethSel").innerHTML = on.length
+      ? "Позначено: <b>"+on.join(", ")+"</b>"
+      : "Зуби не позначено";
+  }
+  function toothBtn(fdi){
+    var b=document.createElement("button");
+    b.type="button"; b.className="tooth"; b.dataset.fdi=fdi;
+    b.setAttribute("aria-pressed","false");
+    b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+GLYPH[toothType(fdi)]+'</svg>'+fdi;
+    b.addEventListener("click",function(){
+      selTeeth[fdi]=!selTeeth[fdi];
+      b.classList.toggle("on",!!selTeeth[fdi]);
+      b.setAttribute("aria-pressed",selTeeth[fdi]?"true":"false");
+      renderTeethSel();
+    });
+    return b;
+  }
+  UPPER.forEach(function(t){ $("#teethU").appendChild(toothBtn(t)); });
+  LOWER.forEach(function(t){ $("#teethL").appendChild(toothBtn(t)); });
+
+  // ── services (two columns exactly as in the paper form) ──────────────────
+  var SVC_L=[
+    "Коронка / Вінір / e.max CAD",
+    "Коронка/вінір з пошаровим нанесенням кераміки",
+    "Вінір на рефракторі",
+    "Тимчасова керамічна коронка",
+    "Коронка ZrO2 Multilayer",
+    "Коронка з гвинтовою фіксацією",
+    "Абатмент ZrO2",
+    "Тимчасова коронка з гвинтовою фіксацією",
+    "Хірургічний шаблон",
+    "Каппа/шина"
+  ];
+  var SVC_R=[
+    "Депрограматор",
+    "Тимчасова коронка з PMMA + Optiglaze Color",
+    "Тимчасова коронка з PMMA",
+    "Цифрове моделювання",
+    "Індивідуальна ложка",
+    "Діагностичні моделі",
+    "Індивідуалізація ясна",
+    "Первинний ковпачок",
+    "POM вкладка",
+    "3D друк одного квадранту",
+    "3D друк моделі щелепи"
+  ];
+  var svcGrid=$("#svcGrid");
+  function svcRow(name){
+    var r=document.createElement("div"); r.className="svc";
+    var id="s_"+Math.abs(name.split("").reduce(function(a,c){return (a*31+c.charCodeAt(0))|0;},7));
+    r.innerHTML='<label class="box" for="'+id+'">'+CHECK+'</label>'
+      +'<input type="checkbox" id="'+id+'" data-svc="'+name.replace(/"/g,"")+'">'
+      +'<label class="name" for="'+id+'">'+name+'</label>'
+      +'<input type="text" class="note" placeholder="№ зубів" aria-label="Зуби або кількість">';
+    var cb=r.querySelector('input[type=checkbox]');
+    var note=r.querySelector('.note');
+    cb.addEventListener("change",function(){ r.classList.toggle("on", cb.checked); });
+    note.addEventListener("input",function(){
+      if(note.value.trim() && !cb.checked){ cb.checked=true; r.classList.add("on"); }
+    });
+    return r;
+  }
+  var maxLen=Math.max(SVC_L.length,SVC_R.length);
+  for(var i=0;i<maxLen;i++){
+    if(SVC_L[i]) svcGrid.appendChild(svcRow(SVC_L[i])); else svcGrid.appendChild(document.createElement("div"));
+    if(SVC_R[i]) svcGrid.appendChild(svcRow(SVC_R[i])); else svcGrid.appendChild(document.createElement("div"));
+  }
+
+  // ── gather ────────────────────────────────────────────────────────────────
+  function v(id){var e=$("#"+id); return e?e.value.trim():"";}
+  function services(){
+    var out=[];
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      if(cb.checked){
+        var s=cb.dataset.svc;
+        var note=cb.parentElement.querySelector('.note');
+        if(note && note.value.trim()) s+=" — "+note.value.trim();
+        out.push(s);
+      }
+    });
+    return out;
+  }
+  function teethList(){
+    var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
+    return on;
+  }
+  function materialsClient(){
+    var m=[];
+    [["matTray","Відбиткова ложка"],["matBow","Суппорт лиц. дуги"],["matTrans","Трансфери"],
+     ["matAbut","Абатменти"],["matAnal","Аналоги"],["matOther","Інше"]].forEach(function(p){
+      if(v(p[0])) m.push(p[1]+": "+v(p[0]));
+    });
+    return m;
+  }
+  function validate(){
+    var miss=[];
+    if(!v("clinic"))miss.push("Клініка");
+    if(!v("doctor"))miss.push("Лікар");
+    if(!v("patient"))miss.push("Пацієнт");
+    if(services().length===0)miss.push("Види робіт");
+    return miss;
+  }
+  function toast(m,k){var t=$("#toast"); t.textContent=m; t.className="toast show"+(k?(" "+k):"");}
+
+  function orderText(){
+    var L=[];
+    L.push("ЗАМОВЛЕННЯ-НАРЯД · STELMAKH LAB");
+    L.push("№ "+v("oid")+"    Дата: "+v("odate")+" "+v("otime"));
+    L.push("");
+    L.push("КЛІНІКА");
+    L.push("  Клініка: "+(v("clinic")||"—")+"    Лікар: "+(v("doctor")||"—"));
+    if(v("phone")||v("cemail")) L.push("  Тел.: "+(v("phone")||"—")+"    Email: "+(v("cemail")||"—"));
+    L.push("");
+    L.push("ПАЦІЄНТ: "+(v("patient")||"—")+(v("age")?("   Вік: "+v("age")):""));
+    L.push("  Дата доставки: "+(v("due")||"—")+"    Технік: "+(v("tech")||"—"));
+    L.push("");
+    var teeth=teethList();
+    if(teeth.length){L.push("ЗУБИ: "+teeth.join(", ")); L.push("");}
+    if(v("shade")||v("implant")||v("stump")){
+      L.push("ПАРАМЕТРИ");
+      if(v("shade"))   L.push("  Колір реставрації: "+v("shade"));
+      if(v("implant")) L.push("  Імплант система: "+v("implant"));
+      if(v("stump"))   L.push("  Колір культі: "+v("stump"));
+      L.push("");
+    }
+    var s=services(); if(s.length){L.push("ВИДИ РОБІТ"); s.forEach(function(x){L.push("  • "+x);}); L.push("");}
+    var mc=materialsClient();
+    if(mc.length){L.push("МАТЕРІАЛИ КЛІЄНТА, ПОВЕРНУТИ"); mc.forEach(function(x){L.push("  • "+x);}); L.push("");}
+    if(v("matLab")){L.push("МАТЕРІАЛИ STELMAKH LAB, ПОВЕРНУТИ: "+v("matLab")); L.push("");}
+    if(v("notes")){L.push("ВАЖЛИВО ДЛЯ ТЕХНІКА"); L.push("  "+v("notes")); L.push("");}
+    L.push("— Надіслано через форму наряду Stelmakh LAB —");
+    return L.join("\n");
+  }
+
+  $("#form").addEventListener("submit",function(e){
+    e.preventDefault();
+    var miss=validate();
+    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
+    var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
+    window.location.href=href;
+    toast("Відкрито пошту з листом на "+LAB_EMAIL+". Не відкрилось? Натисніть «Завантажити наряд».","ok");
+  });
+
+  $("#download").addEventListener("click",function(){
+    var miss=validate();
+    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    var name="naryad-"+v("oid")+".txt";
+    var data=orderText();
+    if(window.claude&&window.claude.downloads){
+      window.claude.downloads.save({filename:name,data:data}).then(function(){
+        toast("Наряд збережено. Надішліть файл лабораторії вкладенням.","ok");
+      }).catch(function(err){
+        var c=(err&&err.code)||"unavailable";
+        if(c==="declined")toast("Збереження скасовано.","");
+        else blobDownload(name,data);
+      });
+    } else blobDownload(name,data);
+  });
+  function blobDownload(name,data){
+    try{
+      var blob=new Blob([data],{type:"text/plain;charset=utf-8"});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement("a"); a.href=url; a.download=name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url);},1500);
+      toast("Наряд завантажено. Надішліть файл лабораторії вкладенням.","ok");
+    }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
+  }
+  $("#print").addEventListener("click",function(){window.print();});
+
+  // ── Clinic registration (per-device, localStorage) ───────────────────────
+  var KEY="slClinic";
+  function loadClinic(){ try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;} }
+  function saveClinicRec(o){ try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){} }
+  function clearClinicRec(){ try{localStorage.removeItem(KEY);}catch(e){} }
+  function applyClinic(c){
+    if(!c) return;
+    if(c.clinic) $("#clinic").value=c.clinic;
+    if(c.doctor) $("#doctor").value=c.doctor;
+    if(c.phone)  $("#phone").value=c.phone;
+    if(c.email)  $("#cemail").value=c.email;
+  }
+  function showView(v){
+    document.querySelectorAll(".view").forEach(function(el){ el.hidden = el.dataset.view!==v; });
+    document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("on", t.dataset.view===v); });
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.addEventListener("click",function(){ showView(t.dataset.view); });
+  });
+  function refreshBanner(){
+    var c=loadClinic(); var b=$("#clinicBanner");
+    if(c&&c.clinic){
+      b.hidden=false;
+      b.innerHTML='<span>Наряд для клініки: <b>'+c.clinic+'</b>'+(c.doctor?(' · '+c.doctor):'')+'</span>'
+        +'<button type="button" id="bEdit">Змінити реєстрацію</button>';
+      $("#bEdit").addEventListener("click",function(){ showView("register"); });
+    } else b.hidden=true;
+  }
+  (function(){
+    var c=loadClinic();
+    if(c){ $("#rClinic").value=c.clinic||""; $("#rDoctor").value=c.doctor||"";
+           $("#rPhone").value=c.phone||""; $("#rEmail").value=c.email||""; applyClinic(c); }
+    refreshBanner();
+  })();
+  $("#rSave").addEventListener("click",function(){
+    var o={clinic:($("#rClinic").value||"").trim(),doctor:($("#rDoctor").value||"").trim(),
+           phone:($("#rPhone").value||"").trim(),email:($("#rEmail").value||"").trim()};
+    var t=$("#rToast");
+    if(!o.clinic||!o.doctor){ t.textContent="Вкажіть клініку та лікаря."; t.className="toast show err"; return; }
+    saveClinicRec(o); applyClinic(o); refreshBanner();
+    t.textContent="Збережено. Дані підставлятимуться в кожен наряд."; t.className="toast show ok";
+    setTimeout(function(){ showView("order"); },800);
+  });
+  $("#rClear").addEventListener("click",function(){
+    clearClinicRec();
+    $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";
+    refreshBanner();
+    var t=$("#rToast"); t.textContent="Реєстрацію очищено."; t.className="toast show";
+  });
+})();
+</script>
+</body>
+</html>

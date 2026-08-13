@@ -108,6 +108,11 @@
   h3.block{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-strong);
     font-weight:600; margin:30px 0 4px;}
   .block-note{font-size:12px; color:var(--faint); margin:0 0 14px;}
+  /* the one line a doctor must not miss: splints belong to the other naryad */
+  .callout{font-size:15px; line-height:1.5; color:var(--strong); margin:0 0 16px;
+    border:2px solid var(--err); border-radius:3px; padding:11px 14px;
+    background:rgba(180,70,47,.05);}
+  .callout a{color:var(--err); font-weight:700;}
   .divider{height:1px; background:var(--line); margin:26px 0;}
 
   /* materials-return two columns of small labelled lines */
@@ -357,8 +362,9 @@
     <h3 class="block">Види робіт</h3>
     <p class="block-note">Клікніть назву роботи — вона стає активним «пензлем»; далі клацайте
       зуби у формулі: вони офарбовуються кольором роботи, а номери самі підставляються в її
-      рядок. Повторний клік по назві вимикає пензель.
-      Капи та шини — <a href="../" style="color:var(--blue-strong)">окремий наряд Gnatho Hub</a>.</p>
+      рядок. Повторний клік по назві вимикає пензель.</p>
+    <p class="callout">Капи та шини сюди не входять — для них
+      <a href="../">окремий наряд Gnatho Hub</a>.</p>
     <div class="svc-grid" id="svcGrid"></div>
 
     <!-- important -->

@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#1D1C1A">
 <meta name="description" content="Gnatho Hub — замовлення-наряд на капи. Реєстрація клініки та формування наряду.">
 <title>Gnatho Hub — Замовлення-наряд</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 </head>
 <body>
 <style>
@@ -148,15 +150,18 @@
   .chip:has(input:checked) .dot{background:var(--warm); border-color:var(--warm);}
   .chip:has(input:focus-visible){box-shadow:0 0 0 3px var(--warm-soft);}
 
-  /* services two columns; each = checkbox + label + note line */
+  /* services: coloured rows that paint the chart */
   .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 30px;}
   @media (max-width:680px){ .svc-grid{grid-template-columns:1fr;} }
-  .svc{display:flex; align-items:center; gap:9px; padding:6px 0; border-bottom:1px solid var(--line);}
-  .svc:hover{border-color:var(--line-2);}
+  .svc{display:flex; align-items:center; gap:9px; padding:6px 0 6px 8px; border-bottom:1px solid var(--line);
+    border-left:4px solid var(--sc, transparent); border-radius:2px; transition:background .13s ease;}
+  .svc:hover{border-bottom-color:var(--line-2);}
+  .svc.armed{background:var(--sc-bg, rgba(0,0,0,.05));}
+  .svc.armed .name{font-weight:700;}
   .svc .box{width:15px; height:15px; flex:none; border:1px solid var(--line-2); border-radius:3px;
     display:grid; place-items:center; cursor:pointer; transition:.13s ease; background:var(--field);}
-  .svc .box svg{width:9px; height:9px; opacity:0; transition:opacity .12s ease; color:var(--accent-ink);}
-  .svc.on .box{background:var(--accent); border-color:var(--accent);}
+  .svc .box svg{width:9px; height:9px; opacity:0; transition:opacity .12s ease; color:#fff;}
+  .svc.on .box{background:var(--sc, var(--accent)); border-color:var(--sc, var(--accent));}
   .svc.on .box svg{opacity:1;}
   .svc .name{font-size:13px; color:var(--strong); flex:1; cursor:pointer; line-height:1.25;}
   .svc.hot .name{color:var(--warm); font-weight:600;}
@@ -173,6 +178,73 @@
   .svc-opt label:has(input:focus-visible){box-shadow:0 0 0 3px var(--warm-soft);}
   .svc-opt.off{opacity:.35; pointer-events:none;}
 
+  /* the one line a doctor must not miss: splints belong to the other naryad */
+  .callout{font-size:15px; line-height:1.5; color:var(--strong); margin:0 0 16px;
+    border:2px solid var(--err); border-radius:3px; padding:11px 14px;
+    background:rgba(180,70,47,.05);}
+  .callout a{color:var(--err); font-weight:700;}
+  /* history tab */
+  .hist{display:flex; flex-direction:column;}
+  .hist-item{display:flex; gap:14px; align-items:center; padding:12px 2px;
+    border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .hist-item .meta{flex:1 1 240px; min-width:0; font-size:13.5px; color:var(--muted);}
+  .hist-item .meta b{color:var(--strong); font-variant-numeric:tabular-nums;}
+  .hist-item .meta .sub{font-size:12px; color:var(--faint); margin-top:2px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px;}
+  .hist-item .ops{display:flex; gap:8px; flex:none;}
+  .hist-item .ops button{background:transparent; border:1px solid var(--line-2); color:var(--strong);
+    font-size:12.5px; padding:7px 12px; border-radius:2px;}
+  .hist-item .ops button:hover{border-color:var(--muted);}
+  .hist-empty{color:var(--faint); font-size:13px; padding:18px 0;}
+
+  /* tooth chart — exocad-style arch in the same block footprint */
+  .teeth{position:relative; background:var(--raise); border:1px solid var(--line);
+    border-radius:var(--radius); padding:12px 10px 12px; box-shadow:var(--shadow); overflow-x:auto;}
+  .arch-wrap{position:relative; min-width:560px;}
+  #archSvg{display:block; width:100%; height:auto; user-select:none;}
+  /* the guide selectors live INSIDE the ring, where the paper form is empty */
+  .arch-ctl{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    display:flex; flex-direction:column; gap:9px; align-items:stretch; z-index:5;}
+  .ac-row{display:flex; gap:9px; align-items:center; justify-content:space-between;
+    font-size:12.5px; color:var(--muted);}
+  .ac-row select{font-family:inherit; font-size:13px; color:var(--ink); background:var(--field);
+    border:1px solid var(--line-2); border-radius:3px; padding:4px 8px; min-width:190px;}
+  .ac-row select:focus{outline:none; border-color:var(--blue);}
+  .ac-full{font-family:inherit; font-size:12.5px; font-weight:600; letter-spacing:.04em;
+    color:var(--strong); background:var(--field); border:1px solid var(--line-2);
+    border-radius:3px; padding:6px 12px; cursor:pointer; transition:.13s ease;}
+  .ac-full:hover{border-color:var(--blue);}
+  .ac-full.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .tooth-g{cursor:pointer;}
+  .tooth-g .shape{fill:var(--field); stroke:var(--faint); stroke-width:2; transition:.13s ease;
+    vector-effect:non-scaling-stroke;}
+  .tooth-g .fiss{fill:none; stroke:var(--faint); stroke-width:1.6; opacity:.9; transition:.13s ease;
+    stroke-linecap:round; vector-effect:non-scaling-stroke;}
+  .tooth-g text{font-size:16px; font-weight:600; fill:var(--strong); text-anchor:middle;
+    font-family:var(--sans); font-variant-numeric:tabular-nums; pointer-events:none;
+    paint-order:stroke; stroke:var(--raise); stroke-width:4px; stroke-linejoin:round;}
+  .tooth-g .sh{font-size:11.5px; fill:var(--blue-strong); font-weight:700;
+    pointer-events:auto; cursor:pointer;}
+  .tooth-pop{position:absolute; z-index:30; background:var(--raise); border:1px solid var(--line-2);
+    border-radius:4px; box-shadow:var(--shadow); padding:12px; width:290px; max-height:320px; overflow:auto;}
+  .tooth-pop h5{margin:0 0 8px; font-size:12.5px; color:var(--strong);}
+  .tooth-pop .chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;}
+  .tooth-pop .chip{border:1px solid var(--line-2); background:var(--field); color:var(--strong);
+    font-size:12px; padding:5px 8px; border-radius:3px; cursor:pointer; font-family:inherit;}
+  .tooth-pop .chip.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .tooth-pop .ok{display:block; margin-left:auto; font-family:inherit; font-size:12.5px;
+    padding:7px 14px; border-radius:3px; border:1px solid var(--accent);
+    background:var(--accent); color:var(--accent-ink); cursor:pointer;}
+  .tooth-g .impb{fill:var(--muted);}
+  .tooth-g .impt{stroke:var(--raise); stroke-width:1.1; fill:none;}
+  .teeth-clear{position:absolute; right:10px; bottom:10px; font-family:inherit; font-size:12px;
+    color:var(--muted); background:transparent; border:1px solid var(--line-2);
+    border-radius:3px; padding:5px 10px; cursor:pointer; transition:.13s ease;}
+  .teeth-clear:hover{color:var(--err); border-color:var(--err);}
+  .tooth-g:hover .shape{stroke:var(--blue);}
+  /* a marked tooth is PAINTED in its service colour (inline fill) — no black
+     default state, no popup: the click IS the assignment */
+  .tooth-g.on .fiss{opacity:.55;}
   textarea{width:100%; font-family:inherit; font-size:14px; color:var(--ink); background:var(--field);
     border:1px solid var(--line-2); border-radius:var(--radius); padding:11px 12px; min-height:76px;
     resize:vertical; line-height:1.5; transition:border-color .15s ease;}
@@ -198,11 +270,47 @@
   footer{padding:22px clamp(18px,4vw,40px) 0; color:var(--muted); font-size:12px; line-height:1.7; border-top:1px solid var(--line); margin-top:8px;}
   footer .fine{color:var(--faint); font-size:11px; margin-top:8px;}
 
+  /* ── The naryad DOCUMENT (what gets printed / saved / attached) ── */
+  #docView{display:none;}
+  body.doc-mode .wrap{display:none;}
+  body.doc-mode #docView{display:block;}
+  .doc{max-width:860px; margin:0 auto; padding:0 0 40px; background:#fff; color:#1E2025;
+    font-family:var(--sans); font-size:13px; line-height:1.45;}
+  .doc-head{display:flex; align-items:center; justify-content:space-between; gap:20px;
+    background:#2D2E32; color:#F2F3F5; padding:20px 26px;}
+  .doc-head img{height:64px; width:auto; display:block;}
+  .doc-head .r{text-align:right; font-size:10.5px; line-height:1.65; color:#BCC0C8;}
+  .doc-head .r .no{font-size:14px; color:#fff; font-weight:700; letter-spacing:.06em; margin-bottom:5px;}
+  .doc-body{padding:20px 26px 0;}
+  .doc h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#5F7BA6;
+    font-weight:700; margin:20px 0 7px; border-bottom:1px solid #E4E6EB; padding-bottom:5px;}
+  .doc h2:first-child{margin-top:0;}
+  .kv{display:grid; grid-template-columns:repeat(4,auto 1fr); gap:5px 10px; align-items:baseline;}
+  .kv .k{color:#787D87; font-size:11px; white-space:nowrap;}
+  .kv .v{font-weight:600; border-bottom:1px dotted #D4D8DF; min-width:60px;}
+  .doc table{width:100%; border-collapse:collapse; margin-top:2px;}
+  .doc th{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#787D87;
+    text-align:left; font-weight:600; padding:5px 8px; border-bottom:1px solid #D4D8DF;}
+  .doc td{padding:7px 8px; border-bottom:1px solid #EDEFF3; vertical-align:top;}
+  .doc td.w{font-weight:600;}
+  .doc td.t{font-variant-numeric:tabular-nums;}
+  .doc .sw{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
+    vertical-align:baseline;}
+  .doc .chart{border:1px solid #E4E6EB; border-radius:3px; padding:8px; margin-top:4px;}
+  .doc .chart svg{display:block; width:100%; height:auto;}
+  .doc .note{white-space:pre-wrap; border:1px solid #E4E6EB; border-radius:3px; padding:10px 12px;
+    background:#FCFCFD;}
+  .doc .fine{margin-top:22px; font-size:10px; color:#A8ACB5; text-align:center;}
+  @media print{
+    body.doc-mode #docView{display:block;}
+    .doc-head{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .doc{max-width:100%;}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
   @media print{
     body{background:#fff;} .wrap{max-width:100%;}
     .masthead{background:#1D1C1A !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
-    .actions,.toast,.block-note,footer .fine{display:none;}
+    .tabs,.actions,.toast,.block-note,footer .fine,#clinicBanner{display:none;}
     .teeth,textarea,.svc .note,.f input{box-shadow:none;}
   }
 </style>
@@ -242,6 +350,7 @@
   <nav class="tabs">
     <button type="button" class="tab on" data-view="order">Наряд</button>
     <button type="button" class="tab" data-view="register">Реєстрація клініки</button>
+    <button type="button" class="tab" data-view="history">Історія</button>
   </nav>
 
   <div id="clinicBanner" class="banner" hidden></div>
@@ -281,23 +390,33 @@
 
     <!-- services -->
     <h3 class="block">Види робіт</h3>
-    <p class="block-note">Позначте потрібні роботи.</p>
+    <p class="block-note">Клікніть назву роботи (або галочку) — вона стає активним «пензлем»;
+      далі клацайте зуби у формулі нижче.</p>
+    <p class="callout">Коронки, вініри та роботи на імплантатах сюди не входять — для них
+      <a href="stelmakh/">окремий наряд Stelmakh LAB</a>.</p>
     <div class="svc-grid" id="svcGrid"></div>
+
+    <!-- tooth chart -->
+    <h3 class="block">Зубна формула</h3>
+    <div class="teeth" id="teeth">
+      <div class="arch-wrap">
+        <svg id="archSvg" viewBox="0 -34 1000 402" role="group" aria-label="Зубна формула"></svg>
+        <div class="arch-ctl">
+          <button type="button" class="ac-full" id="fullUpper">Full Upper</button>
+          <button type="button" class="ac-full" id="fullLower">Full Lower</button>
+        </div>
+      </div>
+      <button type="button" class="teeth-clear" id="teethClear">Очистити все</button>
+    </div>
 
     <!-- important -->
     <h3 class="block">Важливо для техніка</h3>
     <textarea id="notes" placeholder="Побажання, деталі роботи…"></textarea>
 
-    <div class="signrow">
-      <div class="sign">Підпис лікаря</div>
-      <div class="sign">Вихідний контроль</div>
-      <div class="sign">Дата</div>
-    </div>
-
     <div class="actions">
       <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
-      <button type="button" class="btn-ghost" id="download">Завантажити наряд</button>
-      <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
+      <button type="button" class="btn-ghost" id="pdf">Завантажити PDF</button>
+      <button type="button" class="btn-ghost" id="newOrder">Новий наряд</button>
     </div>
     <div class="toast" id="toast" role="status"></div>
   </form>
@@ -318,11 +437,19 @@
     <div class="toast" id="rToast" role="status"></div>
   </section>
 
+  <section id="viewHistory" class="body view" data-view="history" hidden>
+    <h3 class="block">Історія нарядів</h3>
+    <p class="block-note">Надіслані наряди з цього пристрою. Зберігаються лише у вашому браузері.</p>
+    <div class="hist" id="histList"></div>
+  </section>
+
   <footer>
     <div><b>Gnatho Hub</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
-    <p class="fine">«Надіслати» відкриє вашу пошту з готовим листом на лабораторію. Скани та зліпки надсилайте вкладенням або звичним каналом.</p>
+    <p class="fine">«Надіслати» формує PDF-бланк наряду і відправляє його прямо в лабораторію.
+      «Завантажити PDF» — той самий бланк собі на пристрій.</p>
   </footer>
 </div>
+<div id="docView" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -332,7 +459,12 @@
   if(typeof NodeList!=="undefined" && NodeList.prototype && !NodeList.prototype.forEach)
     NodeList.prototype.forEach=Array.prototype.forEach;
   var $=function(s,r){return (r||document).querySelector(s);};
-  var LAB_EMAIL="admin@stelmakhlab.com";
+  var LAB_EMAIL="dr.eugenesl@gmail.com";   // ТИМЧАСОВО для тесту
+  var TG_TOKEN="8992069969:AAH0MFm3IKPw6ODAXl0uvTGjsb67bT6gmao";  // @StelmakhLab_naryad_bot
+  var TG_CHAT="-5506214550";                                       // група «StelmkhLab НАРЯДИ»
+  var TG_ON=function(){ return !!(TG_TOKEN&&TG_CHAT); };
+  function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
   var CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 6.2 5 8.6 9.6 3.5"/></svg>';
 
   // order number + dates
@@ -345,12 +477,84 @@
   $("#due").value=d7.getFullYear()+"-"+pad(d7.getMonth()+1)+"-"+pad(d7.getDate());
 
   // services (two columns as in the PDF; Каппа/шина highlighted — lab focus)
+  // ── tooth chart (FDI) — the exocad ring, tooth by tooth ──────────────────
+  // Every tooth type has its own occlusal drawing (outer contour + fissures),
+  // drawn in a local 100-wide box centred at 0: −y = outward (buccal/incisal),
+  // +x = distal. Right-side quadrants (2 and 3) are mirrored copies.
+  var GLYPH={
+    uI1:{o:"M-40 -38 C-30 -50 30 -50 40 -38 C48 -24 44 8 30 30 C18 44 -18 44 -30 30 C-44 8 -48 -24 -40 -38 Z",
+         f:"M-30 -30 C-10 -38 10 -38 30 -30 M-18 -16 C-6 -22 6 -22 18 -16"},
+    uI2:{o:"M-36 -34 C-26 -48 26 -48 36 -34 C44 -18 40 10 26 30 C14 42 -14 42 -26 30 C-40 10 -44 -18 -36 -34 Z",
+         f:"M-24 -26 C-8 -33 8 -33 24 -26"},
+    uC:{o:"M0 -50 C22 -42 38 -20 36 2 C34 24 20 42 0 46 C-20 42 -34 24 -36 2 C-38 -20 -22 -42 0 -50 Z",
+        f:"M0 -34 C4 -12 4 14 0 32 M-16 -6 C-8 -2 8 -2 16 -6"},
+    uP:{o:"M-34 -40 C-10 -50 10 -50 34 -40 C46 -28 48 24 34 38 C14 50 -14 50 -34 38 C-48 24 -46 -28 -34 -40 Z",
+        f:"M-22 0 C-8 -6 8 -6 22 0 M-20 -22 C-14 -14 -16 -8 -22 -4 M20 -22 C14 -14 16 -8 22 -4"},
+    uM1:{o:"M-44 -34 C-28 -48 24 -50 40 -38 C50 -28 50 20 40 34 C26 48 -24 50 -40 38 C-52 26 -52 -20 -44 -34 Z",
+         f:"M-26 -10 C-12 -2 -4 4 6 14 M-26 -10 C-18 -20 -8 -24 2 -26 M6 14 C16 8 22 0 26 -8 M-32 22 C-20 28 -6 28 4 24 M14 -34 C18 -26 20 -20 26 -16"},
+    uM2:{o:"M-42 -30 C-24 -46 26 -46 40 -32 C50 -20 48 22 36 34 C20 46 -22 46 -38 34 C-50 22 -50 -16 -42 -30 Z",
+         f:"M-24 -8 C-10 0 0 6 10 12 M-22 -12 C-14 -22 -4 -26 6 -26 M12 12 C20 6 24 -2 26 -10"},
+    uM3:{o:"M-38 -28 C-20 -44 24 -42 36 -28 C46 -16 44 20 32 32 C16 44 -20 44 -34 30 C-46 18 -46 -14 -38 -28 Z",
+         f:"M-18 -12 C-6 -4 4 2 12 10 M-16 -16 C-8 -24 2 -26 10 -22 M-24 16 C-12 22 2 22 12 18"},
+    lI:{o:"M-24 -56 C-14 -62 14 -62 24 -56 C30 -40 28 -6 20 28 C14 50 -14 50 -20 28 C-28 -6 -30 -40 -24 -56 Z",
+        f:"M-14 -44 C-4 -50 4 -50 14 -44"},
+    lC:{o:"M0 -56 C18 -48 30 -26 30 -2 C30 22 18 42 0 48 C-18 42 -30 22 -30 -2 C-30 -26 -18 -48 0 -56 Z",
+        f:"M0 -40 C4 -16 4 12 0 34"},
+    lP:{o:"M-34 -36 C-14 -50 14 -50 34 -36 C48 -20 48 18 32 36 C14 50 -14 50 -32 36 C-48 18 -48 -20 -34 -36 Z",
+        f:"M-20 -4 C-8 -10 8 -10 20 -4 M0 -8 C2 4 2 16 0 26 M-14 -26 C-6 -20 6 -20 14 -26"},
+    lM1:{o:"M-46 -36 C-30 -50 30 -50 44 -38 C54 -26 54 22 44 36 C28 50 -28 52 -44 38 C-56 24 -56 -22 -46 -36 Z",
+         f:"M-30 0 C-14 -4 14 -4 30 0 M0 -32 C-2 -18 -2 16 0 30 M-30 0 C-24 -14 -18 -22 -10 -28 M30 0 C24 12 16 20 8 26 M-28 18 C-18 24 -8 26 -2 24"},
+    lM2:{o:"M-42 -34 C-26 -46 28 -46 42 -34 C52 -22 52 20 42 34 C26 46 -26 46 -42 34 C-52 22 -52 -22 -42 -34 Z",
+         f:"M-28 0 C-12 -4 12 -4 28 0 M0 -30 C-2 -16 -2 16 0 28 M-22 -18 C-16 -12 -10 -8 -4 -6 M22 16 C14 20 8 22 2 22"},
+    lM3:{o:"M-36 -30 C-20 -44 24 -44 36 -30 C46 -18 46 18 34 32 C18 44 -20 44 -34 30 C-46 16 -46 -16 -36 -30 Z",
+         f:"M-20 -6 C-6 -12 8 -10 20 -4 M-2 -26 C-4 -12 -2 10 0 24 M-18 14 C-8 20 4 20 12 16"}
+  };
+  function glyphOf(fdi){
+    var p=fdi%10, up=fdi<30;
+    if(up) return p===1?GLYPH.uI1:p===2?GLYPH.uI2:p===3?GLYPH.uC
+              :p<=5?GLYPH.uP:p===6?GLYPH.uM1:p===7?GLYPH.uM2:GLYPH.uM3;
+    return p<=2?GLYPH.lI:p===3?GLYPH.lC:p<=5?GLYPH.lP
+              :p===6?GLYPH.lM1:p===7?GLYPH.lM2:GLYPH.lM3;
+  }
+  // mesiodistal widths (relative units, anatomical proportions), 1..8 від центру
+  var W_UP=[8.5,6.6,7.6,7.2,6.8,10.4,9.8,9.2];
+  var W_LO=[5.4,5.9,6.9,7.1,7.3,10.8,10.2,9.6];
+  var UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+  var LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+  var selTeeth={}, toothSvc={};
+
+  var SVC_COLOR={
+    "Мічіганська капа":"#2F6ED8","Репозиційна капа":"#128F88","Міорелаксуюча капа":"#7A45E0",
+    "Депрограматор":"#C1503A","Функціограф":"#3E7D46","Відбілювальна капа":"#B3A125",
+    "Ретенційна капа":"#B84A6E","Капа з кламерами":"#AE8A6A"
+  };
+  var svcEls={}, activeSvc=null;
+  function setActiveSvc(name){
+    activeSvc=name;
+    Object.keys(svcEls).forEach(function(n){
+      svcEls[n].row.classList.toggle("armed", n===activeSvc);
+    });
+  }
+  function svcTeethOf(name){
+    return UPPER.concat(LOWER).filter(function(t){ return toothSvc[t]===name; });
+  }
+  function refreshSvcNote(name){
+    var e=svcEls[name]; if(!e) return;
+    if(svcTeethOf(name).length){ e.cb.checked=true; e.row.classList.add("on"); }
+  }
+  function teethList(){
+    var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
+    return on;
+  }
+  function renderTeethSel(){}
   var SVC_L=["Мічіганська капа","Репозиційна капа","Міорелаксуюча капа","Депрограматор"];
   var SVC_R=["Функціограф","Відбілювальна капа","Ретенційна капа","Капа з кламерами"];
   var HOT={};
   var svcGrid=$("#svcGrid");
   function svcRow(name){
     var r=document.createElement("div"); r.className="svc"+(HOT[name]?" hot":"");
+    var col=SVC_COLOR[name];
+    if(col){ r.style.setProperty("--sc",col); r.style.setProperty("--sc-bg",col+"22"); }
     var id="s_"+Math.abs(name.split("").reduce(function(a,c){return (a*31+c.charCodeAt(0))|0;},7));
     var extra="";
     if(name==="Депрограматор"){
@@ -361,11 +565,23 @@
     }
     r.innerHTML='<label class="box" for="'+id+'">'+CHECK+'</label>'
       +'<input type="checkbox" id="'+id+'" data-svc="'+name.replace(/"/g,"")+'">'
-      +'<label class="name" for="'+id+'">'+name+'</label>'+extra;
+      +'<span class="name">'+name+'</span>'+extra;
     var cb=r.querySelector('input[type=checkbox]');
     var opt=r.querySelector('.svc-opt');
+    svcEls[name]={row:r,cb:cb};
+    r.querySelector('.name').addEventListener("click",function(){
+      setActiveSvc(activeSvc===name?null:name);
+      if(activeSvc===name && !cb.checked){ cb.checked=true; r.classList.add("on"); }
+    });
     cb.addEventListener("change",function(){
       r.classList.toggle("on", cb.checked);
+      if(cb.checked) setActiveSvc(name);
+      else {
+        svcTeethOf(name).forEach(function(t){
+          delete toothSvc[t]; delete selTeeth[t]; updateToothVisual(t);
+        });
+        if(activeSvc===name) setActiveSvc(null);
+      }
       // Депрограматор → material buttons activate only while it is selected.
       if(opt){
         opt.classList.toggle("off", !cb.checked);
@@ -399,6 +615,120 @@
   toggleRadioGroup("reg"); toggleRadioGroup("deprog_method");
 
   // gather
+  // The ring: teeth laid ALONG THE ARC LENGTH by their anatomical widths, so
+  // the edges touch like in exocad — no even spacing, no gaps. Each tooth is
+  // rotated with the arc's tangent (molars end up sideways), the number stays
+  // upright on the tooth with a paper-coloured halo.
+  var SVGNS="http://www.w3.org/2000/svg";
+  function archLayout(list,widths,cy,ry,lower){
+    var N=400, pts=[], total=0;
+    for(var k=0;k<=N;k++){
+      var th=Math.PI*(1-k/N);                       // left → right
+      var x=500+448*Math.cos(th);
+      var y=lower? cy+ry*Math.sin(th) : cy-ry*Math.sin(th);
+      if(k>0) total+=Math.hypot(x-pts[k-1].x,y-pts[k-1].y);
+      pts.push({x:x,y:y,s:total});
+    }
+    var wsum=0; widths.forEach(function(w){wsum+=w;});
+    var ks=total/wsum, out=[], acc=0;
+    for(var i=0;i<list.length;i++){
+      var w=widths[i]*ks;
+      var sc=acc+w/2; acc+=w;
+      var j=0; while(j<N-1&&pts[j+1].s<sc)j++;
+      var t0=pts[j], t1=pts[j+1];
+      var f=(sc-t0.s)/Math.max(1e-6,t1.s-t0.s);
+      out.push({fdi:list[i],
+        x:t0.x+(t1.x-t0.x)*f, y:t0.y+(t1.y-t0.y)*f,
+        rot:Math.atan2(t1.y-t0.y,t1.x-t0.x)*180/Math.PI+(lower?180:0),
+        w:w});
+    }
+    return out;
+  }
+  var toothEls={};
+  function updateToothVisual(fdi){
+    var g=toothEls[fdi]; if(!g) return;
+    if(selTeeth[fdi]) g.classList.add("on"); else g.classList.remove("on");
+    var shp=g.querySelector(".shape");
+    var svc=toothSvc[fdi];
+    if(shp) shp.style.fill=(selTeeth[fdi]&&svc&&SVC_COLOR[svc])?SVC_COLOR[svc]:"";
+  }
+  (function buildArch(){
+    var svg=$("#archSvg");
+    var wU=W_UP.slice().reverse().concat(W_UP);      // 18..11 + 21..28
+    var wL=W_LO.slice().reverse().concat(W_LO);
+    var rows=archLayout(UPPER,wU,150,100,false)
+      .concat(archLayout(LOWER,wL,190,100,true));
+    rows.forEach(function(p){
+      var fdi=p.fdi;
+      var G=glyphOf(fdi);
+      var q=Math.floor(fdi/10);
+      var mir=(q===2||q===3)?-1:1;                   // right side = mirror copy
+      var s=(p.w*0.98)/100;
+      var g=document.createElementNS(SVGNS,"g");
+      g.setAttribute("class","tooth-g");
+      g.setAttribute("data-fdi",fdi);
+      g.innerHTML=
+        '<g transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+') rotate('+p.rot.toFixed(1)
+          +') scale('+(mir*s).toFixed(3)+' '+s.toFixed(3)+')">'
+        +'<path class="shape" d="'+G.o+'"/>'
+        +(G.f?('<path class="fiss" d="'+G.f+'"/>'):'')
+        +'<rect x="-56" y="-66" width="112" height="132" fill="transparent"/></g>'
+        +'<text x="'+p.x.toFixed(1)+'" y="'+(p.y+5).toFixed(1)+'">'+fdi+'</text>';
+      g.addEventListener("click",function(ev){
+        ev.stopPropagation();
+        if(!activeSvc){
+          toast("Спершу клікніть назву виду роботи — тоді кліки по зубах фарбують їх її кольором.","");
+          return;
+        }
+        if(toothSvc[fdi]===activeSvc){
+          delete toothSvc[fdi]; delete selTeeth[fdi];
+          updateToothVisual(fdi); refreshSvcNote(activeSvc);
+        } else {
+          var prev=toothSvc[fdi];
+          selTeeth[fdi]=true; toothSvc[fdi]=activeSvc;
+          updateToothVisual(fdi);
+          if(prev) refreshSvcNote(prev);
+          refreshSvcNote(activeSvc);
+        }
+        renderTeethSel();
+      });
+      svg.appendChild(g);
+      toothEls[fdi]=g;
+    });
+  })();
+
+  // Full Upper / Full Lower — всі зуби 1..7 відповідної щелепи одним тапом.
+  // Другий тап знімає ту саму сімку (позначки інших зубів не чіпає).
+  function fullArc(list,btn){
+    var seven=list.filter(function(t){ return t%10<=7; });
+    if(activeSvc){
+      // painting mode: the whole seven goes to the armed service
+      var touched={};
+      seven.forEach(function(t){
+        if(toothSvc[t]) touched[toothSvc[t]]=1;
+        selTeeth[t]=true; toothSvc[t]=activeSvc;
+        updateToothVisual(t);
+      });
+      touched[activeSvc]=1;
+      Object.keys(touched).forEach(refreshSvcNote);
+      btn.classList.add("on");
+      renderTeethSel();
+      return;
+    }
+    toast("Спершу клікніть назву виду роботи — тоді Full Upper/Lower позначать всю сімку її кольором.","");
+  }
+  $("#fullUpper").addEventListener("click",function(){ fullArc(UPPER,this); });
+  $("#fullLower").addEventListener("click",function(){ fullArc(LOWER,this); });
+
+  // corner broom: wipes every mark on the chart, the service rows stay as set
+  $("#teethClear").addEventListener("click",function(){
+    selTeeth={}; toothSvc={};
+    UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
+    $("#fullUpper").classList.remove("on");
+    $("#fullLower").classList.remove("on");
+    renderTeethSel();
+  });
+
   function v(id){var e=$("#"+id); return e?e.value.trim():"";}
   function radio(name){var e=document.querySelector('input[name="'+name+'"]:checked'); return e?e.value:"";}
   function services(){
@@ -407,6 +737,8 @@
       if(cb.checked){
         var s=cb.dataset.svc;
         if(s==="Депрограматор"){ var m=radio("deprog_method"); if(m) s+=" — "+m; }
+        var teeth=svcTeethOf(cb.dataset.svc);
+        if(teeth.length) s+=" — зуби: "+teeth.join(", ");
         out.push(s);
       }
     });
@@ -442,33 +774,169 @@
     return L.join("\n");
   }
 
+  // ── НАРЯД ЯК ДОКУМЕНТ ────────────────────────────────────────────────────
+  // Пошта вміє лише простий текст, тож бланк живе окремо: шапка з лого,
+  // картки клініки й пацієнта, кольорова формула і таблиця робіт. «Друк/PDF»
+  // друкує саме його, «Завантажити» зберігає самодостатній HTML-файл, який
+  // відкривається як документ і чіпляється до листа.
+  function chartSnapshot(){
+    var svg=$("#archSvg"); if(!svg) return "";
+    var c=svg.cloneNode(true);
+    // inline the styles the document CSS does not carry
+    c.querySelectorAll(".tooth-g").forEach(function(g){
+      var fdi=g.getAttribute("data-fdi");
+      var painted=selTeeth[fdi];
+      var col=(painted&&toothSvc[fdi]&&SVC_COLOR[toothSvc[fdi]])||"";
+      var shp=g.querySelector(".shape");
+      if(shp){ shp.setAttribute("fill",col||"#FFFFFF");
+               shp.setAttribute("stroke","#A8ACB5"); shp.setAttribute("stroke-width","1.4"); }
+      var f=g.querySelector(".fiss");
+      if(f){ f.setAttribute("fill","none"); f.setAttribute("stroke",col?"#FFFFFF":"#C6C9D0");
+             f.setAttribute("stroke-width","1.2"); f.setAttribute("opacity",col?".55":".9"); }
+      g.querySelectorAll("text").forEach(function(tx){
+        var isSh=tx.getAttribute("class")==="sh";
+        tx.setAttribute("fill",isSh?"#5F7BA6":(col?"#FFFFFF":"#2A2D33"));
+        tx.setAttribute("font-size",isSh?"11":"15");
+        tx.setAttribute("font-weight",isSh?"700":"600");
+        tx.setAttribute("font-family","Helvetica, Arial, sans-serif");
+        tx.setAttribute("text-anchor","middle");
+      });
+    });
+    return c.outerHTML;
+  }
+  function docHtml(){
+    var logo=document.querySelector(".brandimg");
+    var rows="";
+    document.querySelectorAll("input[data-svc]").forEach(function(cb){
+      if(!cb.checked) return;
+      var n=cb.dataset.svc, e=svcEls[n]||{};
+      var teeth=svcTeethOf(n);
+      rows+="<tr><td class=\"w\"><span class=\"sw\" style=\"background:"+(SVC_COLOR[n]||"#D4D8DF")
+        +"\"></span>"+esc(n)+"</td>"
+        +"<td class=\"t\">"+(teeth.length?teeth.join(", "):"—")+"</td>"+"<td>"+esc(radio("reg")||"—")+"</td>"
+        +"<td>"+esc((e.st&&e.st.value)||"—")+"</td></tr>";
+    });
+    var mats=v("matLab")?[v("matLab")]:[];
+    var kv=function(k,val){ return "<span class=\"k\">"+k+"</span><span class=\"v\">"
+      +esc(val||"—")+"</span>"; };
+    return '<div class="doc">'
+      +'<div class="doc-head">'
+        +'<b style="font-size:22px;letter-spacing:.04em">GNATHO&nbsp;·&nbsp;HUB</b>' 
+        +'<div class="r"><div class="no">НАРЯД '+esc(v("oid"))+'</div>'
+        +'вул. В. Липківського, 37 В, оф. 1001, Київ, 03035<br>'
+        +'+38 067 807 21 22 · +38 050 807 21 55<br>admin@stelmakhlab.com</div></div>'
+      +'<div class="doc-body">'
+        +'<h2>Клініка та пацієнт</h2><div class="kv">'
+          +kv("Клініка",v("clinic"))+kv("Лікар",v("doctor"))
+          +kv("Телефон",v("phone"))+kv("Email",v("cemail"))
+          +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
+          +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
+          +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Реєстрація",radio("reg"))
+        +'</div>'
+        +'<h2>Зубна формула</h2><div class="chart">'+chartSnapshot()+'</div>'
+        +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
+          +'<th>Реєстрація</th></tr></thead><tbody>'
+          +(rows||'<tr><td colspan="3">—</td></tr>')+'</tbody></table>'
+        +(mats.length?('<h2>Матеріали на повернення</h2><table><tbody>'
+          +mats.map(function(m){return '<tr><td>'+esc(m)+'</td></tr>';}).join("")
+          +'</tbody></table>'):'')
+        +(v("notes")?('<h2>Важливо для техніка</h2><div class="note">'+esc(v("notes"))+'</div>'):'')
+        +'<div class="fine">Сформовано у формі наряду Gnatho Hub · '+esc(v("oid"))+'</div>'
+      +'</div></div>';
+  }
+  function standaloneDoc(){
+    var css=document.querySelector("style").textContent;
+    return '<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">'
+      +'<meta name="viewport" content="width=device-width, initial-scale=1">'
+      +'<title>Наряд '+esc(v("oid"))+' — Gnatho Hub</title><style>'
+      +css+'\n#docView{display:block !important;} body{margin:0;background:#fff;}'
+      +'</style></head><body><div id="docView">'+docHtml()+'</div></body></html>';
+  }
+
+  // ── PDF ──────────────────────────────────────────────────────────────────
+  // The blank is rendered off-screen at A4 width, rasterised and paged into a
+  // PDF. Rasterising (not text-drawing) is deliberate: jsPDF's built-in fonts
+  // have no Cyrillic, and shipping a Ukrainian font would add ~300 KB to a
+  // page that must stay a single file.
+  function makePdf(cb,noSave){
+    var W=window.jspdf&&window.jspdf.jsPDF;
+    if(!window.html2canvas||!W){
+      toast("Бібліотеку PDF не завантажено — скористайтесь «Друк / PDF».","err");
+      if(cb)cb(false); return;
+    }
+    var host=document.createElement("div");
+    host.style.cssText="position:fixed;left:-10000px;top:0;width:860px;background:#fff;z-index:-1;";
+    host.innerHTML=docHtml();
+    document.body.appendChild(host);
+    toast("Готуємо PDF…","");
+    window.html2canvas(host.firstChild,{scale:2,backgroundColor:"#ffffff",useCORS:true})
+      .then(function(canvas){
+        var pdf=new W({unit:"mm",format:"a4",orientation:"portrait"});
+        var pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
+        var iw=pw, ih=canvas.height*pw/canvas.width;
+        var pos=0, left=ih;
+        var img=canvas.toDataURL("image/jpeg",0.92);
+        pdf.addImage(img,"JPEG",0,0,iw,ih);
+        left-=ph;
+        while(left>0.5){ pos-=ph; pdf.addPage(); pdf.addImage(img,"JPEG",0,pos,iw,ih); left-=ph; }
+        document.body.removeChild(host);
+        if(noSave){ if(cb)cb(true,pdf.output("blob")); return; }
+        pdf.save("naryad-"+v("oid")+".pdf");
+        toast("PDF збережено: naryad-"+v("oid")+".pdf — додайте його до листа.","ok");
+        if(cb)cb(true);
+      })
+      .catch(function(){
+        document.body.removeChild(host);
+        toast("Не вдалося зібрати PDF — скористайтесь «Друк / PDF».","err");
+        if(cb)cb(false,null);
+      });
+  }
+  $("#pdf").addEventListener("click",function(){
+    var miss=validate();
+    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist(); makePdf();
+  });
+
+  // Uploads the PDF straight into the lab's chat. sendDocument takes the file
+  // as multipart, the caption is the same short summary the letter carries
+  // (Telegram caps captions at 1024 characters, so it is trimmed).
+  function sendTelegram(blob,done){
+    var fd=new FormData();
+    fd.append("chat_id",TG_CHAT);
+    fd.append("document",blob,"naryad-"+v("oid")+".pdf");
+    var cap=orderBrief();
+    if(cap.length>1000) cap=cap.slice(0,997)+"…";
+    fd.append("caption",cap);
+    fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendDocument",{method:"POST",body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ done(!!(j&&j.ok), j&&j.description); })
+      .catch(function(err){ done(false,String(err)); });
+  }
+
   $("#form").addEventListener("submit",function(e){
     e.preventDefault();
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
-    var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
-    var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
-    window.location.href=href;
-    toast("Відкрито пошту з листом на "+LAB_EMAIL+". Не відкрилось? Натисніть «Завантажити наряд».","ok");
+    pushHist();
+    if(TG_ON()){
+      var btn=$("#send"); btn.disabled=true;
+      toast("Надсилаємо наряд у лабораторію…","");
+      makePdf(function(ok,blob){
+        if(!ok||!blob){ btn.disabled=false; return; }
+        sendTelegram(blob,function(sent,why){
+          btn.disabled=false;
+          if(sent) toast("Наряд "+v("oid")+" надіслано в лабораторію ✓","ok");
+          else toast("Не вдалося надіслати: "+(why||"немає зв'язку")+". Скористайтесь «Завантажити PDF».","err");
+        });
+      },true);
+      return;
+    }
+    var subj="Наряд "+v("oid")+" · "+(v("patient")||"пацієнт")+" · "+(v("clinic")||"");
+    window.location.href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)
+      +"&body="+encodeURIComponent(orderBrief());
+    toast("Відкрито пошту на "+LAB_EMAIL+".","ok");
   });
 
-  $("#download").addEventListener("click",function(){
-    var miss=validate();
-    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
-    var name="naryad-"+v("oid")+".txt";
-    var data=orderText();
-    // Universal: use the claude.ai save API inside the artifact sandbox, and a
-    // plain Blob download on a real website (gnatho-hub.com) — one file works both.
-    if(window.claude&&window.claude.downloads){
-      window.claude.downloads.save({filename:name,data:data}).then(function(){
-        toast("Наряд збережено. Надішліть файл лабораторії вкладенням.","ok");
-      }).catch(function(err){
-        var c=(err&&err.code)||"unavailable";
-        if(c==="declined")toast("Збереження скасовано.","");
-        else blobDownload(name,data);
-      });
-    } else blobDownload(name,data);
-  });
   function blobDownload(name,data){
     try{
       var blob=new Blob([data],{type:"text/plain;charset=utf-8"});
@@ -479,8 +947,121 @@
       toast("Наряд завантажено. Надішліть файл лабораторії вкладенням.","ok");
     }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
   }
-  $("#print").addEventListener("click",function(){window.print();});
 
+  // ── Snapshot: усі поля + зуби + роботи (для чернетки та історії) ─────────
+  function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
+  var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
+    "patient","age","tech","matLab","notes"];
+  function collectAll(){
+    var o={};
+    FIELD_IDS.forEach(function(id){o[id]=v(id);});
+    o.teeth=teethList();
+    o.tsvc={};
+    teethList().forEach(function(t){ if(toothSvc[t]) o.tsvc[t]=toothSvc[t]; });
+    o.reg=radio("reg");
+    o.svc=[];
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      if(cb.checked) o.svc.push({n:cb.dataset.svc,c:1});
+    });
+    return o;
+  }
+  function applyAll(o){
+    if(!o) return;
+    FIELD_IDS.forEach(function(id){ if(o[id]!==undefined) setv(id,o[id]); });
+    selTeeth={}; toothSvc={};
+    (o.teeth||[]).forEach(function(t){selTeeth[t]=true;});
+    Object.keys(o.tsvc||{}).forEach(function(t){toothSvc[t]=o.tsvc[t];});
+    if(o.reg){ var rr=document.querySelector('input[name="reg"][value="'+o.reg+'"]');
+               if(rr) rr.checked=true; }
+    setActiveSvc(null);
+    UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
+    renderTeethSel();
+    var byName={};
+    (o.svc||[]).forEach(function(s){byName[s.n]=s;});
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      var s=byName[cb.dataset.svc];
+      var row=cb.parentElement;
+      cb.checked=!!(s&&s.c);
+      row.classList.toggle("on",cb.checked);
+    });
+  }
+
+  // ── Чернетка: форма переживає закриту вкладку ────────────────────────────
+  var DRAFT_KEY="ghDraft", draftTimer=null;
+  function saveDraft(){ try{localStorage.setItem(DRAFT_KEY,JSON.stringify(collectAll()));}catch(e){} }
+  function clearDraft(){ try{localStorage.removeItem(DRAFT_KEY);}catch(e){} }
+  function schedDraft(){ if(draftTimer)clearTimeout(draftTimer); draftTimer=setTimeout(saveDraft,350); }
+  $("#form").addEventListener("input",schedDraft);
+  $("#form").addEventListener("change",schedDraft);
+  $("#teeth").addEventListener("click",schedDraft);
+  (function(){
+    var d=null; try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");}catch(e){}
+    if(d&&(d.patient||d.notes||(d.teeth&&d.teeth.length)||(d.svc&&d.svc.length))){
+      applyAll(d);
+      toast("Відновлено чернетку наряду "+(d.oid||"")+". Кнопка «Новий наряд» — почати з чистого.","");
+    }
+  })();
+
+  // ── Історія нарядів (localStorage, останні 60) ───────────────────────────
+  var HIST_KEY="ghOrders";
+  function loadHist(){ try{return JSON.parse(localStorage.getItem(HIST_KEY)||"[]");}catch(e){return [];} }
+  function saveHist(l){ try{localStorage.setItem(HIST_KEY,JSON.stringify(l));}catch(e){} }
+  function pushHist(){
+    var o=collectAll(); o.savedAt=new Date().toISOString(); o.text=orderText();
+    var l=loadHist().filter(function(x){return x.oid!==o.oid;});
+    l.unshift(o); if(l.length>60)l.length=60;
+    saveHist(l);
+  }
+  function renderHist(){
+    var box=$("#histList"); if(!box) return;
+    var l=loadHist();
+    if(!l.length){
+      box.innerHTML='<div class="hist-empty">Поки порожньо — надіслані та завантажені наряди з’являться тут.</div>';
+      return;
+    }
+    box.innerHTML="";
+    l.forEach(function(o){
+      var it=document.createElement("div"); it.className="hist-item";
+      var svcs=(o.svc||[]).map(function(s){return s.n;}).join(", ");
+      var d=(o.savedAt||"").slice(0,10);
+      it.innerHTML='<div class="meta"><b>'+esc(o.oid||"—")+'</b> · '+esc(o.patient||"без пацієнта")
+        +'<div class="sub">'+esc(d)+(svcs?(" · "+esc(svcs)):"")+'</div></div>'
+        +'<div class="ops"><button type="button" data-op="open">У форму</button>'
+        +'<button type="button" data-op="txt">TXT</button>'
+        +'<button type="button" data-op="del" aria-label="Видалити">✕</button></div>';
+      it.querySelector('[data-op=open]').addEventListener("click",function(){
+        applyAll(o); saveDraft(); showView("order");
+        toast("Наряд "+(o.oid||"")+" відкрито у формі — перевірте дати перед надсиланням.","ok");
+      });
+      it.querySelector('[data-op=txt]').addEventListener("click",function(){
+        blobDownload("naryad-"+(o.oid||"x")+".txt", o.text||"");
+      });
+      it.querySelector('[data-op=del]').addEventListener("click",function(){
+        saveHist(loadHist().filter(function(x){return x.oid!==o.oid;}));
+        renderHist();
+      });
+      box.appendChild(it);
+    });
+  }
+
+  // ── Новий наряд: чиста форма, свіжий №, реєстрація клініки лишається ─────
+  $("#newOrder").addEventListener("click",function(){
+    clearDraft();
+    FIELD_IDS.forEach(function(id){setv(id,"");});
+    applyAll({teeth:[],svc:[],tsvc:{}});
+    var n2=new Date();
+    setv("oid","GH-"+String(n2.getFullYear()).slice(2)+pad(n2.getMonth()+1)+pad(n2.getDate())
+         +"-"+pad(n2.getHours())+pad(n2.getMinutes()));
+    setv("odate",n2.getFullYear()+"-"+pad(n2.getMonth()+1)+"-"+pad(n2.getDate()));
+    setv("otime",pad(n2.getHours())+":"+pad(n2.getMinutes()));
+    var dd=new Date(n2.getTime()+7*864e5);
+    setv("due",dd.getFullYear()+"-"+pad(dd.getMonth()+1)+"-"+pad(dd.getDate()));
+    applyClinic(loadClinic());
+    toast("Новий наряд — форму очищено.","");
+    window.scrollTo(0,0);
+  });
   // ── Clinic registration (per-device, localStorage) ───────────────────────
   var KEY="ghClinic";
   function loadClinic(){ try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;} }
@@ -496,6 +1077,7 @@
   function showView(v){
     document.querySelectorAll(".view").forEach(function(el){ el.hidden = el.dataset.view!==v; });
     document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("on", t.dataset.view===v); });
+    if(v==="history") renderHist();
     window.scrollTo(0,0);
   }
   document.querySelectorAll(".tab").forEach(function(t){

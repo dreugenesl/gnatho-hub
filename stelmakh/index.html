@@ -649,7 +649,11 @@
     });
     cb.addEventListener("change",function(){
       r.classList.toggle("on", cb.checked);
-      if(!cb.checked){
+      if(cb.checked){
+        // ticking the box ARMS the service — the next clicks on the chart
+        // paint teeth in its colour and duplicate them into this line
+        setActiveSvc(name);
+      } else {
         // releasing the work releases its painted teeth
         svcTeethOf(name).forEach(function(t){
           delete toothSvc[t]; delete selTeeth[t]; updateToothVisual(t);

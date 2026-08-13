@@ -417,6 +417,12 @@
   var $=function(s,r){return (r||document).querySelector(s);};
   // ТИМЧАСОВО для тесту — повернути admin@stelmakhlab.com перед запуском!
   var LAB_EMAIL="dr.eugenesl@gmail.com";
+  // ── Telegram: наряд летить у чат лабораторії сам ─────────────────────────
+  // Заповніть обидва рядки — і «Надіслати» вантажить PDF у чат замість того,
+  // щоб відкривати пошту. Порожні — працює старий шлях (пошта + файл поруч).
+  var TG_TOKEN="";     // токен від @BotFather
+  var TG_CHAT="";      // id чату/групи лабораторії
+  var TG_ON=function(){ return !!(TG_TOKEN&&TG_CHAT); };
   var CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 6.2 5 8.6 9.6 3.5"/></svg>';
 
   // order number + dates
@@ -1062,7 +1068,7 @@
   // PDF. Rasterising (not text-drawing) is deliberate: jsPDF's built-in fonts
   // have no Cyrillic, and shipping a Ukrainian font would add ~300 KB to a
   // page that must stay a single file.
-  function makePdf(cb){
+  function makePdf(cb,noSave){
     var W=window.jspdf&&window.jspdf.jsPDF;
     if(!window.html2canvas||!W){
       toast("Бібліотеку PDF не завантажено — скористайтесь «Друк / PDF».","err");
@@ -1083,15 +1089,16 @@
         pdf.addImage(img,"JPEG",0,0,iw,ih);
         left-=ph;
         while(left>0.5){ pos-=ph; pdf.addPage(); pdf.addImage(img,"JPEG",0,pos,iw,ih); left-=ph; }
-        pdf.save("naryad-"+v("oid")+".pdf");
         document.body.removeChild(host);
+        if(noSave){ if(cb)cb(true,pdf.output("blob")); return; }
+        pdf.save("naryad-"+v("oid")+".pdf");
         toast("PDF збережено: naryad-"+v("oid")+".pdf — додайте його до листа.","ok");
         if(cb)cb(true);
       })
       .catch(function(){
         document.body.removeChild(host);
         toast("Не вдалося зібрати PDF — скористайтесь «Друк / PDF».","err");
-        if(cb)cb(false);
+        if(cb)cb(false,null);
       });
   }
   $("#pdf").addEventListener("click",function(){
@@ -1100,11 +1107,41 @@
     pushHist(); makePdf();
   });
 
+  // Uploads the PDF straight into the lab's chat. sendDocument takes the file
+  // as multipart, the caption is the same short summary the letter carries
+  // (Telegram caps captions at 1024 characters, so it is trimmed).
+  function sendTelegram(blob,done){
+    var fd=new FormData();
+    fd.append("chat_id",TG_CHAT);
+    fd.append("document",blob,"naryad-"+v("oid")+".pdf");
+    var cap=orderBrief();
+    if(cap.length>1000) cap=cap.slice(0,997)+"…";
+    fd.append("caption",cap);
+    fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendDocument",{method:"POST",body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ done(!!(j&&j.ok), j&&j.description); })
+      .catch(function(err){ done(false,String(err)); });
+  }
+
   $("#form").addEventListener("submit",function(e){
     e.preventDefault();
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
     pushHist();
+    if(TG_ON()){
+      var btn=$("#send"); btn.disabled=true;
+      toast("Надсилаємо наряд у лабораторію…","");
+      makePdf(function(ok,blob){
+        if(!ok||!blob){ btn.disabled=false; return; }
+        sendTelegram(blob,function(sent,why){
+          btn.disabled=false;
+          if(sent) toast("Наряд "+v("oid")+" надіслано в лабораторію ✓","ok");
+          else toast("Не вдалося надіслати: "+(why||"немає зв'язку")+
+                     ". Скористайтесь «Завантажити PDF» і поштою.","err");
+        });
+      },true);
+      return;
+    }
     // A PDF of the blank goes down first, so it is already in Downloads when
     // the mail window opens — mailto: cannot carry attachments by standard,
     // the file has to be dragged in, and this is the shortest path to it.

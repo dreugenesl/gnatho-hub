@@ -139,9 +139,14 @@
   .teeth-sel{margin-top:12px; font-size:12.5px; color:var(--muted); text-align:center; min-height:1.2em;}
   .teeth-sel b{color:var(--strong); font-variant-numeric:tabular-nums;}
 
-  /* services two columns; each = checkbox + label + note line */
-  .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 30px;}
+  /* services: material/construction groups in two columns */
+  .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 30px; align-items:start;}
   @media (max-width:680px){ .svc-grid{grid-template-columns:1fr;} }
+  .svc-group{margin-bottom:10px;}
+  .svc-group h4{font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); font-weight:600; margin:16px 0 2px;
+    border-bottom:1px solid var(--line-2); padding-bottom:6px;}
+  .svc-group h4:first-child{margin-top:16px;}
   .svc{display:flex; align-items:center; gap:9px; padding:6px 0; border-bottom:1px solid var(--line);}
   .svc:hover{border-color:var(--line-2);}
   .svc .box{width:15px; height:15px; flex:none; border:1px solid var(--line-2); border-radius:3px;
@@ -177,6 +182,20 @@
     border:1px solid var(--line-2); background:var(--raise); color:var(--muted); display:none;}
   .toast.show{display:block;} .toast.ok{border-color:var(--ok); color:var(--ok);} .toast.err{border-color:var(--err); color:var(--err);}
 
+  /* history tab */
+  .hist{display:flex; flex-direction:column;}
+  .hist-item{display:flex; gap:14px; align-items:center; padding:12px 2px;
+    border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .hist-item .meta{flex:1 1 240px; min-width:0; font-size:13.5px; color:var(--muted);}
+  .hist-item .meta b{color:var(--strong); font-variant-numeric:tabular-nums;}
+  .hist-item .meta .sub{font-size:12px; color:var(--faint); margin-top:2px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px;}
+  .hist-item .ops{display:flex; gap:8px; flex:none;}
+  .hist-item .ops button{background:transparent; border:1px solid var(--line-2); color:var(--strong);
+    font-size:12.5px; padding:7px 12px; border-radius:2px;}
+  .hist-item .ops button:hover{border-color:var(--muted);}
+  .hist-empty{color:var(--faint); font-size:13px; padding:18px 0;}
+
   footer{padding:22px clamp(18px,4vw,40px) 0; color:var(--muted); font-size:12px; line-height:1.7; border-top:1px solid var(--line); margin-top:8px;}
   footer .fine{color:var(--faint); font-size:11px; margin-top:8px;}
 
@@ -205,6 +224,7 @@
   <nav class="tabs">
     <button type="button" class="tab on" data-view="order">Наряд</button>
     <button type="button" class="tab" data-view="register">Реєстрація клініки</button>
+    <button type="button" class="tab" data-view="history">Історія</button>
   </nav>
 
   <div id="clinicBanner" class="banner" hidden></div>
@@ -260,7 +280,8 @@
 
     <!-- services -->
     <h3 class="block">Види робіт</h3>
-    <p class="block-note">Позначте потрібні роботи; праворуч — номери зубів або кількість.</p>
+    <p class="block-note">Позначте потрібні роботи; праворуч — номери зубів або кількість.
+      Капи та шини — <a href="../" style="color:var(--blue-strong)">окремий наряд Gnatho Hub</a>.</p>
     <div class="svc-grid" id="svcGrid"></div>
 
     <!-- important -->
@@ -277,6 +298,7 @@
       <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
       <button type="button" class="btn-ghost" id="download">Завантажити наряд</button>
       <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
+      <button type="button" class="btn-ghost" id="newOrder">Новий наряд</button>
     </div>
     <div class="toast" id="toast" role="status"></div>
   </form>
@@ -295,6 +317,12 @@
       <button type="button" class="btn-ghost" id="rClear">Очистити</button>
     </div>
     <div class="toast" id="rToast" role="status"></div>
+  </section>
+
+  <section id="viewHistory" class="body view" data-view="history" hidden>
+    <h3 class="block">Історія нарядів</h3>
+    <p class="block-note">Надіслані та завантажені наряди з цього пристрою. Зберігаються лише у вашому браузері.</p>
+    <div class="hist" id="histList"></div>
   </section>
 
   <footer>
@@ -358,31 +386,35 @@
   UPPER.forEach(function(t){ $("#teethU").appendChild(toothBtn(t)); });
   LOWER.forEach(function(t){ $("#teethL").appendChild(toothBtn(t)); });
 
-  // ── services (two columns exactly as in the paper form) ──────────────────
-  var SVC_L=[
-    "Коронка / Вінір / e.max CAD",
-    "Коронка/вінір з пошаровим нанесенням кераміки",
-    "Вінір на рефракторі",
-    "Тимчасова керамічна коронка",
-    "Коронка ZrO2 Multilayer",
-    "Коронка з гвинтовою фіксацією",
-    "Абатмент ZrO2",
-    "Тимчасова коронка з гвинтовою фіксацією",
-    "Хірургічний шаблон",
-    "Каппа/шина"
-  ];
-  var SVC_R=[
-    "Депрограматор",
-    "Тимчасова коронка з PMMA + Optiglaze Color",
-    "Тимчасова коронка з PMMA",
-    "Цифрове моделювання",
-    "Індивідуальна ложка",
-    "Діагностичні моделі",
-    "Індивідуалізація ясна",
-    "Первинний ковпачок",
-    "POM вкладка",
-    "3D друк одного квадранту",
-    "3D друк моделі щелепи"
+  // ── services, grouped by material / construction type ────────────────────
+  // Item names are IDENTICAL to the old flat list — drafts, history entries
+  // and the order text stay compatible (matching is by data-svc name).
+  var SVC_GROUPS=[
+    {t:"Кераміка E.max",items:[
+      "Коронка / Вінір / e.max CAD",
+      "Коронка/вінір з пошаровим нанесенням кераміки",
+      "Вінір на рефракторі"]},
+    {t:"Діоксид цирконію ZrO2",items:[
+      "Коронка ZrO2 Multilayer",
+      "Абатмент ZrO2"]},
+    {t:"Тимчасові конструкції",items:[
+      "Тимчасова коронка з PMMA",
+      "Тимчасова коронка з PMMA + Optiglaze Color",
+      "Тимчасова керамічна коронка"]},
+    {t:"Робота на імплантатах",items:[
+      "Коронка з гвинтовою фіксацією",
+      "Тимчасова коронка з гвинтовою фіксацією"]},
+    {t:"Цифрові послуги та 3D друк",items:[
+      "Цифрове моделювання",
+      "Хірургічний шаблон",
+      "Діагностичні моделі",
+      "3D друк одного квадранту",
+      "3D друк моделі щелепи"]},
+    {t:"Допоміжні роботи",items:[
+      "Індивідуальна ложка",
+      "Індивідуалізація ясна",
+      "Первинний ковпачок",
+      "POM вкладка"]}
   ];
   var svcGrid=$("#svcGrid");
   function svcRow(name){
@@ -400,11 +432,12 @@
     });
     return r;
   }
-  var maxLen=Math.max(SVC_L.length,SVC_R.length);
-  for(var i=0;i<maxLen;i++){
-    if(SVC_L[i]) svcGrid.appendChild(svcRow(SVC_L[i])); else svcGrid.appendChild(document.createElement("div"));
-    if(SVC_R[i]) svcGrid.appendChild(svcRow(SVC_R[i])); else svcGrid.appendChild(document.createElement("div"));
-  }
+  SVC_GROUPS.forEach(function(g){
+    var gd=document.createElement("div"); gd.className="svc-group";
+    var h=document.createElement("h4"); h.textContent=g.t; gd.appendChild(h);
+    g.items.forEach(function(name){ gd.appendChild(svcRow(name)); });
+    svcGrid.appendChild(gd);
+  });
 
   // ── gather ────────────────────────────────────────────────────────────────
   function v(id){var e=$("#"+id); return e?e.value.trim():"";}
@@ -476,6 +509,7 @@
     e.preventDefault();
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist();
     var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
     var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
     window.location.href=href;
@@ -485,6 +519,7 @@
   $("#download").addEventListener("click",function(){
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist();
     var name="naryad-"+v("oid")+".txt";
     var data=orderText();
     if(window.claude&&window.claude.downloads){
@@ -524,6 +559,7 @@
   function showView(v){
     document.querySelectorAll(".view").forEach(function(el){ el.hidden = el.dataset.view!==v; });
     document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("on", t.dataset.view===v); });
+    if(v==="history") renderHist();
     window.scrollTo(0,0);
   }
   document.querySelectorAll(".tab").forEach(function(t){
@@ -558,6 +594,121 @@
     $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";
     refreshBanner();
     var t=$("#rToast"); t.textContent="Реєстрацію очищено."; t.className="toast show";
+  });
+
+  // ── Snapshot: усі поля + зуби + роботи (для чернетки та історії) ─────────
+  function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
+  var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
+    "patient","age","tech","matTray","matBow","matTrans","matAbut","matAnal",
+    "matOther","matLab","shade","implant","stump","notes"];
+  function collectAll(){
+    var o={};
+    FIELD_IDS.forEach(function(id){o[id]=v(id);});
+    o.teeth=teethList();
+    o.svc=[];
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      var note=cb.parentElement.querySelector('.note');
+      var q=note?note.value.trim():"";
+      if(cb.checked||q) o.svc.push({n:cb.dataset.svc,q:q,c:cb.checked?1:0});
+    });
+    return o;
+  }
+  function applyAll(o){
+    if(!o) return;
+    FIELD_IDS.forEach(function(id){ if(o[id]!==undefined) setv(id,o[id]); });
+    selTeeth={};
+    (o.teeth||[]).forEach(function(t){selTeeth[t]=true;});
+    document.querySelectorAll("#teeth .tooth").forEach(function(b){
+      var on=!!selTeeth[b.dataset.fdi];
+      b.classList.toggle("on",on); b.setAttribute("aria-pressed",on?"true":"false");
+    });
+    renderTeethSel();
+    var byName={};
+    (o.svc||[]).forEach(function(s){byName[s.n]=s;});
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      var s=byName[cb.dataset.svc];
+      var row=cb.parentElement, note=row.querySelector('.note');
+      cb.checked=!!(s&&(s.c||s.q));
+      if(note) note.value=s?(s.q||""):"";
+      row.classList.toggle("on",cb.checked);
+    });
+  }
+
+  // ── Чернетка: форма переживає закриту вкладку ────────────────────────────
+  var DRAFT_KEY="slDraft", draftTimer=null;
+  function saveDraft(){ try{localStorage.setItem(DRAFT_KEY,JSON.stringify(collectAll()));}catch(e){} }
+  function clearDraft(){ try{localStorage.removeItem(DRAFT_KEY);}catch(e){} }
+  function schedDraft(){ if(draftTimer)clearTimeout(draftTimer); draftTimer=setTimeout(saveDraft,350); }
+  $("#form").addEventListener("input",schedDraft);
+  $("#form").addEventListener("change",schedDraft);
+  $("#teeth").addEventListener("click",schedDraft);
+  (function(){
+    var d=null; try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");}catch(e){}
+    if(d&&(d.patient||d.notes||(d.teeth&&d.teeth.length)||(d.svc&&d.svc.length))){
+      applyAll(d);
+      toast("Відновлено чернетку наряду "+(d.oid||"")+". Кнопка «Новий наряд» — почати з чистого.","");
+    }
+  })();
+
+  // ── Історія нарядів (localStorage, останні 60) ───────────────────────────
+  var HIST_KEY="slOrders";
+  function loadHist(){ try{return JSON.parse(localStorage.getItem(HIST_KEY)||"[]");}catch(e){return [];} }
+  function saveHist(l){ try{localStorage.setItem(HIST_KEY,JSON.stringify(l));}catch(e){} }
+  function pushHist(){
+    var o=collectAll(); o.savedAt=new Date().toISOString(); o.text=orderText();
+    var l=loadHist().filter(function(x){return x.oid!==o.oid;});
+    l.unshift(o); if(l.length>60)l.length=60;
+    saveHist(l);
+  }
+  function renderHist(){
+    var box=$("#histList"); if(!box) return;
+    var l=loadHist();
+    if(!l.length){
+      box.innerHTML='<div class="hist-empty">Поки порожньо — надіслані та завантажені наряди з’являться тут.</div>';
+      return;
+    }
+    box.innerHTML="";
+    l.forEach(function(o){
+      var it=document.createElement("div"); it.className="hist-item";
+      var svcs=(o.svc||[]).map(function(s){return s.n;}).join(", ");
+      var d=(o.savedAt||"").slice(0,10);
+      it.innerHTML='<div class="meta"><b>'+esc(o.oid||"—")+'</b> · '+esc(o.patient||"без пацієнта")
+        +'<div class="sub">'+esc(d)+(svcs?(" · "+esc(svcs)):"")+'</div></div>'
+        +'<div class="ops"><button type="button" data-op="open">У форму</button>'
+        +'<button type="button" data-op="txt">TXT</button>'
+        +'<button type="button" data-op="del" aria-label="Видалити">✕</button></div>';
+      it.querySelector('[data-op=open]').addEventListener("click",function(){
+        applyAll(o); saveDraft(); showView("order");
+        toast("Наряд "+(o.oid||"")+" відкрито у формі — перевірте дати перед надсиланням.","ok");
+      });
+      it.querySelector('[data-op=txt]').addEventListener("click",function(){
+        blobDownload("naryad-"+(o.oid||"x")+".txt", o.text||"");
+      });
+      it.querySelector('[data-op=del]').addEventListener("click",function(){
+        saveHist(loadHist().filter(function(x){return x.oid!==o.oid;}));
+        renderHist();
+      });
+      box.appendChild(it);
+    });
+  }
+
+  // ── Новий наряд: чиста форма, свіжий №, реєстрація клініки лишається ─────
+  $("#newOrder").addEventListener("click",function(){
+    clearDraft();
+    FIELD_IDS.forEach(function(id){setv(id,"");});
+    applyAll({teeth:[],svc:[]});
+    var n2=new Date();
+    setv("oid","SL-"+String(n2.getFullYear()).slice(2)+pad(n2.getMonth()+1)+pad(n2.getDate())
+         +"-"+pad(n2.getHours())+pad(n2.getMinutes()));
+    setv("odate",n2.getFullYear()+"-"+pad(n2.getMonth()+1)+"-"+pad(n2.getDate()));
+    setv("otime",pad(n2.getHours())+":"+pad(n2.getMinutes()));
+    var dd=new Date(n2.getTime()+7*864e5);
+    setv("due",dd.getFullYear()+"-"+pad(dd.getMonth()+1)+"-"+pad(dd.getDate()));
+    applyClinic(loadClinic());
+    toast("Новий наряд — форму очищено.","");
+    window.scrollTo(0,0);
   });
 })();
 </script>

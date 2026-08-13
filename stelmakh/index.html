@@ -717,7 +717,7 @@
       "Тимчасова коронка з PMMA",
       "Тимчасова коронка з PMMA + Optiglaze Color",
       "Тимчасова керамічна коронка"]},
-    {t:"Робота на імплантатах",shade:true,items:[
+    {t:"Робота на імплантатах",shade:"noStump",items:[
       "Коронка з гвинтовою фіксацією",
       "Тимчасова коронка з гвинтовою фіксацією",
       "Абатмент ZrO2"],
@@ -750,7 +750,7 @@
         +SVC_OPT[name].map(function(o){return '<option>'+o+'</option>';}).join("")
         +'</select>'):'')
       +(wantShade?('<select class="ssh" aria-label="Колір зуба"></select>'
-                  +'<select class="sst" aria-label="Колір культі"></select>'):'');
+                  +(wantShade==="noStump"?'':'<select class="sst" aria-label="Колір культі"></select>')):'');
     var cb=r.querySelector('input[type=checkbox]');
     var shSel=r.querySelector('.ssh');
     var stSel=r.querySelector('.sst');
@@ -802,7 +802,7 @@
   SVC_GROUPS.forEach(function(g){
     var gd=document.createElement("div"); gd.className="svc-group";
     var h=document.createElement("h4"); h.textContent=g.t; gd.appendChild(h);
-    g.items.forEach(function(name){ gd.appendChild(svcRow(name,!!g.shade)); });
+    g.items.forEach(function(name){ gd.appendChild(svcRow(name,g.shade)); });
     (g.fields||[]).forEach(function(f){
       var p=document.createElement("div"); p.className="svc-param";
       var lb=document.createElement("label"); lb.textContent=f.l; lb.htmlFor=f.id;

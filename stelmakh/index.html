@@ -121,22 +121,44 @@
     transition:border-color .15s ease;}
   .svc-param input:focus{outline:none; border-color:var(--blue);}
 
-  /* tooth chart */
-  .teeth{background:var(--raise); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px 10px 12px; box-shadow:var(--shadow); overflow-x:auto;}
-  .teeth-row{display:flex; gap:3px; justify-content:center; min-width:560px;}
-  .teeth-row+.teeth-row{margin-top:8px;}
-  .tooth{flex:1; max-width:48px; min-width:26px; border:1px solid var(--line-2); background:var(--field);
-    border-radius:3px; padding:5px 0 4px; cursor:pointer; text-align:center; user-select:none;
-    transition:.13s ease; color:var(--muted); font-size:10.5px; font-variant-numeric:tabular-nums;}
-  .tooth:hover{border-color:var(--blue);}
-  .tooth svg{display:block; width:20px; height:22px; margin:0 auto 3px;
-    stroke:var(--faint); fill:none; stroke-width:1.2; transition:.13s ease;}
-  .tooth.on{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
-  .tooth.on svg{stroke:var(--blue);}
-  .tooth:focus-visible{outline:2px solid var(--blue); outline-offset:1px;}
-  .teeth-sel{margin-top:12px; font-size:12.5px; color:var(--muted); text-align:center; min-height:1.2em;}
+  /* tooth chart — exocad-style arch in the same block footprint */
+  .teeth{position:relative; background:var(--raise); border:1px solid var(--line);
+    border-radius:var(--radius); padding:12px 10px 12px; box-shadow:var(--shadow); overflow-x:auto;}
+  .teeth-head{display:flex; gap:10px; align-items:center; justify-content:flex-end;
+    font-size:12.5px; color:var(--muted); padding:0 6px 6px;}
+  .teeth-head select{font-family:inherit; font-size:13px; color:var(--ink); background:var(--field);
+    border:1px solid var(--line-2); border-radius:3px; padding:4px 8px;}
+  #archSvg{display:block; width:100%; height:auto; min-width:560px; user-select:none;}
+  .tooth-g{cursor:pointer;}
+  .tooth-g .shape{fill:var(--field); stroke:var(--faint); stroke-width:1.3; transition:.13s ease;}
+  .tooth-g .fiss{fill:none; stroke:var(--faint); stroke-width:1; opacity:.85; transition:.13s ease;}
+  .tooth-g text{font-size:13px; fill:var(--muted); text-anchor:middle;
+    font-family:var(--sans); font-variant-numeric:tabular-nums; pointer-events:none;}
+  .tooth-g .sh{font-size:10.5px; fill:var(--blue-strong); font-weight:600;}
+  .tooth-g:hover .shape{stroke:var(--blue);}
+  .tooth-g.on .shape{fill:var(--accent); stroke:var(--accent);}
+  .tooth-g.on .fiss{stroke:var(--blue);}
+  .tooth-g.on text{fill:var(--accent-ink);}
+  .tooth-g.on .sh{fill:var(--blue);}
+  .teeth-sel{margin-top:8px; font-size:12.5px; color:var(--muted); text-align:center; min-height:1.2em;}
   .teeth-sel b{color:var(--strong); font-variant-numeric:tabular-nums;}
+  /* per-tooth shade popup */
+  .tooth-pop{position:absolute; z-index:30; background:var(--raise); border:1px solid var(--line-2);
+    border-radius:4px; box-shadow:var(--shadow); padding:12px; width:290px; max-height:340px; overflow:auto;}
+  .tooth-pop h5{margin:0 0 8px; font-size:12.5px; color:var(--strong); letter-spacing:.03em;}
+  .tooth-pop .chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;}
+  .tooth-pop .chip{border:1px solid var(--line-2); background:var(--field); color:var(--strong);
+    font-size:12px; padding:5px 8px; border-radius:3px; cursor:pointer; font-family:inherit;}
+  .tooth-pop .chip.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .tooth-pop .f2{display:flex; gap:8px; align-items:baseline; margin-bottom:10px;}
+  .tooth-pop .f2 label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; flex:none;}
+  .tooth-pop .f2 input{flex:1; min-width:0; font-family:inherit; font-size:13px; border:0;
+    border-bottom:1px solid var(--line-2); background:transparent; color:var(--ink); padding:3px 2px;}
+  .tooth-pop .f2 input:focus{outline:none; border-color:var(--blue);}
+  .tooth-pop .ops2{display:flex; gap:8px; justify-content:space-between;}
+  .tooth-pop .ops2 button{font-family:inherit; font-size:12.5px; padding:7px 12px; border-radius:3px;
+    border:1px solid var(--line-2); background:transparent; color:var(--strong); cursor:pointer;}
+  .tooth-pop .ops2 .ok{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
 
   /* services: material/construction groups in two columns */
   .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 30px; align-items:start;}
@@ -197,7 +219,7 @@
   @media print{
     body{background:#fff;} .wrap{max-width:100%;}
     .masthead{background:#2D2E32 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
-    .tabs,.actions,.toast,.block-note,footer .fine,#clinicBanner{display:none;}
+    .tabs,.actions,.toast,.block-note,footer .fine,#clinicBanner,.tooth-pop{display:none;}
     .teeth,textarea,.svc .note,.f input{box-shadow:none;}
   }
 </style>
@@ -259,9 +281,17 @@
     <h3 class="block">Зубна формула</h3>
     <p class="block-note">Позначте зуби, яких стосується робота.</p>
     <div class="teeth" id="teeth">
-      <div class="teeth-row" id="teethU"></div>
-      <div class="teeth-row" id="teethL"></div>
+      <div class="teeth-head">
+        <label for="shadeScale">Розколірка</label>
+        <select id="shadeScale">
+          <option>VITA classical</option>
+          <option>VITA 3D-Master</option>
+          <option>Ivoclar Chromascop</option>
+        </select>
+      </div>
+      <svg id="archSvg" viewBox="0 0 1000 400" role="group" aria-label="Зубна формула"></svg>
       <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
+      <div class="tooth-pop" id="toothPop" hidden></div>
     </div>
 
     <!-- services (restoration parameters live inside their groups) -->
@@ -329,13 +359,17 @@
   var d7=new Date(now.getTime()+7*864e5);
   $("#due").value=d7.getFullYear()+"-"+pad(d7.getMonth()+1)+"-"+pad(d7.getDate());
 
-  // ── tooth chart (FDI) ─────────────────────────────────────────────────────
-  // occlusal-view glyphs per tooth type: 1-2 incisor, 3 canine, 4-5 premolar, 6-8 molar
+  // ── tooth chart (FDI) — exocad-style arch in the block's footprint ───────
+  // occlusal-view glyphs per tooth type: outer contour (filled) + fissures
   var GLYPH={
-    incisor:'<path d="M9 3 C13 1.5 15 1.5 15 5 L15 19 C15 22.5 13 22.5 9 21 C7 17 7 7 9 3 Z" transform="translate(0.5 0)"/>',
-    canine:'<path d="M12 2 C16 5 17 9 17 12 C17 16 15 20 12 22 C9 20 7 16 7 12 C7 9 8 5 12 2 Z"/>',
-    premolar:'<path d="M12 3 C17 3 19 7 19 12 C19 17 17 21 12 21 C7 21 5 17 5 12 C5 7 7 3 12 3 Z"/><path d="M9 12 Q12 10.5 15 12"/>',
-    molar:'<path d="M6 5 C8 3 16 3 18 5 C20 7 20 17 18 19 C16 21 8 21 6 19 C4 17 4 7 6 5 Z"/><path d="M8 12 Q12 10 16 12 M12 7 L12 11"/>'
+    incisor:{o:"M9 3 C13 1.5 15 1.5 15 5 L15 19 C15 22.5 13 22.5 9 21 C7 17 7 7 9 3 Z",
+             f:"M10.5 6 C11.6 10 11.6 14 10.5 18"},
+    canine:{o:"M12 2 C16 5 17 9 17 12 C17 16 15 20 12 22 C9 20 7 16 7 12 C7 9 8 5 12 2 Z",
+            f:"M12 6 L12 18"},
+    premolar:{o:"M12 3 C17 3 19 7 19 12 C19 17 17 21 12 21 C7 21 5 17 5 12 C5 7 7 3 12 3 Z",
+              f:"M9 12 Q12 10.5 15 12 M12 8 Q12.6 12 12 16"},
+    molar:{o:"M6 5 C8 3 16 3 18 5 C20 7 20 17 18 19 C16 21 8 21 6 19 C4 17 4 7 6 5 Z",
+           f:"M8 12 Q12 10 16 12 M12 6.5 L12 11 M9 15.5 Q12 17 15 15.5"}
   };
   function toothType(fdi){
     var p=fdi%10;
@@ -343,28 +377,132 @@
   }
   var UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
   var LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
-  var selTeeth={};
-  function renderTeethSel(){
+  var selTeeth={}, toothShade={}, toothStump={};
+
+  // shade guides (розколірки)
+  var SCALES={
+    "VITA classical":["A1","A2","A3","A3.5","A4","B1","B2","B3","B4","C1","C2","C3","C4","D2","D3","D4"],
+    "VITA 3D-Master":["0M1","0M2","0M3","1M1","1M2","2L1.5","2L2.5","2M1","2M2","2M3","2R1.5","2R2.5",
+                      "3L1.5","3L2.5","3M1","3M2","3M3","3R1.5","3R2.5","4L1.5","4L2.5","4M1","4M2","4M3",
+                      "4R1.5","4R2.5","5M1","5M2","5M3"],
+    "Ivoclar Chromascop":["110","120","130","140","210","220","230","240","310","320","330","340",
+                          "410","420","430","440","510","520","530","540"]
+  };
+  function scaleName(){ var s=$("#shadeScale"); return (s&&s.value)||"VITA classical"; }
+
+  function teethList(){
     var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
-    $("#teethSel").innerHTML = on.length
-      ? "Позначено: <b>"+on.join(", ")+"</b>"
-      : "Зуби не позначено";
+    return on;
   }
-  function toothBtn(fdi){
-    var b=document.createElement("button");
-    b.type="button"; b.className="tooth"; b.dataset.fdi=fdi;
-    b.setAttribute("aria-pressed","false");
-    b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+GLYPH[toothType(fdi)]+'</svg>'+fdi;
-    b.addEventListener("click",function(){
-      selTeeth[fdi]=!selTeeth[fdi];
-      b.classList.toggle("on",!!selTeeth[fdi]);
-      b.setAttribute("aria-pressed",selTeeth[fdi]?"true":"false");
-      renderTeethSel();
+  function renderTeethSel(){
+    var on=teethList();
+    if(!on.length){ $("#teethSel").innerHTML="Зуби не позначено"; return; }
+    var parts=on.map(function(t){
+      var b=[];
+      if(toothShade[t]) b.push(toothShade[t]);
+      if(toothStump[t]) b.push("культя "+toothStump[t]);
+      return "<b>"+t+"</b>"+(b.length?(" ("+esc(b.join(", "))+")"):"");
     });
-    return b;
+    $("#teethSel").innerHTML="Позначено: "+parts.join(", ");
   }
-  UPPER.forEach(function(t){ $("#teethU").appendChild(toothBtn(t)); });
-  LOWER.forEach(function(t){ $("#teethL").appendChild(toothBtn(t)); });
+
+  // Position along the two arches: upper ∩ on top, lower ∪ below — the exocad
+  // ring flattened into the block's wide format. Molars turn sideways with the
+  // arc, numbers stay upright on the tooth.
+  var SVGNS="http://www.w3.org/2000/svg";
+  function archPos(i,n,upper){
+    var t=(i+0.5)/n;
+    var th=Math.PI*(1-t);
+    var x=500+455*Math.cos(th);
+    var y,rot;
+    if(upper){ y=168-128*Math.sin(th); rot=90-th*180/Math.PI; }
+    else     { y=232+128*Math.sin(th); rot=th*180/Math.PI-90; }
+    return {x:x,y:y,rot:rot};
+  }
+  function toothScale(fdi){
+    var p=fdi%10;
+    return p>=6?2.1:p>=4?1.85:p===3?1.75:1.6;
+  }
+  var toothEls={};
+  function updateToothVisual(fdi){
+    var g=toothEls[fdi]; if(!g) return;
+    if(selTeeth[fdi]) g.classList.add("on"); else g.classList.remove("on");
+    var sh=g.querySelector(".sh");
+    if(sh) sh.textContent=toothShade[fdi]||"";
+  }
+  (function buildArch(){
+    var svg=$("#archSvg");
+    function put(list,upper){
+      list.forEach(function(fdi,i){
+        var p=archPos(i,list.length,upper);
+        var s=toothScale(fdi);
+        var G=GLYPH[toothType(fdi)];
+        var g=document.createElementNS(SVGNS,"g");
+        g.setAttribute("class","tooth-g");
+        g.setAttribute("data-fdi",fdi);
+        g.innerHTML=
+          '<g transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+') rotate('+p.rot.toFixed(1)
+            +') scale('+s+') translate(-12 -12)">'
+          +'<path class="shape" d="'+G.o+'"/>'
+          +(G.f?('<path class="fiss" d="'+G.f+'"/>'):'')
+          +'<rect x="-1" y="-1" width="26" height="26" fill="transparent"/></g>'
+          +'<text x="'+p.x.toFixed(1)+'" y="'+(p.y+5).toFixed(1)+'">'+fdi+'</text>'
+          +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'+(p.y+19).toFixed(1)+'"></text>';
+        g.addEventListener("click",function(ev){
+          ev.stopPropagation();
+          if(!selTeeth[fdi]){ selTeeth[fdi]=true; updateToothVisual(fdi); renderTeethSel(); }
+          openPop(fdi,g);
+        });
+        svg.appendChild(g);
+        toothEls[fdi]=g;
+      });
+    }
+    put(UPPER,true); put(LOWER,false);
+  })();
+
+  // per-tooth popup: колір зуба за обраною розколіркою + колір культі
+  var popEl=$("#toothPop");
+  function closePop(){ popEl.hidden=true; }
+  function openPop(fdi,gEl){
+    var sc=SCALES[scaleName()]||[];
+    var cur=toothShade[fdi]||"";
+    var html='<h5>Зуб '+fdi+' · '+esc(scaleName())+'</h5><div class="chips">';
+    sc.forEach(function(s){
+      html+='<button type="button" class="chip'+(s===cur?" on":"")+'" data-sh="'+s+'">'+s+'</button>';
+    });
+    html+='</div><div class="f2"><label>Культя</label>'
+      +'<input type="text" id="popStump" placeholder="напр. ND3" value="'+esc(toothStump[fdi]||"")+'"></div>'
+      +'<div class="ops2"><button type="button" id="popClear">Зняти позначку</button>'
+      +'<button type="button" class="ok" id="popOk">Готово</button></div>';
+    popEl.innerHTML=html;
+    popEl.hidden=false;
+    var tR=$("#teeth").getBoundingClientRect(), gR=gEl.getBoundingClientRect();
+    var x=gR.left-tR.left+gR.width/2-145;
+    x=Math.max(8,Math.min(x,tR.width-300));
+    var y=gR.bottom-tR.top+6;
+    if(y+300>tR.height) y=Math.max(8,gR.top-tR.top-306);
+    popEl.style.left=x+"px"; popEl.style.top=y+"px";
+    popEl.querySelectorAll(".chip").forEach(function(ch){
+      ch.addEventListener("click",function(){
+        toothShade[fdi]=ch.dataset.sh;
+        popEl.querySelectorAll(".chip").forEach(function(c){c.classList.toggle("on",c===ch);});
+        updateToothVisual(fdi); renderTeethSel();
+      });
+    });
+    $("#popStump").addEventListener("input",function(){
+      toothStump[fdi]=this.value.trim(); renderTeethSel();
+    });
+    $("#popClear").addEventListener("click",function(){
+      delete selTeeth[fdi]; delete toothShade[fdi]; delete toothStump[fdi];
+      updateToothVisual(fdi); renderTeethSel(); closePop();
+    });
+    $("#popOk").addEventListener("click",closePop);
+  }
+  document.addEventListener("click",function(e){
+    if(popEl.hidden) return;
+    if(popEl.contains(e.target)) return;
+    closePop();
+  });
 
   // ── services, grouped by material / construction type ────────────────────
   // Item names are IDENTICAL to the old flat list — drafts, history entries
@@ -373,9 +511,7 @@
     {t:"Кераміка E.max",items:[
       "Коронка / Вінір / e.max CAD",
       "Коронка/вінір з пошаровим нанесенням кераміки",
-      "Вінір на рефракторі"],
-     fields:[{id:"shade",l:"Колір реставрації",ph:"напр. A2"},
-             {id:"stump",l:"Колір культі",ph:"—"}]},
+      "Вінір на рефракторі"]},
     {t:"Діоксид цирконію ZrO2",items:[
       "Коронка ZrO2 Multilayer",
       "Абатмент ZrO2"]},
@@ -386,7 +522,10 @@
     {t:"Робота на імплантатах",items:[
       "Коронка з гвинтовою фіксацією",
       "Тимчасова коронка з гвинтовою фіксацією"],
-     fields:[{id:"implant",l:"Імплант система",ph:"—"}]},
+     fields:[{id:"implant",l:"Імплант система",ph:"оберіть або впишіть свою",
+              dl:["Straumann","Nobel Biocare","Astra Tech (Dentsply)","Ankylos",
+                  "Osstem","Dentium","MegaGen (AnyRidge)","MIS","Alpha-Bio",
+                  "Neodent","BioHorizons","Zimmer Biomet","NeoBiotech","Anthogyr","U-impl"]}]},
     {t:"Цифрові послуги та 3D друк",items:[
       "Цифрове моделювання",
       "Хірургічний шаблон",
@@ -424,7 +563,17 @@
       var lb=document.createElement("label"); lb.textContent=f.l; lb.htmlFor=f.id;
       var inp=document.createElement("input"); inp.type="text"; inp.id=f.id;
       inp.placeholder=f.ph||"";
-      p.appendChild(lb); p.appendChild(inp); gd.appendChild(p);
+      p.appendChild(lb); p.appendChild(inp);
+      if(f.dl&&f.dl.length){
+        // dropdown of known options + free typing for anything not listed
+        var dl=document.createElement("datalist"); dl.id=f.id+"List";
+        f.dl.forEach(function(o){
+          var op=document.createElement("option"); op.value=o; dl.appendChild(op);
+        });
+        inp.setAttribute("list",dl.id);
+        p.appendChild(dl);
+      }
+      gd.appendChild(p);
     });
     svcGrid.appendChild(gd);
   });
@@ -443,9 +592,13 @@
     });
     return out;
   }
-  function teethList(){
-    var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
-    return on;
+  function teethDetailed(){
+    return teethList().map(function(t){
+      var b=[];
+      if(toothShade[t]) b.push(toothShade[t]);
+      if(toothStump[t]) b.push("культя "+toothStump[t]);
+      return b.length? (t+" ("+b.join(", ")+")") : String(t);
+    });
   }
   function materialsClient(){
     var m=[];
@@ -477,13 +630,15 @@
     L.push("ПАЦІЄНТ: "+(v("patient")||"—")+(v("age")?("   Вік: "+v("age")):""));
     L.push("  Дата доставки: "+(v("due")||"—")+"    Технік: "+(v("tech")||"—"));
     L.push("");
-    var teeth=teethList();
-    if(teeth.length){L.push("ЗУБИ: "+teeth.join(", ")); L.push("");}
-    if(v("shade")||v("implant")||v("stump")){
+    var teeth=teethDetailed();
+    if(teeth.length){
+      L.push("ЗУБИ ("+scaleName()+"): ");
+      teeth.forEach(function(x){L.push("  • "+x);});
+      L.push("");
+    }
+    if(v("implant")){
       L.push("ПАРАМЕТРИ");
-      if(v("shade"))   L.push("  Колір реставрації: "+v("shade"));
-      if(v("implant")) L.push("  Імплант система: "+v("implant"));
-      if(v("stump"))   L.push("  Колір культі: "+v("stump"));
+      L.push("  Імплант система: "+v("implant"));
       L.push("");
     }
     var s=services(); if(s.length){L.push("ВИДИ РОБІТ"); s.forEach(function(x){L.push("  • "+x);}); L.push("");}
@@ -592,11 +747,16 @@
   function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
   var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
     "patient","age","tech","matTray","matBow","matTrans","matAbut","matAnal",
-    "matOther","matLab","shade","implant","stump","notes"];
+    "matOther","matLab","implant","shadeScale","notes"];
   function collectAll(){
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});
     o.teeth=teethList();
+    o.tsh={}; o.tst={};
+    teethList().forEach(function(t){
+      if(toothShade[t]) o.tsh[t]=toothShade[t];
+      if(toothStump[t]) o.tst[t]=toothStump[t];
+    });
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       var note=cb.parentElement.querySelector('.note');
@@ -608,12 +768,11 @@
   function applyAll(o){
     if(!o) return;
     FIELD_IDS.forEach(function(id){ if(o[id]!==undefined) setv(id,o[id]); });
-    selTeeth={};
+    selTeeth={}; toothShade={}; toothStump={};
     (o.teeth||[]).forEach(function(t){selTeeth[t]=true;});
-    document.querySelectorAll("#teeth .tooth").forEach(function(b){
-      var on=!!selTeeth[b.dataset.fdi];
-      b.classList.toggle("on",on); b.setAttribute("aria-pressed",on?"true":"false");
-    });
+    Object.keys(o.tsh||{}).forEach(function(t){toothShade[t]=o.tsh[t];});
+    Object.keys(o.tst||{}).forEach(function(t){toothStump[t]=o.tst[t];});
+    UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();
     var byName={};
     (o.svc||[]).forEach(function(s){byName[s.n]=s;});

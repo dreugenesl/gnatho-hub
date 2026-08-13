@@ -227,6 +227,45 @@
   footer{padding:22px clamp(18px,4vw,40px) 0; color:var(--muted); font-size:12px; line-height:1.7; border-top:1px solid var(--line); margin-top:8px;}
   footer .fine{color:var(--faint); font-size:11px; margin-top:8px;}
 
+  /* ── The naryad DOCUMENT (what gets printed / saved / attached) ── */
+  #docView{display:none;}
+  body.doc-mode .wrap{display:none;}
+  body.doc-mode #docView{display:block;}
+  .doc{max-width:860px; margin:0 auto; padding:0 0 40px; background:#fff; color:#1E2025;
+    font-family:var(--sans); font-size:13px; line-height:1.45;}
+  .doc-head{display:flex; align-items:center; justify-content:space-between; gap:20px;
+    background:#2D2E32; color:#F2F3F5; padding:20px 26px;}
+  .doc-head img{height:64px; width:auto; display:block;}
+  .doc-head .r{text-align:right; font-size:10.5px; line-height:1.65; color:#BCC0C8;}
+  .doc-head .r .no{font-size:14px; color:#fff; font-weight:700; letter-spacing:.06em; margin-bottom:5px;}
+  .doc-body{padding:20px 26px 0;}
+  .doc h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#5F7BA6;
+    font-weight:700; margin:20px 0 7px; border-bottom:1px solid #E4E6EB; padding-bottom:5px;}
+  .doc h2:first-child{margin-top:0;}
+  .kv{display:grid; grid-template-columns:repeat(4,auto 1fr); gap:5px 10px; align-items:baseline;}
+  .kv .k{color:#787D87; font-size:11px; white-space:nowrap;}
+  .kv .v{font-weight:600; border-bottom:1px dotted #D4D8DF; min-width:60px;}
+  .doc table{width:100%; border-collapse:collapse; margin-top:2px;}
+  .doc th{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#787D87;
+    text-align:left; font-weight:600; padding:5px 8px; border-bottom:1px solid #D4D8DF;}
+  .doc td{padding:7px 8px; border-bottom:1px solid #EDEFF3; vertical-align:top;}
+  .doc td.w{font-weight:600;}
+  .doc td.t{font-variant-numeric:tabular-nums;}
+  .doc .sw{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
+    vertical-align:baseline;}
+  .doc .chart{border:1px solid #E4E6EB; border-radius:3px; padding:8px; margin-top:4px;}
+  .doc .chart svg{display:block; width:100%; height:auto;}
+  .doc .note{white-space:pre-wrap; border:1px solid #E4E6EB; border-radius:3px; padding:10px 12px;
+    background:#FCFCFD;}
+  .doc .signs{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:34px;}
+  .doc .signs div{border-top:1px solid #D4D8DF; padding-top:7px; font-size:10.5px;
+    color:#787D87; text-align:center;}
+  .doc .fine{margin-top:22px; font-size:10px; color:#A8ACB5; text-align:center;}
+  @media print{
+    body.doc-mode #docView{display:block;}
+    .doc-head{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .doc{max-width:100%;}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
   @media print{
     body{background:#fff;} .wrap{max-width:100%;}
@@ -360,9 +399,12 @@
 
   <footer>
     <div><b>Stelmakh LAB</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
-    <p class="fine">«Надіслати» відкриє вашу пошту з готовим листом на лабораторію. Скани та зліпки надсилайте вкладенням або звичним каналом.</p>
+    <p class="fine">«Надіслати» відкриє вашу пошту з коротким листом-нарядом (пошта передає лише текст).
+      Повноцінний бланк — кнопки «Завантажити наряд» (файл-документ) і «Друк / PDF»; додайте його до листа
+      разом зі сканами.</p>
   </footer>
 </div>
+<div id="docView" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -905,6 +947,97 @@
     return L.join("\n");
   }
 
+
+  // ── НАРЯД ЯК ДОКУМЕНТ ────────────────────────────────────────────────────
+  // Пошта вміє лише простий текст, тож бланк живе окремо: шапка з лого,
+  // картки клініки й пацієнта, кольорова формула і таблиця робіт. «Друк/PDF»
+  // друкує саме його, «Завантажити» зберігає самодостатній HTML-файл, який
+  // відкривається як документ і чіпляється до листа.
+  function chartSnapshot(){
+    var svg=$("#archSvg"); if(!svg) return "";
+    var c=svg.cloneNode(true);
+    // inline the styles the document CSS does not carry
+    c.querySelectorAll(".tooth-g").forEach(function(g){
+      var fdi=g.getAttribute("data-fdi");
+      var painted=selTeeth[fdi];
+      var col=(painted&&toothSvc[fdi]&&SVC_COLOR[toothSvc[fdi]])||"";
+      var shp=g.querySelector(".shape");
+      if(shp){ shp.setAttribute("fill",col||"#FFFFFF");
+               shp.setAttribute("stroke","#A8ACB5"); shp.setAttribute("stroke-width","1.4"); }
+      var f=g.querySelector(".fiss");
+      if(f){ f.setAttribute("fill","none"); f.setAttribute("stroke",col?"#FFFFFF":"#C6C9D0");
+             f.setAttribute("stroke-width","1.2"); f.setAttribute("opacity",col?".55":".9"); }
+      var im=g.querySelector(".imp");
+      if(im&&im.style.display!=="none"){
+        var b=im.querySelector(".impb"); if(b) b.setAttribute("fill","#787D87");
+        var t=im.querySelector(".impt");
+        if(t){ t.setAttribute("stroke","#FFFFFF"); t.setAttribute("fill","none");
+               t.setAttribute("stroke-width","1.1"); }
+      }
+      g.querySelectorAll("text").forEach(function(tx){
+        var isSh=tx.getAttribute("class")==="sh";
+        tx.setAttribute("fill",isSh?"#5F7BA6":(col?"#FFFFFF":"#2A2D33"));
+        tx.setAttribute("font-size",isSh?"11":"15");
+        tx.setAttribute("font-weight",isSh?"700":"600");
+        tx.setAttribute("font-family","Helvetica, Arial, sans-serif");
+        tx.setAttribute("text-anchor","middle");
+      });
+    });
+    return c.outerHTML;
+  }
+  function docHtml(){
+    var logo=document.querySelector(".brandimg");
+    var rows="";
+    document.querySelectorAll("input[data-svc]").forEach(function(cb){
+      if(!cb.checked) return;
+      var n=cb.dataset.svc, e=svcEls[n]||{};
+      var teeth=svcTeethOf(n);
+      rows+="<tr><td class=\"w\"><span class=\"sw\" style=\"background:"+(SVC_COLOR[n]||"#D4D8DF")
+        +"\"></span>"+esc(n)+(e.op&&e.op.value?(" · "+esc(e.op.value)):"")+"</td>"
+        +"<td class=\"t\">"+(teeth.length?teeth.join(", "):"—")+"</td>"
+        +"<td>"+esc((e.sh&&e.sh.value)||"—")+"</td>"
+        +"<td>"+esc((e.st&&e.st.value)||"—")+"</td></tr>";
+    });
+    var mats=materialsClient();
+    if(v("matLab")) mats.push("Stelmakh Lab: "+v("matLab"));
+    var kv=function(k,val){ return "<span class=\"k\">"+k+"</span><span class=\"v\">"
+      +esc(val||"—")+"</span>"; };
+    return '<div class="doc">'
+      +'<div class="doc-head">'
+        +(logo?('<img src="'+logo.getAttribute("src")+'" alt="Stelmakh LAB">'):'<b>STELMAKH LAB</b>')
+        +'<div class="r"><div class="no">НАРЯД '+esc(v("oid"))+'</div>'
+        +'вул. В. Липківського, 37 В, оф. 1001, Київ, 03035<br>'
+        +'+38 067 807 21 22 · +38 050 807 21 55<br>admin@stelmakhlab.com</div></div>'
+      +'<div class="doc-body">'
+        +'<h2>Клініка та пацієнт</h2><div class="kv">'
+          +kv("Клініка",v("clinic"))+kv("Лікар",v("doctor"))
+          +kv("Телефон",v("phone"))+kv("Email",v("cemail"))
+          +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
+          +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
+          +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Розколірка",scaleName())
+          +kv("Культі",stumpScaleName())+kv("Імплант система",v("implant"))
+        +'</div>'
+        +'<h2>Зубна формула</h2><div class="chart">'+chartSnapshot()+'</div>'
+        +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
+          +'<th>Колір</th><th>Культя</th></tr></thead><tbody>'
+          +(rows||'<tr><td colspan="4">—</td></tr>')+'</tbody></table>'
+        +(mats.length?('<h2>Матеріали на повернення</h2><table><tbody>'
+          +mats.map(function(m){return '<tr><td>'+esc(m)+'</td></tr>';}).join("")
+          +'</tbody></table>'):'')
+        +(v("notes")?('<h2>Важливо для техніка</h2><div class="note">'+esc(v("notes"))+'</div>'):'')
+        +'<div class="signs"><div>Підпис лікаря</div><div>Прийняв(ла)</div><div>Дата</div></div>'
+        +'<div class="fine">Сформовано у формі наряду Stelmakh LAB · '+esc(v("oid"))+'</div>'
+      +'</div></div>';
+  }
+  function standaloneDoc(){
+    var css=document.querySelector("style").textContent;
+    return '<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">'
+      +'<meta name="viewport" content="width=device-width, initial-scale=1">'
+      +'<title>Наряд '+esc(v("oid"))+' — Stelmakh LAB</title><style>'
+      +css+'\n#docView{display:block !important;} body{margin:0;background:#fff;}'
+      +'</style></head><body><div id="docView">'+docHtml()+'</div></body></html>';
+  }
+
   $("#form").addEventListener("submit",function(e){
     e.preventDefault();
     var miss=validate();
@@ -913,18 +1046,18 @@
     var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
     var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
     window.location.href=href;
-    toast("Відкрито пошту з листом на "+LAB_EMAIL+". Не відкрилось? Натисніть «Завантажити наряд».","ok");
+    toast("Відкрито пошту на "+LAB_EMAIL+". Красивий бланк — «Завантажити наряд» (HTML) або «Друк / PDF»; додайте його вкладенням.","ok");
   });
 
   $("#download").addEventListener("click",function(){
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
     pushHist();
-    var name="naryad-"+v("oid")+".txt";
-    var data=orderText();
+    var name="naryad-"+v("oid")+".html";
+    var data=standaloneDoc();
     if(window.claude&&window.claude.downloads){
       window.claude.downloads.save({filename:name,data:data}).then(function(){
-        toast("Наряд збережено. Надішліть файл лабораторії вкладенням.","ok");
+        toast("Бланк наряду збережено. Надішліть файл лабораторії вкладенням.","ok");
       }).catch(function(err){
         var c=(err&&err.code)||"unavailable";
         if(c==="declined")toast("Збереження скасовано.","");
@@ -934,15 +1067,22 @@
   });
   function blobDownload(name,data){
     try{
-      var blob=new Blob([data],{type:"text/plain;charset=utf-8"});
+      var blob=new Blob([data],{type:(/\.html$/.test(name)?"text/html":"text/plain")+";charset=utf-8"});
       var url=URL.createObjectURL(blob);
       var a=document.createElement("a"); a.href=url; a.download=name;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function(){URL.revokeObjectURL(url);},1500);
-      toast("Наряд завантажено. Надішліть файл лабораторії вкладенням.","ok");
+      toast("Бланк наряду завантажено — відкрийте його і надішліть вкладенням (або друкуйте в PDF).","ok");
     }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
   }
-  $("#print").addEventListener("click",function(){window.print();});
+  $("#print").addEventListener("click",function(){
+    var miss=validate();
+    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    $("#docView").innerHTML=docHtml();
+    document.body.classList.add("doc-mode");
+    window.print();
+    setTimeout(function(){ document.body.classList.remove("doc-mode"); },400);
+  });
 
   // ── Clinic registration (per-device, localStorage) ───────────────────────
   var KEY="slClinic";

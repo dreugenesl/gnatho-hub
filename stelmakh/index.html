@@ -371,8 +371,6 @@
     <div class="actions">
       <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
       <button type="button" class="btn-ghost" id="pdf">Завантажити PDF</button>
-      <button type="button" class="btn-ghost" id="download">Бланк (HTML)</button>
-      <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
       <button type="button" class="btn-ghost" id="newOrder">Новий наряд</button>
     </div>
     <div class="toast" id="toast" role="status"></div>
@@ -402,9 +400,8 @@
 
   <footer>
     <div><b>Stelmakh LAB</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
-    <p class="fine">«Надіслати» готує PDF наряду і відкриває пошту з коротким листом — перетягніть
-      PDF у лист (стандарт пошти не дозволяє вкладати файл автоматично). «Завантажити PDF» — той самий
-      бланк окремо, «Друк / PDF» — друк.</p>
+    <p class="fine">«Надіслати» формує PDF-бланк наряду і відправляє його прямо в лабораторію.
+      «Завантажити PDF» — той самий бланк собі на пристрій (для друку чи архіву).</p>
   </footer>
 </div>
 <div id="docView" aria-hidden="true"></div>
@@ -1155,22 +1152,6 @@
     });
   });
 
-  $("#download").addEventListener("click",function(){
-    var miss=validate();
-    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
-    pushHist();
-    var name="naryad-"+v("oid")+".html";
-    var data=standaloneDoc();
-    if(window.claude&&window.claude.downloads){
-      window.claude.downloads.save({filename:name,data:data}).then(function(){
-        toast("Бланк наряду збережено. Надішліть файл лабораторії вкладенням.","ok");
-      }).catch(function(err){
-        var c=(err&&err.code)||"unavailable";
-        if(c==="declined")toast("Збереження скасовано.","");
-        else blobDownload(name,data);
-      });
-    } else blobDownload(name,data);
-  });
   function blobDownload(name,data,quiet){
     try{
       var blob=new Blob([data],{type:(/\.html$/.test(name)?"text/html":"text/plain")+";charset=utf-8"});
@@ -1181,14 +1162,6 @@
       if(!quiet) toast("Бланк наряду завантажено — відкрийте його і надішліть вкладенням (або друкуйте в PDF).","ok");
     }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
   }
-  $("#print").addEventListener("click",function(){
-    var miss=validate();
-    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
-    $("#docView").innerHTML=docHtml();
-    document.body.classList.add("doc-mode");
-    window.print();
-    setTimeout(function(){ document.body.classList.remove("doc-mode"); },400);
-  });
 
   // ── Clinic registration (per-device, localStorage) ───────────────────────
   var KEY="slClinic";

@@ -132,7 +132,9 @@
   .teeth{position:relative; background:var(--raise); border:1px solid var(--line);
     border-radius:var(--radius); padding:12px 10px 12px; box-shadow:var(--shadow); overflow-x:auto;}
   .arch-wrap{position:relative; min-width:560px;}
-  #archSvg{display:block; width:100%; height:auto; user-select:none;}
+  #archSvg{display:block; width:100%; height:auto; user-select:none; touch-action:none;}
+  /* interdental connectors — drawn under the teeth so they read as bridges */
+  .conn{fill:#D6B24A; stroke:#B8963A; stroke-width:1.2; vector-effect:non-scaling-stroke;}
   /* the guide selectors live INSIDE the ring, where the paper form is empty */
   .arch-ctl{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     display:flex; flex-direction:column; gap:9px; align-items:stretch; z-index:5;}
@@ -332,9 +334,18 @@
     <h3 class="block">Матеріали Stelmakh Lab, які необхідно повернути</h3>
     <div class="f wide" style="padding-top:0"><label style="min-width:0"></label><input type="text" id="matLab" placeholder="—"></div>
 
+
+    <!-- services (restoration parameters live inside their groups) -->
+    <h3 class="block">Види робіт</h3>
+    <p class="block-note">Клікніть назву роботи — вона стає активним «пензлем»; далі клацайте
+      зуби у формулі нижче: вони офарбовуються кольором роботи. Протягніть пальцем або мишею
+      по сусідніх зубах — між ними стануть жовті міжзубні конектори.</p>
+    <p class="callout">Капи та шини сюди не входять — для них
+      <a href="../">окремий наряд Gnatho Hub</a>.</p>
+    <div class="svc-grid" id="svcGrid"></div>
+
     <!-- tooth chart -->
     <h3 class="block">Зубна формула</h3>
-    <p class="block-note">Оберіть вид роботи нижче — кліки по зубах фарбують їх кольором цієї роботи.</p>
     <div class="teeth" id="teeth">
       <div class="arch-wrap">
         <svg id="archSvg" viewBox="0 -34 1000 402" role="group" aria-label="Зубна формула"></svg>
@@ -357,15 +368,6 @@
       <div class="tooth-pop" id="toothPop" hidden></div>
       <button type="button" class="teeth-clear" id="teethClear">Очистити все</button>
     </div>
-
-    <!-- services (restoration parameters live inside their groups) -->
-    <h3 class="block">Види робіт</h3>
-    <p class="block-note">Клікніть назву роботи — вона стає активним «пензлем»; далі клацайте
-      зуби у формулі: вони офарбовуються кольором роботи, а номери самі підставляються в її
-      рядок. Повторний клік по назві вимикає пензель.</p>
-    <p class="callout">Капи та шини сюди не входять — для них
-      <a href="../">окремий наряд Gnatho Hub</a>.</p>
-    <div class="svc-grid" id="svcGrid"></div>
 
     <!-- important -->
     <h3 class="block">Важливо для техніка</h3>
@@ -581,7 +583,36 @@
     }
     return out;
   }
-  var toothEls={};
+  var toothEls={}, toothPos={}, conns={};
+  function connKey(a,b){ return (a<b?a+"-"+b:b+"-"+a); }
+  function neighbours(a,b){
+    var f=function(L){ var i=L.indexOf(a), j=L.indexOf(b);
+      return i>=0&&j>=0&&Math.abs(i-j)===1; };
+    return f(UPPER)||f(LOWER);
+  }
+  function drawConns(){
+    var svg=$("#archSvg"); if(!svg) return;
+    var g=$("#connLayer");
+    if(!g){
+      g=document.createElementNS(SVGNS,"g"); g.id="connLayer";
+      svg.insertBefore(g, svg.firstChild);       // under the teeth
+    }
+    g.innerHTML="";
+    Object.keys(conns).forEach(function(k){
+      var p=k.split("-"), A=toothPos[p[0]], B=toothPos[p[1]];
+      if(!A||!B) return;
+      var dx=B.x-A.x, dy=B.y-A.y, len=Math.hypot(dx,dy)||1;
+      var ux=dx/len, uy=dy/len, nx=-uy, ny=ux;
+      var cx=(A.x+B.x)/2, cy=(A.y+B.y)/2;
+      var hl=len*0.42, hw=Math.min(A.w,B.w)*0.26;
+      var pts=[[cx-ux*hl-nx*hw,cy-uy*hl-ny*hw],[cx+ux*hl-nx*hw,cy+uy*hl-ny*hw],
+               [cx+ux*hl+nx*hw,cy+uy*hl+ny*hw],[cx-ux*hl+nx*hw,cy-uy*hl+ny*hw]];
+      var el=document.createElementNS(SVGNS,"polygon");
+      el.setAttribute("class","conn");
+      el.setAttribute("points",pts.map(function(q){return q[0].toFixed(1)+","+q[1].toFixed(1);}).join(" "));
+      g.appendChild(el);
+    });
+  }
   function updateToothVisual(fdi){
     var g=toothEls[fdi]; if(!g) return;
     if(selTeeth[fdi]) g.classList.add("on"); else g.classList.remove("on");
@@ -657,7 +688,57 @@
       });
       svg.appendChild(g);
       toothEls[fdi]=g;
+      toothPos[fdi]={x:p.x,y:p.y,w:p.w};
     });
+
+    // ── ПРОТЯГУВАННЯ = МІЖЗУБНІ КОНЕКТОРИ ─────────────────────────────
+    // Pointer events, so a finger on a phone and a mouse on a desktop take the
+    // same path. Dragging from tooth to neighbouring tooth lays a connector
+    // between them (and lifts it if it was already there); the teeth crossed
+    // are painted with the armed service on the way.
+    var dragFrom=null, dragged=false;
+    function toothUnder(ev){
+      var el=document.elementFromPoint(ev.clientX,ev.clientY);
+      var g=el&&el.closest?el.closest(".tooth-g"):null;
+      return g?g.getAttribute("data-fdi"):null;
+    }
+    function paint(fdi){
+      if(!activeSvc||toothSvc[fdi]===activeSvc) return;
+      var prev=toothSvc[fdi];
+      selTeeth[fdi]=true; toothSvc[fdi]=activeSvc;
+      inheritSvcShades(fdi,activeSvc);
+      updateToothVisual(fdi);
+      if(prev) refreshSvcNote(prev);
+      refreshSvcNote(activeSvc);
+    }
+    svg.addEventListener("pointerdown",function(ev){
+      dragFrom=toothUnder(ev); dragged=false;
+      if(dragFrom) svg.setPointerCapture(ev.pointerId);
+    });
+    svg.addEventListener("pointermove",function(ev){
+      if(!dragFrom) return;
+      var f=toothUnder(ev);
+      if(!f||f===dragFrom) return;
+      if(neighbours(dragFrom,f)){
+        var k=connKey(dragFrom,f);
+        if(!conns[k]){ conns[k]=1; drawConns(); }
+        if(activeSvc){ paint(dragFrom); paint(f); }
+        dragged=true;
+      }
+      dragFrom=f;
+    });
+    function endDrag(ev){
+      if(dragFrom&&svg.hasPointerCapture&&ev.pointerId!==undefined){
+        try{ svg.releasePointerCapture(ev.pointerId); }catch(e){}
+      }
+      dragFrom=null;
+      if(dragged){ ev.preventDefault(); ev.stopPropagation(); }
+      setTimeout(function(){ dragged=false; },0);
+    }
+    svg.addEventListener("pointerup",endDrag);
+    svg.addEventListener("pointercancel",endDrag);
+    // a click that ended a drag must not toggle the tooth under the finger
+    svg.addEventListener("click",function(ev){ if(dragged){ ev.stopPropagation(); } },true);
   })();
 
   // A tooth painted by a service INHERITS the shades picked on its row —
@@ -748,8 +829,9 @@
 
   // corner broom: wipes every mark on the chart, the service rows stay as set
   $("#teethClear").addEventListener("click",function(){
-    selTeeth={}; toothShade={}; toothStump={}; toothSvc={}; toothCustom={};
+    selTeeth={}; toothShade={}; toothStump={}; toothSvc={}; toothCustom={}; conns={};
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
+    drawConns();
     $("#fullUpper").classList.remove("on");
     $("#fullLower").classList.remove("on");
     closePop(); renderTeethSel();
@@ -958,6 +1040,8 @@
       teeth.forEach(function(x){L.push("  • "+x);});
       L.push("");
     }
+    var ck=Object.keys(conns);
+    if(ck.length){ L.push("МІЖЗУБНІ КОНЕКТОРИ: "+ck.join(", ")); L.push(""); }
     if(v("implant")){
       L.push("ПАРАМЕТРИ");
       L.push("  Імплант система: "+v("implant"));
@@ -1235,6 +1319,7 @@
       if(toothSvc[t])    o.tsvc[t]=toothSvc[t];
       if(toothCustom[t]) o.tcs[t]=1;
     });
+    o.conns=Object.keys(conns);
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       var e=svcEls[cb.dataset.svc]||{};
@@ -1253,6 +1338,7 @@
     Object.keys(o.tst||{}).forEach(function(t){toothStump[t]=o.tst[t];});
     Object.keys(o.tsvc||{}).forEach(function(t){toothSvc[t]=o.tsvc[t];});
     Object.keys(o.tcs||{}).forEach(function(t){toothCustom[t]=1;});
+    conns={}; (o.conns||[]).forEach(function(k){conns[k]=1;}); drawConns();
     setActiveSvc(null);
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();

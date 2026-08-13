@@ -173,15 +173,25 @@
   .svc-opt label:has(input:focus-visible){box-shadow:0 0 0 3px var(--warm-soft);}
   .svc-opt.off{opacity:.35; pointer-events:none;}
 
+  /* history tab */
+  .hist{display:flex; flex-direction:column;}
+  .hist-item{display:flex; gap:14px; align-items:center; padding:12px 2px;
+    border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .hist-item .meta{flex:1 1 240px; min-width:0; font-size:13.5px; color:var(--muted);}
+  .hist-item .meta b{color:var(--strong); font-variant-numeric:tabular-nums;}
+  .hist-item .meta .sub{font-size:12px; color:var(--faint); margin-top:2px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:520px;}
+  .hist-item .ops{display:flex; gap:8px; flex:none;}
+  .hist-item .ops button{background:transparent; border:1px solid var(--line-2); color:var(--strong);
+    font-size:12.5px; padding:7px 12px; border-radius:2px;}
+  .hist-item .ops button:hover{border-color:var(--muted);}
+  .hist-empty{color:var(--faint); font-size:13px; padding:18px 0;}
+
   textarea{width:100%; font-family:inherit; font-size:14px; color:var(--ink); background:var(--field);
     border:1px solid var(--line-2); border-radius:var(--radius); padding:11px 12px; min-height:76px;
     resize:vertical; line-height:1.5; transition:border-color .15s ease;}
   textarea:focus{outline:none; border-color:var(--warm); box-shadow:0 0 0 3px var(--warm-soft);}
 
-  .signrow{display:grid; grid-template-columns:repeat(3,1fr); gap:26px; margin-top:34px;}
-  @media (max-width:620px){ .signrow{grid-template-columns:1fr;} }
-  .sign{border-top:1px solid var(--line-2); padding-top:9px; font-size:11.5px; color:var(--muted);
-    text-align:center; letter-spacing:.02em;}
 
   .actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; align-items:center;}
   button{font-family:inherit; cursor:pointer; border-radius:var(--radius); transition:.15s ease; border:1px solid transparent;}
@@ -242,6 +252,7 @@
   <nav class="tabs">
     <button type="button" class="tab on" data-view="order">Наряд</button>
     <button type="button" class="tab" data-view="register">Реєстрація клініки</button>
+    <button type="button" class="tab" data-view="history">Історія</button>
   </nav>
 
   <div id="clinicBanner" class="banner" hidden></div>
@@ -288,14 +299,9 @@
     <h3 class="block">Важливо для техніка</h3>
     <textarea id="notes" placeholder="Побажання, деталі роботи…"></textarea>
 
-    <div class="signrow">
-      <div class="sign">Підпис лікаря</div>
-      <div class="sign">Вихідний контроль</div>
-      <div class="sign">Дата</div>
-    </div>
-
     <div class="actions">
       <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
+      <button type="button" class="btn-ghost" id="newOrder">Новий наряд</button>
       <button type="button" class="btn-ghost" id="download">Завантажити наряд</button>
       <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
     </div>
@@ -316,6 +322,12 @@
       <button type="button" class="btn-ghost" id="rClear">Очистити</button>
     </div>
     <div class="toast" id="rToast" role="status"></div>
+  </section>
+
+  <section id="viewHistory" class="body view" data-view="history" hidden>
+    <h3 class="block">Історія нарядів</h3>
+    <p class="block-note">Наряди з цього пристрою. Зберігаються лише у вашому браузері.</p>
+    <div class="hist" id="histList"></div>
   </section>
 
   <footer>
@@ -446,6 +458,7 @@
     e.preventDefault();
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist();
     var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
     var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
     window.location.href=href;
@@ -455,6 +468,7 @@
   $("#download").addEventListener("click",function(){
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist();
     var name="naryad-"+v("oid")+".txt";
     var data=orderText();
     // Universal: use the claude.ai save API inside the artifact sandbox, and a
@@ -481,6 +495,112 @@
   }
   $("#print").addEventListener("click",function(){window.print();});
 
+  // ── Snapshot: усі поля + зуби + роботи (для чернетки та історії) ─────────
+  function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+  function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
+  var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
+    "patient","age","tech","matLab","notes"];
+  function collectAll(){
+    var o={};
+    FIELD_IDS.forEach(function(id){o[id]=v(id);});
+    o.reg=radio("reg");
+    o.deprog=radio("deprog_method");
+    o.svc=[];
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      if(cb.checked) o.svc.push({n:cb.dataset.svc,c:1});
+    });
+    return o;
+  }
+  function applyAll(o){
+    if(!o) return;
+    FIELD_IDS.forEach(function(id){ if(o[id]!==undefined) setv(id,o[id]); });
+    document.querySelectorAll('input[name="reg"]').forEach(function(x){x.checked=false;});
+    if(o.reg){ var rr=document.querySelector('input[name="reg"][value="'+o.reg+'"]');
+               if(rr){ rr.checked=true; rr._pre=true; } }
+    var byName={};
+    (o.svc||[]).forEach(function(s){byName[s.n]=s;});
+    document.querySelectorAll('input[data-svc]').forEach(function(cb){
+      var s=byName[cb.dataset.svc];
+      var row=cb.parentElement;
+      cb.checked=!!(s&&s.c);
+      row.classList.toggle("on",cb.checked);
+    });
+  }
+
+  // ── Чернетка: форма переживає закриту вкладку ────────────────────────────
+  var DRAFT_KEY="ghDraft", draftTimer=null;
+  function saveDraft(){ try{localStorage.setItem(DRAFT_KEY,JSON.stringify(collectAll()));}catch(e){} }
+  function clearDraft(){ try{localStorage.removeItem(DRAFT_KEY);}catch(e){} }
+  function schedDraft(){ if(draftTimer)clearTimeout(draftTimer); draftTimer=setTimeout(saveDraft,350); }
+  $("#form").addEventListener("input",schedDraft);
+  $("#form").addEventListener("change",schedDraft);
+  (function(){
+    var d=null; try{d=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");}catch(e){}
+    if(d&&(d.patient||d.notes||(d.svc&&d.svc.length))){
+      applyAll(d);
+      toast("Відновлено чернетку наряду "+(d.oid||"")+". Кнопка «Новий наряд» — почати з чистого.","");
+    }
+  })();
+
+  // ── Історія нарядів (localStorage, останні 60) ───────────────────────────
+  var HIST_KEY="ghOrders";
+  function loadHist(){ try{return JSON.parse(localStorage.getItem(HIST_KEY)||"[]");}catch(e){return [];} }
+  function saveHist(l){ try{localStorage.setItem(HIST_KEY,JSON.stringify(l));}catch(e){} }
+  function pushHist(){
+    var o=collectAll(); o.savedAt=new Date().toISOString(); o.text=orderText();
+    var l=loadHist().filter(function(x){return x.oid!==o.oid;});
+    l.unshift(o); if(l.length>60)l.length=60;
+    saveHist(l);
+  }
+  function renderHist(){
+    var box=$("#histList"); if(!box) return;
+    var l=loadHist();
+    if(!l.length){
+      box.innerHTML='<div class="hist-empty">Поки порожньо — надіслані та завантажені наряди з’являться тут.</div>';
+      return;
+    }
+    box.innerHTML="";
+    l.forEach(function(o){
+      var it=document.createElement("div"); it.className="hist-item";
+      var svcs=(o.svc||[]).map(function(s){return s.n;}).join(", ");
+      var d=(o.savedAt||"").slice(0,10);
+      it.innerHTML='<div class="meta"><b>'+esc(o.oid||"—")+'</b> · '+esc(o.patient||"без пацієнта")
+        +'<div class="sub">'+esc(d)+(svcs?(" · "+esc(svcs)):"")+'</div></div>'
+        +'<div class="ops"><button type="button" data-op="open">У форму</button>'
+        +'<button type="button" data-op="txt">TXT</button>'
+        +'<button type="button" data-op="del" aria-label="Видалити">✕</button></div>';
+      it.querySelector('[data-op=open]').addEventListener("click",function(){
+        applyAll(o); saveDraft(); showView("order");
+        toast("Наряд "+(o.oid||"")+" відкрито у формі — перевірте дати перед надсиланням.","ok");
+      });
+      it.querySelector('[data-op=txt]').addEventListener("click",function(){
+        blobDownload("naryad-"+(o.oid||"x")+".txt", o.text||"");
+      });
+      it.querySelector('[data-op=del]').addEventListener("click",function(){
+        saveHist(loadHist().filter(function(x){return x.oid!==o.oid;}));
+        renderHist();
+      });
+      box.appendChild(it);
+    });
+  }
+
+  // ── Новий наряд: чиста форма, свіжий №, реєстрація клініки лишається ─────
+  $("#newOrder").addEventListener("click",function(){
+    clearDraft();
+    FIELD_IDS.forEach(function(id){setv(id,"");});
+    applyAll({teeth:[],svc:[],tsvc:{}});
+    var n2=new Date();
+    setv("oid","GH-"+String(n2.getFullYear()).slice(2)+pad(n2.getMonth()+1)+pad(n2.getDate())
+         +"-"+pad(n2.getHours())+pad(n2.getMinutes()));
+    setv("odate",n2.getFullYear()+"-"+pad(n2.getMonth()+1)+"-"+pad(n2.getDate()));
+    setv("otime",pad(n2.getHours())+":"+pad(n2.getMinutes()));
+    var dd=new Date(n2.getTime()+7*864e5);
+    setv("due",dd.getFullYear()+"-"+pad(dd.getMonth()+1)+"-"+pad(dd.getDate()));
+    applyClinic(loadClinic());
+    toast("Новий наряд — форму очищено.","");
+    window.scrollTo(0,0);
+  });
   // ── Clinic registration (per-device, localStorage) ───────────────────────
   var KEY="ghClinic";
   function loadClinic(){ try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;} }
@@ -496,6 +616,7 @@
   function showView(v){
     document.querySelectorAll(".view").forEach(function(el){ el.hidden = el.dataset.view!==v; });
     document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("on", t.dataset.view===v); });
+    if(v==="history") renderHist();
     window.scrollTo(0,0);
   }
   document.querySelectorAll(".tab").forEach(function(t){

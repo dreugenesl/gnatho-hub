@@ -431,6 +431,10 @@
     "Первинний ковпачок":"#AE8A6A",
     "POM вкладка":"#6A5ACD"
   };
+  // per-service variant options (shown as a small dropdown on the row)
+  var SVC_OPT={
+    "Індивідуальна ложка":["перфорована","неперфорована"]
+  };
   var svcEls={}, activeSvc=null;
   function setActiveSvc(name){
     activeSvc=name;
@@ -621,15 +625,20 @@
     r.innerHTML='<label class="box" for="'+id+'">'+CHECK+'</label>'
       +'<input type="checkbox" id="'+id+'" data-svc="'+name.replace(/"/g,"")+'">'
       +'<span class="name">'+name+'</span>'
+      +(SVC_OPT[name]?('<select class="sopt" aria-label="Варіант"><option value="">тип</option>'
+        +SVC_OPT[name].map(function(o){return '<option>'+o+'</option>';}).join("")
+        +'</select>'):'')
       +(wantShade?('<select class="ssh" aria-label="Колір зуба"></select>'
                   +'<select class="sst" aria-label="Колір культі"></select>'):'');
     var cb=r.querySelector('input[type=checkbox]');
     var shSel=r.querySelector('.ssh');
     var stSel=r.querySelector('.sst');
-    svcEls[name]={row:r,cb:cb,sh:shSel,st:stSel};
+    var opSel=r.querySelector('.sopt');
+    svcEls[name]={row:r,cb:cb,sh:shSel,st:stSel,op:opSel};
     function armCheck(){ if(!cb.checked){ cb.checked=true; r.classList.add("on"); } }
     if(shSel) shSel.addEventListener("change",armCheck);
     if(stSel) stSel.addEventListener("change",armCheck);
+    if(opSel) opSel.addEventListener("change",armCheck);
     // the NAME arms the service as the painting tool; the BOX just checks it
     r.querySelector('.name').addEventListener("click",function(){
       setActiveSvc(activeSvc===name?null:name);
@@ -707,6 +716,7 @@
         if(teeth.length) s+=" — зуби: "+teeth.join(", ");
         var e=svcEls[name]||{};
         var bits=[];
+        if(e.op&&e.op.value) bits.push(e.op.value);
         if(e.sh&&e.sh.value) bits.push("колір "+e.sh.value);
         if(e.st&&e.st.value) bits.push("культя "+e.st.value);
         if(bits.length) s+=" ("+bits.join(", ")+")";
@@ -884,9 +894,9 @@
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       var e=svcEls[cb.dataset.svc]||{};
-      var sh=e.sh?e.sh.value:"", st=e.st?e.st.value:"";
-      if(cb.checked||sh||st)
-        o.svc.push({n:cb.dataset.svc,c:cb.checked?1:0,sh:sh,st:st});
+      var sh=e.sh?e.sh.value:"", st=e.st?e.st.value:"", op=e.op?e.op.value:"";
+      if(cb.checked||sh||st||op)
+        o.svc.push({n:cb.dataset.svc,c:cb.checked?1:0,sh:sh,st:st,op:op});
     });
     return o;
   }
@@ -908,9 +918,10 @@
       var s=byName[cb.dataset.svc];
       var row=cb.parentElement;
       var e=svcEls[cb.dataset.svc]||{};
-      cb.checked=!!(s&&(s.c||s.q||s.sh||s.st));
+      cb.checked=!!(s&&(s.c||s.q||s.sh||s.st||s.op));
       if(e.sh) e.sh.value=s?(s.sh||""):"";
       if(e.st) e.st.value=s?(s.st||""):"";
+      if(e.op) e.op.value=s?(s.op||""):"";
       row.classList.toggle("on",cb.checked);
     });
   }

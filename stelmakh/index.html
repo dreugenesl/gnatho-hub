@@ -181,13 +181,16 @@
     color:var(--strong); font-weight:700; margin:16px 0 2px;
     border-bottom:1px solid var(--line-2); padding-bottom:6px;}
   .svc-group h4:first-child{margin-top:16px;}
-  .svc{display:flex; align-items:center; gap:9px; padding:6px 0; border-bottom:1px solid var(--line);}
-  .svc:hover{border-color:var(--line-2);}
+  .svc{display:flex; align-items:center; gap:9px; padding:6px 0 6px 8px; border-bottom:1px solid var(--line);
+    border-left:4px solid var(--sc, transparent); border-radius:2px; transition:background .13s ease;}
+  .svc:hover{border-bottom-color:var(--line-2);}
   .svc .box{width:15px; height:15px; flex:none; border:1px solid var(--line-2); border-radius:3px;
     display:grid; place-items:center; cursor:pointer; transition:.13s ease; background:var(--field);}
-  .svc .box svg{width:9px; height:9px; opacity:0; transition:opacity .12s ease; color:var(--accent-ink);}
-  .svc.on .box{background:var(--accent); border-color:var(--accent);}
+  .svc .box svg{width:9px; height:9px; opacity:0; transition:opacity .12s ease; color:#fff;}
+  .svc.on .box{background:var(--sc, var(--accent)); border-color:var(--sc, var(--accent));}
   .svc.on .box svg{opacity:1;}
+  .svc.armed{background:var(--sc-bg, rgba(0,0,0,.05));}
+  .svc.armed .name{font-weight:700;}
   .svc .name{font-size:13px; color:var(--strong); flex:1; cursor:pointer; line-height:1.25;}
   .svc .note{width:84px; flex:none; font-family:inherit; font-size:12px; color:var(--ink);
     background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:3px 2px; text-align:right;}
@@ -318,7 +321,9 @@
 
     <!-- services (restoration parameters live inside their groups) -->
     <h3 class="block">Види робіт</h3>
-    <p class="block-note">Позначте потрібні роботи; праворуч — номери зубів або кількість.
+    <p class="block-note">Клікніть назву роботи — вона стає активним «пензлем»; далі клацайте
+      зуби у формулі: вони офарбовуються кольором роботи, а номери самі підставляються в її
+      рядок. Повторний клік по назві вимикає пензель.
       Капи та шини — <a href="../" style="color:var(--blue-strong)">окремий наряд Gnatho Hub</a>.</p>
     <div class="svc-grid" id="svcGrid"></div>
 
@@ -425,7 +430,50 @@
   var W_LO=[5.4,5.9,6.9,7.1,7.3,10.8,10.2,9.6];
   var UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
   var LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
-  var selTeeth={}, toothShade={}, toothStump={};
+  var selTeeth={}, toothShade={}, toothStump={}, toothSvc={};
+
+  // exocad-style: every service owns a colour; the armed service paints teeth
+  var SVC_COLOR={
+    "Коронка / Вінір / e.max CAD":"#9C3FB5",
+    "Коронка/вінір з пошаровим нанесенням кераміки":"#128F88",
+    "Вінір на рефракторі":"#2F6ED8",
+    "Коронка ZrO2 Multilayer":"#B3A125",
+    "Абатмент ZrO2":"#7A45E0",
+    "Тимчасова коронка з PMMA":"#C1503A",
+    "Тимчасова коронка з PMMA + Optiglaze Color":"#D07A2E",
+    "Тимчасова керамічна коронка":"#B84A6E",
+    "Коронка з гвинтовою фіксацією":"#8E2430",
+    "Тимчасова коронка з гвинтовою фіксацією":"#C74A59",
+    "Цифрове моделювання":"#3E7D46",
+    "Хірургічний шаблон":"#4E9FC9",
+    "Діагностичні моделі":"#7D9C42",
+    "3D друк одного квадранту":"#3F8F6C",
+    "3D друк моделі щелепи":"#1F7F95",
+    "Індивідуальна ложка":"#7FA9C9",
+    "Індивідуалізація ясна":"#C7899F",
+    "Первинний ковпачок":"#AE8A6A",
+    "POM вкладка":"#6A5ACD"
+  };
+  var svcEls={}, activeSvc=null;
+  function setActiveSvc(name){
+    activeSvc=name;
+    Object.keys(svcEls).forEach(function(n){
+      svcEls[n].row.classList.toggle("armed", n===activeSvc);
+    });
+  }
+  function svcTeethOf(name){
+    return UPPER.concat(LOWER).filter(function(t){ return toothSvc[t]===name; });
+  }
+  function refreshSvcNote(name){
+    var e=svcEls[name]; if(!e) return;
+    var list=svcTeethOf(name);
+    if(list.length){
+      e.note.value=list.join(", ");
+      e.cb.checked=true; e.row.classList.add("on");
+    } else if(/^[\d ,]*$/.test(e.note.value)){
+      e.note.value="";          // clear only auto-filled numbers, keep manual text
+    }
+  }
 
   // shade guides (розколірки)
   var SCALES={
@@ -492,6 +540,9 @@
   function updateToothVisual(fdi){
     var g=toothEls[fdi]; if(!g) return;
     if(selTeeth[fdi]) g.classList.add("on"); else g.classList.remove("on");
+    var shp=g.querySelector(".shape");
+    var svc=toothSvc[fdi];
+    if(shp) shp.style.fill=(selTeeth[fdi]&&svc&&SVC_COLOR[svc])?SVC_COLOR[svc]:"";
     var sh=g.querySelector(".sh");
     if(sh) sh.textContent=toothShade[fdi]||"";
   }
@@ -520,6 +571,21 @@
         +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'+(p.y+20).toFixed(1)+'"></text>';
       g.addEventListener("click",function(ev){
         ev.stopPropagation();
+        if(activeSvc){
+          // painting mode: assign/unassign the armed service to this tooth
+          if(toothSvc[fdi]===activeSvc){
+            delete toothSvc[fdi]; delete selTeeth[fdi];
+            updateToothVisual(fdi); refreshSvcNote(activeSvc);
+          } else {
+            var prev=toothSvc[fdi];
+            selTeeth[fdi]=true; toothSvc[fdi]=activeSvc;
+            updateToothVisual(fdi);
+            if(prev) refreshSvcNote(prev);
+            refreshSvcNote(activeSvc);
+          }
+          renderTeethSel();
+          return;
+        }
         if(!selTeeth[fdi]){ selTeeth[fdi]=true; updateToothVisual(fdi); renderTeethSel(); }
         openPop(fdi,g);
       });
@@ -594,9 +660,24 @@
   // Другий тап знімає ту саму сімку (позначки інших зубів не чіпає).
   function fullArc(list,btn){
     var seven=list.filter(function(t){ return t%10<=7; });
+    if(activeSvc){
+      // painting mode: the whole seven goes to the armed service
+      var touched={};
+      seven.forEach(function(t){
+        if(toothSvc[t]) touched[toothSvc[t]]=1;
+        selTeeth[t]=true; toothSvc[t]=activeSvc;
+        updateToothVisual(t);
+      });
+      touched[activeSvc]=1;
+      Object.keys(touched).forEach(refreshSvcNote);
+      btn.classList.add("on");
+      renderTeethSel();
+      return;
+    }
     var all=seven.every(function(t){ return !!selTeeth[t]; });
     seven.forEach(function(t){
-      if(all) delete selTeeth[t]; else selTeeth[t]=true;
+      if(all){ delete selTeeth[t]; delete toothSvc[t]; }
+      else selTeeth[t]=true;
       updateToothVisual(t);
     });
     btn.classList.toggle("on",!all);
@@ -642,14 +723,32 @@
   var svcGrid=$("#svcGrid");
   function svcRow(name){
     var r=document.createElement("div"); r.className="svc";
+    var col=SVC_COLOR[name];
+    if(col){ r.style.setProperty("--sc",col); r.style.setProperty("--sc-bg",col+"22"); }
     var id="s_"+Math.abs(name.split("").reduce(function(a,c){return (a*31+c.charCodeAt(0))|0;},7));
     r.innerHTML='<label class="box" for="'+id+'">'+CHECK+'</label>'
       +'<input type="checkbox" id="'+id+'" data-svc="'+name.replace(/"/g,"")+'">'
-      +'<label class="name" for="'+id+'">'+name+'</label>'
+      +'<span class="name">'+name+'</span>'
       +'<input type="text" class="note" placeholder="№ зубів" aria-label="Зуби або кількість">';
     var cb=r.querySelector('input[type=checkbox]');
     var note=r.querySelector('.note');
-    cb.addEventListener("change",function(){ r.classList.toggle("on", cb.checked); });
+    svcEls[name]={row:r,cb:cb,note:note};
+    // the NAME arms the service as the painting tool; the BOX just checks it
+    r.querySelector('.name').addEventListener("click",function(){
+      setActiveSvc(activeSvc===name?null:name);
+      if(activeSvc===name && !cb.checked){ cb.checked=true; r.classList.add("on"); }
+    });
+    cb.addEventListener("change",function(){
+      r.classList.toggle("on", cb.checked);
+      if(!cb.checked){
+        // releasing the work releases its painted teeth
+        svcTeethOf(name).forEach(function(t){
+          delete toothSvc[t]; delete selTeeth[t]; updateToothVisual(t);
+        });
+        if(activeSvc===name) setActiveSvc(null);
+        refreshSvcNote(name); renderTeethSel();
+      }
+    });
     note.addEventListener("input",function(){
       if(note.value.trim() && !cb.checked){ cb.checked=true; r.classList.add("on"); }
     });
@@ -853,10 +952,11 @@
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});
     o.teeth=teethList();
-    o.tsh={}; o.tst={};
+    o.tsh={}; o.tst={}; o.tsvc={};
     teethList().forEach(function(t){
       if(toothShade[t]) o.tsh[t]=toothShade[t];
       if(toothStump[t]) o.tst[t]=toothStump[t];
+      if(toothSvc[t])   o.tsvc[t]=toothSvc[t];
     });
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
@@ -869,10 +969,12 @@
   function applyAll(o){
     if(!o) return;
     FIELD_IDS.forEach(function(id){ if(o[id]!==undefined) setv(id,o[id]); });
-    selTeeth={}; toothShade={}; toothStump={};
+    selTeeth={}; toothShade={}; toothStump={}; toothSvc={};
     (o.teeth||[]).forEach(function(t){selTeeth[t]=true;});
     Object.keys(o.tsh||{}).forEach(function(t){toothShade[t]=o.tsh[t];});
     Object.keys(o.tst||{}).forEach(function(t){toothStump[t]=o.tst[t];});
+    Object.keys(o.tsvc||{}).forEach(function(t){toothSvc[t]=o.tsvc[t];});
+    setActiveSvc(null);
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();
     var byName={};

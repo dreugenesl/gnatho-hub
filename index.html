@@ -149,6 +149,7 @@
   .chip:has(input:checked){background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
   .chip:has(input:checked) .dot{background:var(--warm); border-color:var(--warm);}
   .chip:has(input:focus-visible){box-shadow:0 0 0 3px var(--warm-soft);}
+  .callchip{margin-top:12px;}
 
   /* services two columns; each = checkbox + label + note line */
   .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 30px;}
@@ -308,6 +309,7 @@
       <div class="f"><label>Клініка *</label><input type="text" id="clinic" autocomplete="organization"></div>
       <div class="f"><label>Телефон</label><input type="tel" id="phone" autocomplete="tel"></div>
       <div class="f"><label>Лікар *</label><input type="text" id="doctor"></div>
+      <div class="f"><label>Тел. лікаря</label><input type="tel" id="dphone"></div>
       <div class="f"><label>Email</label><input type="email" id="cemail" autocomplete="email"></div>
       <div class="f"><label>ClinicCards</label>
         <input type="text" id="cc" placeholder="напр. clinic.cliniccards.com"></div>
@@ -322,6 +324,19 @@
       <div class="f"><label>Технік</label><input type="text" id="tech"></div>
       <div class="f wide"><label>Дата замовлення</label><input type="date" id="odate"></div>
       <div class="f"><label>Час</label><input type="text" id="otime" placeholder="—"></div>
+    </div>
+    <label class="chip callchip"><input type="checkbox" id="callFirst"><span class="dot"></span>
+      Зв'язатися з лікарем до початку моделювання</label>
+
+    <!-- what the lab receives -->
+    <h3 class="block">Вхідна інформація</h3>
+    <p class="block-note">Що передано в лабораторію разом із нарядом.</p>
+    <div class="chips" id="inbox">
+      <label class="chip"><input type="checkbox" name="inb" value="Скани ВЩ, НЩ"><span class="dot"></span>Скани ВЩ, НЩ</label>
+      <label class="chip"><input type="checkbox" name="inb" value="Байти (скани)"><span class="dot"></span>Байти (скани)</label>
+      <label class="chip"><input type="checkbox" name="inb" value="Байти (фізично)"><span class="dot"></span>Байти (фізично)</label>
+      <label class="chip"><input type="checkbox" name="inb" value="КТ черепа"><span class="dot"></span>КТ черепа</label>
+      <label class="chip"><input type="checkbox" name="inb" value="Трансфер в артикулятор"><span class="dot"></span>Трансфер в артикулятор</label>
     </div>
 
     <!-- materials to return -->
@@ -343,6 +358,25 @@
     <h3 class="block">Види робіт</h3>
     <p class="block-note">Позначте потрібні роботи.</p>
     <div class="svc-grid" id="svcGrid"></div>
+
+    <div class="row">
+      <div class="f wide"><label>Висота капи</label>
+        <input type="number" id="height" min="0" max="15" step="0.5" placeholder="мм"></div>
+      <div class="f"><label>Термін</label>
+        <select id="lead">
+          <option>7–10 днів</option>
+          <option>Терміново (узгоджується)</option>
+        </select></div>
+    </div>
+    <p class="block-note">Термін рахується від затвердження проєкту: при узгодженні проєкту —
+      протягом доби, в інших випадках плюс 3 доби після затвердження.</p>
+
+    <h3 class="block">Чи необхідні</h3>
+    <div class="chips" id="extras">
+      <label class="chip"><input type="checkbox" name="ext" value="Кламери"><span class="dot"></span>Кламери</label>
+      <label class="chip"><input type="checkbox" name="ext" value="Друкована 3D модель"><span class="dot"></span>Друкована 3D модель</label>
+      <label class="chip"><input type="checkbox" name="ext" value="Ретроконтроль"><span class="dot"></span>Ретроконтроль</label>
+    </div>
 
     <!-- important -->
     <h3 class="block">Важливо для техніка</h3>
@@ -413,8 +447,8 @@
   $("#due").value=d7.getFullYear()+"-"+pad(d7.getMonth()+1)+"-"+pad(d7.getDate());
 
   // services (two columns as in the PDF; Каппа/шина highlighted — lab focus)
-  var SVC_L=["Мічіганська капа","Репозиційна капа","Міорелаксуюча капа","Депрограматор"];
-  var SVC_R=["Функціограф","Відбілювальна капа","Ретенційна капа","Капа з кламерами"];
+  var SVC_L=["Мічіганська капа","Репозиційна капа","Стабілізуюча капа","Міорелаксуюча капа","Депрограматор"];
+  var SVC_R=["Функціограф","Ретенційна капа","Дистракційна капа","Відбілювальна капа"];
   var HOT={};
   var svcGrid=$("#svcGrid");
   function svcRow(name){
@@ -469,6 +503,11 @@
   // gather
   function v(id){var e=$("#"+id); return e?e.value.trim():"";}
   function radio(name){var e=document.querySelector('input[name="'+name+'"]:checked'); return e?e.value:"";}
+  function checks(name){
+    var out=[];
+    document.querySelectorAll('input[name="'+name+'"]:checked').forEach(function(c){ out.push(c.value); });
+    return out;
+  }
   function services(){
     var out=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
@@ -504,8 +543,16 @@
     if(v("cc")||v("ccCard")) L.push("  ClinicCards: "+(v("cc")||"—")+
       (v("ccCard")?("    Картка: "+v("ccCard")):""));
     L.push("");
+    if($("#callFirst").checked){L.push("! Зв'язатися з лікарем до початку моделювання"); L.push("");}
+    var inb=checks("inb");
+    if(inb.length){L.push("ВХІДНА ІНФОРМАЦІЯ: "+inb.join(", ")); L.push("");}
     if(radio("reg")){L.push("РЕЄСТРАЦІЯ: "+radio("reg")); L.push("");}
     var s=services(); if(s.length){L.push("ВИДИ РОБІТ"); s.forEach(function(x){L.push("  • "+x);}); L.push("");}
+    if(v("height")) L.push("ВИСОТА КАПИ: "+v("height")+" мм");
+    if(v("lead"))   L.push("ТЕРМІН: "+v("lead"));
+    var ext=checks("ext");
+    if(ext.length) L.push("НЕОБХІДНІ: "+ext.join(", "));
+    if(v("height")||v("lead")||ext.length) L.push("");
     if(v("matLab")){L.push("ПОВЕРНУТИ: "+v("matLab")); L.push("");}
     if(v("notes")){L.push("ВАЖЛИВО ДЛЯ ТЕХНІКА"); L.push("  "+v("notes")); L.push("");}
     L.push("— Надіслано через Gnatho Hub · форму наряду —");
@@ -520,6 +567,11 @@
     L.push("Пацієнт: "+(v("patient")||"—")+(v("age")?(", "+v("age")+" р."):""));
     L.push("Дата доставки: "+(v("due")||"—"));
     if(radio("reg")) L.push("Реєстрація: "+radio("reg"));
+    if(v("height")) L.push("Висота капи: "+v("height")+" мм");
+    if(v("lead"))   L.push("Термін: "+v("lead"));
+    var inb=checks("inb"); if(inb.length) L.push("Вхідне: "+inb.join(", "));
+    var ext=checks("ext"); if(ext.length) L.push("Необхідні: "+ext.join(", "));
+    if($("#callFirst").checked) L.push("⚠ Зв'язатися з лікарем до початку моделювання");
     if(v("ccCard")) L.push("Картка пацієнта: "+v("ccCard"));
     L.push("");
     var s=services();
@@ -558,10 +610,17 @@
           +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
           +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
           +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Реєстрація",radio("reg"))
+          +kv("Тел. лікаря",v("dphone"))+kv("Термін",v("lead"))
+          +kv("Висота капи",v("height")?(v("height")+" мм"):"")
+          +kv("Зв'язок",$("#callFirst").checked?"до початку моделювання":"")
         +'</div>'
         +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
           +'<th>Реєстрація</th></tr></thead><tbody>'
           +(rows||'<tr><td>—</td></tr>')+'</tbody></table>'
+        +(checks("inb").length?('<h2>Вхідна інформація</h2><div class="note">'
+          +esc(checks("inb").join(" · "))+'</div>'):'')
+        +(checks("ext").length?('<h2>Чи необхідні</h2><div class="note">'
+          +esc(checks("ext").join(" · "))+'</div>'):'')
         +(mats.length?('<h2>Матеріали на повернення</h2><table><tbody>'
           +mats.map(function(m){return '<tr><td>'+esc(m)+'</td></tr>';}).join("")
           +'</tbody></table>'):'')
@@ -678,12 +737,14 @@
     return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
   function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
   var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
-    "patient","age","tech","cc","ccCard","matLab","notes"];
+    "patient","age","tech","dphone","cc","ccCard","matLab","height","lead","notes"];
   function collectAll(){
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});
     o.reg=radio("reg");
     o.deprog=radio("deprog_method");
+    o.inb=checks("inb"); o.ext=checks("ext");
+    o.call=$("#callFirst").checked?1:0;
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       if(cb.checked) o.svc.push({n:cb.dataset.svc,c:1});
@@ -696,6 +757,12 @@
     document.querySelectorAll('input[name="reg"]').forEach(function(x){x.checked=false;});
     if(o.reg){ var rr=document.querySelector('input[name="reg"][value="'+o.reg+'"]');
                if(rr){ rr.checked=true; rr._pre=true; } }
+    ["inb","ext"].forEach(function(nm){
+      var want=(nm==="inb"?(o.inb||[]):(o.ext||[]));
+      document.querySelectorAll('input[name="'+nm+'"]').forEach(function(c){
+        c.checked=want.indexOf(c.value)>=0; });
+    });
+    $("#callFirst").checked=!!o.call;
     var byName={};
     (o.svc||[]).forEach(function(s){byName[s.n]=s;});
     document.querySelectorAll('input[data-svc]').forEach(function(cb){

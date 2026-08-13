@@ -292,7 +292,7 @@
           <option>Ivoclar Chromascop</option>
         </select>
       </div>
-      <svg id="archSvg" viewBox="0 0 1000 382" role="group" aria-label="Зубна формула"></svg>
+      <svg id="archSvg" viewBox="0 0 1000 374" role="group" aria-label="Зубна формула"></svg>
       <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
       <div class="tooth-pop" id="toothPop" hidden></div>
     </div>
@@ -476,7 +476,7 @@
     var wU=W_UP.slice().reverse().concat(W_UP);      // 18..11 + 21..28
     var wL=W_LO.slice().reverse().concat(W_LO);
     var rows=archLayout(UPPER,wU,150,100,false)
-      .concat(archLayout(LOWER,wL,238,100,true));
+      .concat(archLayout(LOWER,wL,230,100,true));
     rows.forEach(function(p){
       var fdi=p.fdi;
       var G=glyphOf(fdi);

@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#1D1C1A">
 <meta name="description" content="Gnatho Hub — замовлення-наряд на капи. Реєстрація клініки та формування наряду.">
 <title>Gnatho Hub — Замовлення-наряд</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 </head>
 <body>
 <style>
@@ -208,11 +210,54 @@
   footer{padding:22px clamp(18px,4vw,40px) 0; color:var(--muted); font-size:12px; line-height:1.7; border-top:1px solid var(--line); margin-top:8px;}
   footer .fine{color:var(--faint); font-size:11px; margin-top:8px;}
 
+  /* ── The naryad DOCUMENT (what gets printed / saved / attached) ── */
+  #docView{display:none;}
+  body.doc-mode .wrap{display:none;}
+  body.doc-mode #docView{display:block;}
+  .doc{max-width:860px; margin:0 auto; padding:0 0 40px; background:#fff; color:#1E2025;
+    font-family:var(--sans); font-size:13px; line-height:1.45;}
+  .doc-head{display:flex; align-items:center; justify-content:space-between; gap:20px;
+    background:#2D2E32; color:#F2F3F5; padding:20px 26px;}
+  .doc-head img{height:64px; width:auto; display:block;}
+  .doc-head .r{text-align:right; font-size:10.5px; line-height:1.65; color:#BCC0C8;}
+  .doc-head .r .no{font-size:14px; color:#fff; font-weight:700; letter-spacing:.06em; margin-bottom:5px;}
+  .doc-body{padding:20px 26px 0;}
+  .doc h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#5F7BA6;
+    font-weight:700; margin:20px 0 7px; border-bottom:1px solid #E4E6EB; padding-bottom:5px;}
+  .doc h2:first-child{margin-top:0;}
+  .kv{display:grid; grid-template-columns:repeat(4,auto 1fr); gap:5px 10px; align-items:baseline;}
+  .kv .k{color:#787D87; font-size:11px; white-space:nowrap;}
+  .kv .v{font-weight:600; border-bottom:1px dotted #D4D8DF; min-width:60px;}
+  .doc table{width:100%; border-collapse:collapse; margin-top:2px;}
+  .doc th{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#787D87;
+    text-align:left; font-weight:600; padding:5px 8px; border-bottom:1px solid #D4D8DF;}
+  .doc td{padding:7px 8px; border-bottom:1px solid #EDEFF3; vertical-align:top;}
+  .doc td.w{font-weight:600;}
+  .doc td.t{font-variant-numeric:tabular-nums;}
+  .doc .sw{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
+    vertical-align:baseline;}
+  .doc .chart{border:1px solid #E4E6EB; border-radius:3px; padding:8px; margin-top:4px;}
+  .doc .chart svg{display:block; width:100%; height:auto;}
+  .doc .note{white-space:pre-wrap; border:1px solid #E4E6EB; border-radius:3px; padding:10px 12px;
+    background:#FCFCFD;}
+  .doc .fine{margin-top:22px; font-size:10px; color:#A8ACB5; text-align:center;}
+  @media print{
+    body.doc-mode #docView{display:block;}
+    .doc-head{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    .doc{max-width:100%;}
+  }
+  @media (max-width:760px){
+    .btn-primary{min-width:0; width:100%;}
+    .btn-ghost{flex:1 1 44%;}
+    .svc{flex-wrap:wrap; row-gap:8px;}
+    .svc .name{flex:1 1 100%; font-size:14px; order:2;}
+    .svc .box{order:1;} .svc-opt{order:3;}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
   @media print{
     body{background:#fff;} .wrap{max-width:100%;}
     .masthead{background:#1D1C1A !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
-    .actions,.toast,.block-note,footer .fine{display:none;}
+    .tabs,.actions,.toast,.block-note,footer .fine,#clinicBanner{display:none;}
     .teeth,textarea,.svc .note,.f input{box-shadow:none;}
   }
 </style>
@@ -302,8 +347,7 @@
     <div class="actions">
       <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
       <button type="button" class="btn-ghost" id="newOrder">Новий наряд</button>
-      <button type="button" class="btn-ghost" id="download">Завантажити наряд</button>
-      <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
+      <button type="button" class="btn-ghost" id="pdf">Завантажити PDF</button>
     </div>
     <div class="toast" id="toast" role="status"></div>
   </form>
@@ -332,9 +376,11 @@
 
   <footer>
     <div><b>Gnatho Hub</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
-    <p class="fine">«Надіслати» відкриє вашу пошту з готовим листом на лабораторію. Скани та зліпки надсилайте вкладенням або звичним каналом.</p>
+    <p class="fine">«Надіслати» формує PDF-бланк наряду і відправляє його прямо в лабораторію.
+      «Завантажити PDF» — той самий бланк собі на пристрій.</p>
   </footer>
 </div>
+<div id="docView" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -345,6 +391,10 @@
     NodeList.prototype.forEach=Array.prototype.forEach;
   var $=function(s,r){return (r||document).querySelector(s);};
   var LAB_EMAIL="admin@stelmakhlab.com";
+  // ── Telegram: наряд летить у чат лабораторії сам ─────────────────────────
+  var TG_TOKEN="8992069969:AAH0MFm3IKPw6ODAXl0uvTGjsb67bT6gmao";  // @StelmakhLab_naryad_bot
+  var TG_CHAT="-5506214550";                                       // група «StelmkhLab НАРЯДИ»
+  var TG_ON=function(){ return !!(TG_TOKEN&&TG_CHAT); };
   var CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 6.2 5 8.6 9.6 3.5"/></svg>';
 
   // order number + dates
@@ -454,35 +504,154 @@
     return L.join("\n");
   }
 
+  // Короткий супровідний підпис до PDF у чаті.
+  function orderBrief(){
+    var L=[];
+    L.push("Наряд "+v("oid")+" · Gnatho Hub");
+    L.push("Клініка: "+(v("clinic")||"—")+" · Лікар: "+(v("doctor")||"—"));
+    L.push("Пацієнт: "+(v("patient")||"—")+(v("age")?(", "+v("age")+" р."):""));
+    L.push("Дата доставки: "+(v("due")||"—"));
+    if(radio("reg")) L.push("Реєстрація: "+radio("reg"));
+    L.push("");
+    var s=services();
+    if(s.length){ L.push("Роботи:"); s.forEach(function(x){L.push("  • "+x);}); }
+    if(v("notes")){ L.push(""); L.push("Важливо для техніка: "+v("notes")); }
+    return L.join("\n");
+  }
+
+  // ── НАРЯД ЯК ДОКУМЕНТ ────────────────────────────────────────────────────
+  // Пошта вміє лише простий текст, тож бланк живе окремо: шапка з лого,
+  // картки клініки й пацієнта, кольорова формула і таблиця робіт. «Друк/PDF»
+  // друкує саме його, «Завантажити» зберігає самодостатній HTML-файл, який
+  // відкривається як документ і чіпляється до листа.
+  function docHtml(){
+    var rows="";
+    document.querySelectorAll("input[data-svc]").forEach(function(cb){
+      if(!cb.checked) return;
+      var n=cb.dataset.svc;
+      var extra=(n==="Депрограматор"&&radio("deprog_method"))?(" · "+radio("deprog_method")):"";
+      rows+="<tr><td class=\"w\">"+esc(n)+esc(extra)+"</td></tr>";
+    });
+    var mats=v("matLab")?[v("matLab")]:[];
+    var kv=function(k,val){ return "<span class=\"k\">"+k+"</span><span class=\"v\">"
+      +esc(val||"—")+"</span>"; };
+    return '<div class="doc">'
+      +'<div class="doc-head">'
+        +'<b style="font-size:22px;letter-spacing:.04em">GNATHO&nbsp;·&nbsp;HUB</b>' 
+        +'<div class="r"><div class="no">НАРЯД '+esc(v("oid"))+'</div>'
+        +'вул. В. Липківського, 37 В, оф. 1001, Київ, 03035<br>'
+        +'+38 067 807 21 22 · +38 050 807 21 55<br>admin@stelmakhlab.com</div></div>'
+      +'<div class="doc-body">'
+        +'<h2>Клініка та пацієнт</h2><div class="kv">'
+          +kv("Клініка",v("clinic"))+kv("Лікар",v("doctor"))
+          +kv("Телефон",v("phone"))+kv("Email",v("cemail"))
+          +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
+          +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
+          +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Реєстрація",radio("reg"))
+        +'</div>'
+        +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
+          +'<th>Реєстрація</th></tr></thead><tbody>'
+          +(rows||'<tr><td>—</td></tr>')+'</tbody></table>'
+        +(mats.length?('<h2>Матеріали на повернення</h2><table><tbody>'
+          +mats.map(function(m){return '<tr><td>'+esc(m)+'</td></tr>';}).join("")
+          +'</tbody></table>'):'')
+        +(v("notes")?('<h2>Важливо для техніка</h2><div class="note">'+esc(v("notes"))+'</div>'):'')
+        +'<div class="fine">Сформовано у формі наряду Gnatho Hub · '+esc(v("oid"))+'</div>'
+      +'</div></div>';
+  }
+  function standaloneDoc(){
+    var css=document.querySelector("style").textContent;
+    return '<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">'
+      +'<meta name="viewport" content="width=device-width, initial-scale=1">'
+      +'<title>Наряд '+esc(v("oid"))+' — Gnatho Hub</title><style>'
+      +css+'\n#docView{display:block !important;} body{margin:0;background:#fff;}'
+      +'</style></head><body><div id="docView">'+docHtml()+'</div></body></html>';
+  }
+
+  // ── PDF ──────────────────────────────────────────────────────────────────
+  // The blank is rendered off-screen at A4 width, rasterised and paged into a
+  // PDF. Rasterising (not text-drawing) is deliberate: jsPDF's built-in fonts
+  // have no Cyrillic, and shipping a Ukrainian font would add ~300 KB to a
+  // page that must stay a single file.
+  function makePdf(cb,noSave){
+    var W=window.jspdf&&window.jspdf.jsPDF;
+    if(!window.html2canvas||!W){
+      toast("Бібліотеку PDF не завантажено — скористайтесь «Друк / PDF».","err");
+      if(cb)cb(false); return;
+    }
+    var host=document.createElement("div");
+    host.style.cssText="position:fixed;left:-10000px;top:0;width:860px;background:#fff;z-index:-1;";
+    host.innerHTML=docHtml();
+    document.body.appendChild(host);
+    toast("Готуємо PDF…","");
+    window.html2canvas(host.firstChild,{scale:2,backgroundColor:"#ffffff",useCORS:true})
+      .then(function(canvas){
+        var pdf=new W({unit:"mm",format:"a4",orientation:"portrait"});
+        var pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
+        var iw=pw, ih=canvas.height*pw/canvas.width;
+        var pos=0, left=ih;
+        var img=canvas.toDataURL("image/jpeg",0.92);
+        pdf.addImage(img,"JPEG",0,0,iw,ih);
+        left-=ph;
+        while(left>0.5){ pos-=ph; pdf.addPage(); pdf.addImage(img,"JPEG",0,pos,iw,ih); left-=ph; }
+        document.body.removeChild(host);
+        if(noSave){ if(cb)cb(true,pdf.output("blob")); return; }
+        pdf.save("naryad-"+v("oid")+".pdf");
+        toast("PDF збережено: naryad-"+v("oid")+".pdf — додайте його до листа.","ok");
+        if(cb)cb(true);
+      })
+      .catch(function(){
+        document.body.removeChild(host);
+        toast("Не вдалося зібрати PDF — скористайтесь «Друк / PDF».","err");
+        if(cb)cb(false,null);
+      });
+  }
+  $("#pdf").addEventListener("click",function(){
+    var miss=validate();
+    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist(); makePdf();
+  });
+
+  // Uploads the PDF straight into the lab's chat. sendDocument takes the file
+  // as multipart, the caption is the same short summary the letter carries
+  // (Telegram caps captions at 1024 characters, so it is trimmed).
+  function sendTelegram(blob,done){
+    var fd=new FormData();
+    fd.append("chat_id",TG_CHAT);
+    fd.append("document",blob,"naryad-"+v("oid")+".pdf");
+    var cap=orderBrief();
+    if(cap.length>1000) cap=cap.slice(0,997)+"…";
+    fd.append("caption",cap);
+    fetch("https://api.telegram.org/bot"+TG_TOKEN+"/sendDocument",{method:"POST",body:fd})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ done(!!(j&&j.ok), j&&j.description); })
+      .catch(function(err){ done(false,String(err)); });
+  }
+
   $("#form").addEventListener("submit",function(e){
     e.preventDefault();
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
     pushHist();
-    var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
-    var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
-    window.location.href=href;
-    toast("Відкрито пошту з листом на "+LAB_EMAIL+". Не відкрилось? Натисніть «Завантажити наряд».","ok");
+    if(TG_ON()){
+      var btn=$("#send"); btn.disabled=true;
+      toast("Надсилаємо наряд у лабораторію…","");
+      makePdf(function(ok,blob){
+        if(!ok||!blob){ btn.disabled=false; return; }
+        sendTelegram(blob,function(sent,why){
+          btn.disabled=false;
+          if(sent) toast("Наряд "+v("oid")+" надіслано в лабораторію ✓","ok");
+          else toast("Не вдалося надіслати: "+(why||"немає зв'язку")+". Скористайтесь «Завантажити PDF».","err");
+        });
+      },true);
+      return;
+    }
+    var subj="Наряд "+v("oid")+" · "+(v("patient")||"пацієнт")+" · "+(v("clinic")||"");
+    window.location.href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)
+      +"&body="+encodeURIComponent(orderBrief());
+    toast("Відкрито пошту на "+LAB_EMAIL+".","ok");
   });
 
-  $("#download").addEventListener("click",function(){
-    var miss=validate();
-    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
-    pushHist();
-    var name="naryad-"+v("oid")+".txt";
-    var data=orderText();
-    // Universal: use the claude.ai save API inside the artifact sandbox, and a
-    // plain Blob download on a real website (gnatho-hub.com) — one file works both.
-    if(window.claude&&window.claude.downloads){
-      window.claude.downloads.save({filename:name,data:data}).then(function(){
-        toast("Наряд збережено. Надішліть файл лабораторії вкладенням.","ok");
-      }).catch(function(err){
-        var c=(err&&err.code)||"unavailable";
-        if(c==="declined")toast("Збереження скасовано.","");
-        else blobDownload(name,data);
-      });
-    } else blobDownload(name,data);
-  });
   function blobDownload(name,data){
     try{
       var blob=new Blob([data],{type:"text/plain;charset=utf-8"});
@@ -493,7 +662,6 @@
       toast("Наряд завантажено. Надішліть файл лабораторії вкладенням.","ok");
     }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
   }
-  $("#print").addEventListener("click",function(){window.print();});
 
   // ── Snapshot: усі поля + зуби + роботи (для чернетки та історії) ─────────
   function esc(s){return String(s||"").replace(/[&<>"]/g,function(c){

@@ -124,11 +124,16 @@
   /* tooth chart — exocad-style arch in the same block footprint */
   .teeth{position:relative; background:var(--raise); border:1px solid var(--line);
     border-radius:var(--radius); padding:12px 10px 12px; box-shadow:var(--shadow); overflow-x:auto;}
-  .teeth-head{display:flex; gap:10px; align-items:center; justify-content:flex-end;
-    font-size:12.5px; color:var(--muted); padding:0 6px 6px;}
-  .teeth-head select{font-family:inherit; font-size:13px; color:var(--ink); background:var(--field);
-    border:1px solid var(--line-2); border-radius:3px; padding:4px 8px;}
-  #archSvg{display:block; width:100%; height:auto; min-width:560px; user-select:none;}
+  .arch-wrap{position:relative; min-width:560px;}
+  #archSvg{display:block; width:100%; height:auto; user-select:none;}
+  /* the guide selectors live INSIDE the ring, where the paper form is empty */
+  .arch-ctl{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    display:flex; flex-direction:column; gap:9px; align-items:stretch; z-index:5;}
+  .ac-row{display:flex; gap:9px; align-items:center; justify-content:space-between;
+    font-size:12.5px; color:var(--muted);}
+  .ac-row select{font-family:inherit; font-size:13px; color:var(--ink); background:var(--field);
+    border:1px solid var(--line-2); border-radius:3px; padding:4px 8px; min-width:190px;}
+  .ac-row select:focus{outline:none; border-color:var(--blue);}
   .tooth-g{cursor:pointer;}
   .tooth-g .shape{fill:var(--field); stroke:var(--faint); stroke-width:2; transition:.13s ease;
     vector-effect:non-scaling-stroke;}
@@ -284,15 +289,22 @@
     <h3 class="block">Зубна формула</h3>
     <p class="block-note">Позначте зуби, яких стосується робота.</p>
     <div class="teeth" id="teeth">
-      <div class="teeth-head">
-        <label for="shadeScale">Розколірка</label>
-        <select id="shadeScale">
-          <option>VITA classical</option>
-          <option>VITA 3D-Master</option>
-          <option>Ivoclar Chromascop</option>
-        </select>
+      <div class="arch-wrap">
+        <svg id="archSvg" viewBox="0 0 1000 334" role="group" aria-label="Зубна формула"></svg>
+        <div class="arch-ctl">
+          <div class="ac-row"><label for="shadeScale">Розколірка</label>
+            <select id="shadeScale">
+              <option>VITA classical</option>
+              <option>VITA 3D-Master</option>
+              <option>Ivoclar Chromascop</option>
+            </select></div>
+          <div class="ac-row"><label for="stumpScale">Культі</label>
+            <select id="stumpScale">
+              <option>IPS Natural Die</option>
+              <option>VITA classical</option>
+            </select></div>
+        </div>
       </div>
-      <svg id="archSvg" viewBox="0 0 1000 334" role="group" aria-label="Зубна формула"></svg>
       <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
       <div class="tooth-pop" id="toothPop" hidden></div>
     </div>
@@ -418,6 +430,11 @@
                           "410","420","430","440","510","520","530","540"]
   };
   function scaleName(){ var s=$("#shadeScale"); return (s&&s.value)||"VITA classical"; }
+  var STUMP_SCALES={
+    "IPS Natural Die":["ND1","ND2","ND3","ND4","ND5","ND6","ND7","ND8","ND9"],
+    "VITA classical":["A1","A2","A3","A3.5","A4","B1","B2","B3","B4","C1","C2","C3","C4","D2","D3","D4"]
+  };
+  function stumpScaleName(){ var s=$("#stumpScale"); return (s&&s.value)||"IPS Natural Die"; }
 
   function teethList(){
     var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
@@ -510,12 +527,18 @@
   function openPop(fdi,gEl){
     var sc=SCALES[scaleName()]||[];
     var cur=toothShade[fdi]||"";
+    var scS=STUMP_SCALES[stumpScaleName()]||[];
+    var curS=toothStump[fdi]||"";
     var html='<h5>Зуб '+fdi+' · '+esc(scaleName())+'</h5><div class="chips">';
     sc.forEach(function(s){
       html+='<button type="button" class="chip'+(s===cur?" on":"")+'" data-sh="'+s+'">'+s+'</button>';
     });
-    html+='</div><div class="f2"><label>Культя</label>'
-      +'<input type="text" id="popStump" placeholder="напр. ND3" value="'+esc(toothStump[fdi]||"")+'"></div>'
+    html+='</div><h5>Культя · '+esc(stumpScaleName())+'</h5><div class="chips">';
+    scS.forEach(function(s){
+      html+='<button type="button" class="chip'+(s===curS?" on":"")+'" data-st="'+s+'">'+s+'</button>';
+    });
+    html+='</div><div class="f2"><label>Культя своя</label>'
+      +'<input type="text" id="popStump" placeholder="інший варіант" value="'+esc(curS)+'"></div>'
       +'<div class="ops2"><button type="button" id="popClear">Зняти позначку</button>'
       +'<button type="button" class="ok" id="popOk">Готово</button></div>';
     popEl.innerHTML=html;
@@ -526,15 +549,27 @@
     var y=gR.bottom-tR.top+6;
     if(y+300>tR.height) y=Math.max(8,gR.top-tR.top-306);
     popEl.style.left=x+"px"; popEl.style.top=y+"px";
-    popEl.querySelectorAll(".chip").forEach(function(ch){
+    popEl.querySelectorAll(".chip[data-sh]").forEach(function(ch){
       ch.addEventListener("click",function(){
         toothShade[fdi]=ch.dataset.sh;
-        popEl.querySelectorAll(".chip").forEach(function(c){c.classList.toggle("on",c===ch);});
+        popEl.querySelectorAll(".chip[data-sh]").forEach(function(c){c.classList.toggle("on",c===ch);});
         updateToothVisual(fdi); renderTeethSel();
       });
     });
+    popEl.querySelectorAll(".chip[data-st]").forEach(function(ch){
+      ch.addEventListener("click",function(){
+        toothStump[fdi]=ch.dataset.st;
+        $("#popStump").value=ch.dataset.st;
+        popEl.querySelectorAll(".chip[data-st]").forEach(function(c){c.classList.toggle("on",c===ch);});
+        renderTeethSel();
+      });
+    });
     $("#popStump").addEventListener("input",function(){
-      toothStump[fdi]=this.value.trim(); renderTeethSel();
+      toothStump[fdi]=this.value.trim();
+      popEl.querySelectorAll(".chip[data-st]").forEach(function(c){
+        c.classList.toggle("on",c.dataset.st===toothStump[fdi]);
+      });
+      renderTeethSel();
     });
     $("#popClear").addEventListener("click",function(){
       delete selTeeth[fdi]; delete toothShade[fdi]; delete toothStump[fdi];
@@ -791,7 +826,7 @@
   function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
   var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
     "patient","age","tech","matTray","matBow","matTrans","matAbut","matAnal",
-    "matOther","matLab","implant","shadeScale","notes"];
+    "matOther","matLab","implant","shadeScale","stumpScale","notes"];
   function collectAll(){
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});

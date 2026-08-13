@@ -149,30 +149,11 @@
     paint-order:stroke; stroke:var(--raise); stroke-width:4px; stroke-linejoin:round;}
   .tooth-g .sh{font-size:11.5px; fill:var(--blue-strong); font-weight:700;}
   .tooth-g:hover .shape{stroke:var(--blue);}
-  .tooth-g.on .shape{fill:var(--accent); stroke:var(--accent);}
-  .tooth-g.on .fiss{stroke:var(--blue);}
-  .tooth-g.on text{fill:var(--accent-ink); stroke:var(--accent);}
-  .tooth-g.on .sh{fill:var(--blue);}
+  /* a marked tooth is PAINTED in its service colour (inline fill) — no black
+     default state, no popup: the click IS the assignment */
+  .tooth-g.on .fiss{opacity:.55;}
   .teeth-sel{margin-top:8px; font-size:12.5px; color:var(--muted); text-align:center; min-height:1.2em;}
   .teeth-sel b{color:var(--strong); font-variant-numeric:tabular-nums;}
-  /* per-tooth shade popup */
-  .tooth-pop{position:absolute; z-index:30; background:var(--raise); border:1px solid var(--line-2);
-    border-radius:4px; box-shadow:var(--shadow); padding:12px; width:290px; max-height:340px; overflow:auto;}
-  .tooth-pop h5{margin:0 0 8px; font-size:12.5px; color:var(--strong); letter-spacing:.03em;}
-  .tooth-pop .chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;}
-  .tooth-pop .chip{border:1px solid var(--line-2); background:var(--field); color:var(--strong);
-    font-size:12px; padding:5px 8px; border-radius:3px; cursor:pointer; font-family:inherit;}
-  .tooth-pop .chip.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
-  .tooth-pop .f2{display:flex; gap:8px; align-items:baseline; margin-bottom:10px;}
-  .tooth-pop .f2 label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; flex:none;}
-  .tooth-pop .f2 input{flex:1; min-width:0; font-family:inherit; font-size:13px; border:0;
-    border-bottom:1px solid var(--line-2); background:transparent; color:var(--ink); padding:3px 2px;}
-  .tooth-pop .f2 input:focus{outline:none; border-color:var(--blue);}
-  .tooth-pop .ops2{display:flex; gap:8px; justify-content:space-between;}
-  .tooth-pop .ops2 button{font-family:inherit; font-size:12.5px; padding:7px 12px; border-radius:3px;
-    border:1px solid var(--line-2); background:transparent; color:var(--strong); cursor:pointer;}
-  .tooth-pop .ops2 .ok{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
-
   /* services: material/construction groups in two columns */
   .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 30px; align-items:start;}
   @media (max-width:680px){ .svc-grid{grid-template-columns:1fr;} }
@@ -295,7 +276,7 @@
 
     <!-- tooth chart -->
     <h3 class="block">Зубна формула</h3>
-    <p class="block-note">Позначте зуби, яких стосується робота.</p>
+    <p class="block-note">Оберіть вид роботи нижче — кліки по зубах фарбують їх кольором цієї роботи.</p>
     <div class="teeth" id="teeth">
       <div class="arch-wrap">
         <svg id="archSvg" viewBox="0 0 1000 334" role="group" aria-label="Зубна формула"></svg>
@@ -316,7 +297,6 @@
         </div>
       </div>
       <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
-      <div class="tooth-pop" id="toothPop" hidden></div>
     </div>
 
     <!-- services (restoration parameters live inside their groups) -->
@@ -571,90 +551,26 @@
         +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'+(p.y+20).toFixed(1)+'"></text>';
       g.addEventListener("click",function(ev){
         ev.stopPropagation();
-        if(activeSvc){
-          // painting mode: assign/unassign the armed service to this tooth
-          if(toothSvc[fdi]===activeSvc){
-            delete toothSvc[fdi]; delete selTeeth[fdi];
-            updateToothVisual(fdi); refreshSvcNote(activeSvc);
-          } else {
-            var prev=toothSvc[fdi];
-            selTeeth[fdi]=true; toothSvc[fdi]=activeSvc;
-            updateToothVisual(fdi);
-            if(prev) refreshSvcNote(prev);
-            refreshSvcNote(activeSvc);
-          }
-          renderTeethSel();
+        if(!activeSvc){
+          toast("Спершу клікніть назву виду роботи — тоді кліки по зубах фарбують їх її кольором.","");
           return;
         }
-        if(!selTeeth[fdi]){ selTeeth[fdi]=true; updateToothVisual(fdi); renderTeethSel(); }
-        openPop(fdi,g);
+        if(toothSvc[fdi]===activeSvc){
+          delete toothSvc[fdi]; delete selTeeth[fdi];
+          updateToothVisual(fdi); refreshSvcNote(activeSvc);
+        } else {
+          var prev=toothSvc[fdi];
+          selTeeth[fdi]=true; toothSvc[fdi]=activeSvc;
+          updateToothVisual(fdi);
+          if(prev) refreshSvcNote(prev);
+          refreshSvcNote(activeSvc);
+        }
+        renderTeethSel();
       });
       svg.appendChild(g);
       toothEls[fdi]=g;
     });
   })();
-
-  // per-tooth popup: колір зуба за обраною розколіркою + колір культі
-  var popEl=$("#toothPop");
-  function closePop(){ popEl.hidden=true; }
-  function openPop(fdi,gEl){
-    var sc=SCALES[scaleName()]||[];
-    var cur=toothShade[fdi]||"";
-    var scS=STUMP_SCALES[stumpScaleName()]||[];
-    var curS=toothStump[fdi]||"";
-    var html='<h5>Зуб '+fdi+' · '+esc(scaleName())+'</h5><div class="chips">';
-    sc.forEach(function(s){
-      html+='<button type="button" class="chip'+(s===cur?" on":"")+'" data-sh="'+s+'">'+s+'</button>';
-    });
-    html+='</div><h5>Культя · '+esc(stumpScaleName())+'</h5><div class="chips">';
-    scS.forEach(function(s){
-      html+='<button type="button" class="chip'+(s===curS?" on":"")+'" data-st="'+s+'">'+s+'</button>';
-    });
-    html+='</div><div class="f2"><label>Культя своя</label>'
-      +'<input type="text" id="popStump" placeholder="інший варіант" value="'+esc(curS)+'"></div>'
-      +'<div class="ops2"><button type="button" id="popClear">Зняти позначку</button>'
-      +'<button type="button" class="ok" id="popOk">Готово</button></div>';
-    popEl.innerHTML=html;
-    popEl.hidden=false;
-    var tR=$("#teeth").getBoundingClientRect(), gR=gEl.getBoundingClientRect();
-    var x=gR.left-tR.left+gR.width/2-145;
-    x=Math.max(8,Math.min(x,tR.width-300));
-    var y=gR.bottom-tR.top+6;
-    if(y+300>tR.height) y=Math.max(8,gR.top-tR.top-306);
-    popEl.style.left=x+"px"; popEl.style.top=y+"px";
-    popEl.querySelectorAll(".chip[data-sh]").forEach(function(ch){
-      ch.addEventListener("click",function(){
-        toothShade[fdi]=ch.dataset.sh;
-        popEl.querySelectorAll(".chip[data-sh]").forEach(function(c){c.classList.toggle("on",c===ch);});
-        updateToothVisual(fdi); renderTeethSel();
-      });
-    });
-    popEl.querySelectorAll(".chip[data-st]").forEach(function(ch){
-      ch.addEventListener("click",function(){
-        toothStump[fdi]=ch.dataset.st;
-        $("#popStump").value=ch.dataset.st;
-        popEl.querySelectorAll(".chip[data-st]").forEach(function(c){c.classList.toggle("on",c===ch);});
-        renderTeethSel();
-      });
-    });
-    $("#popStump").addEventListener("input",function(){
-      toothStump[fdi]=this.value.trim();
-      popEl.querySelectorAll(".chip[data-st]").forEach(function(c){
-        c.classList.toggle("on",c.dataset.st===toothStump[fdi]);
-      });
-      renderTeethSel();
-    });
-    $("#popClear").addEventListener("click",function(){
-      delete selTeeth[fdi]; delete toothShade[fdi]; delete toothStump[fdi];
-      updateToothVisual(fdi); renderTeethSel(); closePop();
-    });
-    $("#popOk").addEventListener("click",closePop);
-  }
-  document.addEventListener("click",function(e){
-    if(popEl.hidden) return;
-    if(popEl.contains(e.target)) return;
-    closePop();
-  });
 
   // Full Upper / Full Lower — всі зуби 1..7 відповідної щелепи одним тапом.
   // Другий тап знімає ту саму сімку (позначки інших зубів не чіпає).
@@ -674,14 +590,7 @@
       renderTeethSel();
       return;
     }
-    var all=seven.every(function(t){ return !!selTeeth[t]; });
-    seven.forEach(function(t){
-      if(all){ delete selTeeth[t]; delete toothSvc[t]; }
-      else selTeeth[t]=true;
-      updateToothVisual(t);
-    });
-    btn.classList.toggle("on",!all);
-    renderTeethSel();
+    toast("Спершу клікніть назву виду роботи — тоді Full Upper/Lower позначать всю сімку її кольором.","");
   }
   $("#fullUpper").addEventListener("click",function(){ fullArc(UPPER,this); });
   $("#fullLower").addEventListener("click",function(){ fullArc(LOWER,this); });

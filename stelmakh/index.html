@@ -455,7 +455,8 @@
   // tooth's apical side (above upper teeth, below lower) when they paint it
   var IMPLANT_SVCS={
     "Коронка з гвинтовою фіксацією":1,
-    "Тимчасова коронка з гвинтовою фіксацією":1
+    "Тимчасова коронка з гвинтовою фіксацією":1,
+    "Абатмент ZrO2":1
   };
   // per-service variant options (shown as a small dropdown on the row)
   var SVC_OPT={
@@ -707,20 +708,19 @@
   // Item names are IDENTICAL to the old flat list — drafts, history entries
   // and the order text stay compatible (matching is by data-svc name).
   var SVC_GROUPS=[
-    {t:"Кераміка E.max",shade:true,items:[
+    {t:"Кераміка E.max і ZrO2",shade:true,items:[
       "Коронка / Вінір / e.max CAD",
       "Коронка/вінір з пошаровим нанесенням кераміки",
-      "Вінір на рефракторі"]},
-    {t:"Діоксид цирконію ZrO2",shade:true,items:[
-      "Коронка ZrO2 Multilayer",
-      "Абатмент ZrO2"]},
+      "Вінір на рефракторі",
+      "Коронка ZrO2 Multilayer"]},
     {t:"Тимчасові конструкції",shade:true,items:[
       "Тимчасова коронка з PMMA",
       "Тимчасова коронка з PMMA + Optiglaze Color",
       "Тимчасова керамічна коронка"]},
     {t:"Робота на імплантатах",items:[
       "Коронка з гвинтовою фіксацією",
-      "Тимчасова коронка з гвинтовою фіксацією"],
+      "Тимчасова коронка з гвинтовою фіксацією",
+      "Абатмент ZrO2"],
      fields:[{id:"implant",l:"Імплант система",ph:"оберіть або впишіть свою",
               dl:["Straumann","Nobel Biocare","Astra Tech (Dentsply)","Ankylos",
                   "Osstem","Dentium","MegaGen (AnyRidge)","MIS","Alpha-Bio",

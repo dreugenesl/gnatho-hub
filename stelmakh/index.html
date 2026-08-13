@@ -399,9 +399,8 @@
 
   <footer>
     <div><b>Stelmakh LAB</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
-    <p class="fine">«Надіслати» відкриє вашу пошту з коротким листом-нарядом (пошта передає лише текст).
-      Повноцінний бланк — кнопки «Завантажити наряд» (файл-документ) і «Друк / PDF»; додайте його до листа
-      разом зі сканами.</p>
+    <p class="fine">«Надіслати» зберігає бланк наряду файлом і відкриває пошту з коротким листом —
+      перетягніть файл у лист (пошта сама передає лише текст). «Друк / PDF» друкує той самий бланк.</p>
   </footer>
 </div>
 <div id="docView" aria-hidden="true"></div>
@@ -915,6 +914,22 @@
   }
   function toast(m,k){var t=$("#toast"); t.textContent=m; t.className="toast show"+(k?(" "+k):"");}
 
+  // Короткий супровідний текст листа: бланк іде ВКЛАДЕННЯМ, тож у тілі — лише
+  // те, що має бути видно в списку листів без відкриття файлу.
+  function orderBrief(){
+    var L=[];
+    L.push("Наряд "+v("oid")+" · Stelmakh LAB");
+    L.push("Клініка: "+(v("clinic")||"—")+" · Лікар: "+(v("doctor")||"—"));
+    L.push("Пацієнт: "+(v("patient")||"—")+(v("age")?(", "+v("age")+" р."):""));
+    L.push("Дата доставки: "+(v("due")||"—"));
+    L.push("");
+    var s=services();
+    if(s.length){ L.push("Роботи:"); s.forEach(function(x){L.push("  • "+x);}); L.push(""); }
+    if(v("notes")){ L.push("Важливо для техніка: "+v("notes")); L.push(""); }
+    L.push("До листа додано бланк наряду (файл naryad-"+v("oid")+".html) —");
+    L.push("відкрийте його у браузері: там зубна формула в кольорі та всі деталі.");
+    return L.join("\n");
+  }
   function orderText(){
     var L=[];
     L.push("ЗАМОВЛЕННЯ-НАРЯД · STELMAKH LAB");
@@ -1043,10 +1058,14 @@
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
     pushHist();
-    var subj="Наряд "+v("oid")+" — "+(services()[0]||"")+" — "+v("clinic");
-    var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(orderText());
-    window.location.href=href;
-    toast("Відкрито пошту на "+LAB_EMAIL+". Красивий бланк — «Завантажити наряд» (HTML) або «Друк / PDF»; додайте його вкладенням.","ok");
+    // the pretty blank goes down first, so it is already in Downloads when the
+    // mail window opens — the doctor only has to drag it in
+    blobDownload("naryad-"+v("oid")+".html", standaloneDoc(), true);
+    var subj="Наряд "+v("oid")+" · "+(v("patient")||"пацієнт")+" · "+(v("clinic")||"");
+    var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)
+            +"&body="+encodeURIComponent(orderBrief());
+    setTimeout(function(){ window.location.href=href; },350);
+    toast("Бланк naryad-"+v("oid")+".html збережено в Завантаження, пошта відкривається — перетягніть файл у лист.","ok");
   });
 
   $("#download").addEventListener("click",function(){
@@ -1065,14 +1084,14 @@
       });
     } else blobDownload(name,data);
   });
-  function blobDownload(name,data){
+  function blobDownload(name,data,quiet){
     try{
       var blob=new Blob([data],{type:(/\.html$/.test(name)?"text/html":"text/plain")+";charset=utf-8"});
       var url=URL.createObjectURL(blob);
       var a=document.createElement("a"); a.href=url; a.download=name;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function(){URL.revokeObjectURL(url);},1500);
-      toast("Бланк наряду завантажено — відкрийте його і надішліть вкладенням (або друкуйте в PDF).","ok");
+      if(!quiet) toast("Бланк наряду завантажено — відкрийте його і надішліть вкладенням (або друкуйте в PDF).","ok");
     }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
   }
   $("#print").addEventListener("click",function(){

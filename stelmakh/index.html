@@ -272,6 +272,31 @@
     .doc-head{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
     .doc{max-width:100%;}
   }
+  /* ── МОБІЛЬНА ВЕРСІЯ ─────────────────────────────────────────────────
+     На вузькому екрані кільце не вміщає керування всередині: селектори
+     наїжджали на зуби і вилазили за картку. Тому нижче 760px керування
+     стає звичайним рядком під формулою, а сама дуга вписується в ширину
+     екрана — вся щелепа видна без горизонтального скролу. */
+  @media (max-width:760px){
+    .arch-wrap{min-width:0;}
+    #archSvg{min-width:0;}
+    .teeth{padding:10px 8px 12px; overflow:visible;}
+    .arch-ctl{position:static; transform:none; margin-top:10px;
+      display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+    .ac-full{padding:11px 10px; font-size:13px;}
+    .ac-row{grid-column:1 / -1; justify-content:space-between;}
+    .ac-row select{min-width:0; flex:1; margin-left:10px;}
+    .teeth-clear{position:static; width:100%; margin-top:10px; padding:10px;}
+    /* a service row breathes: name on its own line, dropdowns under it */
+    .svc{flex-wrap:wrap; padding:9px 0 9px 8px; row-gap:8px;}
+    .svc .name{flex:1 1 100%; font-size:14px; order:2;}
+    .svc .box{order:1;}
+    .svc select{order:3; flex:1 1 0; width:auto; min-width:0; padding:8px 6px; font-size:13px;}
+    .svc-grid{gap:6px 0;}
+    .btn-primary{min-width:0; width:100%;}
+    .btn-ghost{flex:1 1 44%;}
+    .callout{font-size:14px;}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
   @media print{
     body{background:#fff;} .wrap{max-width:100%;}

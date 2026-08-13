@@ -259,9 +259,6 @@
   .doc .chart svg{display:block; width:100%; height:auto;}
   .doc .note{white-space:pre-wrap; border:1px solid #E4E6EB; border-radius:3px; padding:10px 12px;
     background:#FCFCFD;}
-  .doc .signs{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:34px;}
-  .doc .signs div{border-top:1px solid #D4D8DF; padding-top:7px; font-size:10.5px;
-    color:#787D87; text-align:center;}
   .doc .fine{margin-top:22px; font-size:10px; color:#A8ACB5; text-align:center;}
   @media print{
     body.doc-mode #docView{display:block;}
@@ -1047,7 +1044,6 @@
           +mats.map(function(m){return '<tr><td>'+esc(m)+'</td></tr>';}).join("")
           +'</tbody></table>'):'')
         +(v("notes")?('<h2>Важливо для техніка</h2><div class="note">'+esc(v("notes"))+'</div>'):'')
-        +'<div class="signs"><div>Підпис лікаря</div><div>Прийняв(ла)</div><div>Дата</div></div>'
         +'<div class="fine">Сформовано у формі наряду Stelmakh LAB · '+esc(v("oid"))+'</div>'
       +'</div></div>';
   }

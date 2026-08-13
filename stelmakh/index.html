@@ -147,7 +147,22 @@
   .tooth-g text{font-size:16px; font-weight:600; fill:var(--strong); text-anchor:middle;
     font-family:var(--sans); font-variant-numeric:tabular-nums; pointer-events:none;
     paint-order:stroke; stroke:var(--raise); stroke-width:4px; stroke-linejoin:round;}
-  .tooth-g .sh{font-size:11.5px; fill:var(--blue-strong); font-weight:700;}
+  .tooth-g .sh{font-size:11.5px; fill:var(--blue-strong); font-weight:700;
+    pointer-events:auto; cursor:pointer;}
+  .tooth-pop{position:absolute; z-index:30; background:var(--raise); border:1px solid var(--line-2);
+    border-radius:4px; box-shadow:var(--shadow); padding:12px; width:290px; max-height:320px; overflow:auto;}
+  .tooth-pop h5{margin:0 0 8px; font-size:12.5px; color:var(--strong);}
+  .tooth-pop .chips{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;}
+  .tooth-pop .chip{border:1px solid var(--line-2); background:var(--field); color:var(--strong);
+    font-size:12px; padding:5px 8px; border-radius:3px; cursor:pointer; font-family:inherit;}
+  .tooth-pop .chip.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+  .tooth-pop .ok{display:block; margin-left:auto; font-family:inherit; font-size:12.5px;
+    padding:7px 14px; border-radius:3px; border:1px solid var(--accent);
+    background:var(--accent); color:var(--accent-ink); cursor:pointer;}
+  .teeth-clear{position:absolute; right:10px; bottom:10px; font-family:inherit; font-size:12px;
+    color:var(--muted); background:transparent; border:1px solid var(--line-2);
+    border-radius:3px; padding:5px 10px; cursor:pointer; transition:.13s ease;}
+  .teeth-clear:hover{color:var(--err); border-color:var(--err);}
   .tooth-g:hover .shape{stroke:var(--blue);}
   /* a marked tooth is PAINTED in its service colour (inline fill) — no black
      default state, no popup: the click IS the assignment */
@@ -294,6 +309,8 @@
           <button type="button" class="ac-full" id="fullLower">Full Lower</button>
         </div>
       </div>
+      <div class="tooth-pop" id="toothPop" hidden></div>
+      <button type="button" class="teeth-clear" id="teethClear">Очистити все</button>
     </div>
 
     <!-- services (restoration parameters live inside their groups) -->
@@ -407,7 +424,7 @@
   var W_LO=[5.4,5.9,6.9,7.1,7.3,10.8,10.2,9.6];
   var UPPER=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
   var LOWER=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
-  var selTeeth={}, toothShade={}, toothStump={}, toothSvc={};
+  var selTeeth={}, toothShade={}, toothStump={}, toothSvc={}, toothCustom={};
 
   // exocad-style: every service owns a colour; the armed service paints teeth
   var SVC_COLOR={
@@ -511,7 +528,11 @@
     var svc=toothSvc[fdi];
     if(shp) shp.style.fill=(selTeeth[fdi]&&svc&&SVC_COLOR[svc])?SVC_COLOR[svc]:"";
     var sh=g.querySelector(".sh");
-    if(sh) sh.textContent=toothShade[fdi]||"";
+    if(sh){
+      var lbl=toothShade[fdi]||"";
+      if(toothStump[fdi]) lbl+=(lbl?" / ":"культя ")+toothStump[fdi];
+      sh.textContent=lbl||(selTeeth[fdi]?"—":"");
+    }
   }
   (function buildArch(){
     var svg=$("#archSvg");
@@ -544,20 +565,89 @@
         }
         if(toothSvc[fdi]===activeSvc){
           delete toothSvc[fdi]; delete selTeeth[fdi];
+          delete toothShade[fdi]; delete toothStump[fdi]; delete toothCustom[fdi];
           updateToothVisual(fdi); refreshSvcNote(activeSvc);
         } else {
           var prev=toothSvc[fdi];
           selTeeth[fdi]=true; toothSvc[fdi]=activeSvc;
+          inheritSvcShades(fdi,activeSvc);
           updateToothVisual(fdi);
           if(prev) refreshSvcNote(prev);
           refreshSvcNote(activeSvc);
         }
         renderTeethSel();
       });
+      var shLbl=g.querySelector(".sh");
+      if(shLbl) shLbl.addEventListener("click",function(ev){
+        ev.stopPropagation();
+        if(selTeeth[fdi]) openShadePop(fdi,shLbl);
+      });
       svg.appendChild(g);
       toothEls[fdi]=g;
     });
   })();
+
+  // A tooth painted by a service INHERITS the shades picked on its row —
+  // unless the tooth was customised by hand (toothCustom), which wins.
+  function inheritSvcShades(fdi,name){
+    delete toothCustom[fdi];
+    var e=svcEls[name]||{};
+    if(e.sh&&e.sh.value) toothShade[fdi]=e.sh.value; else delete toothShade[fdi];
+    if(e.st&&e.st.value) toothStump[fdi]=e.st.value; else delete toothStump[fdi];
+  }
+  function propagateSvcShades(name){
+    svcTeethOf(name).forEach(function(t){
+      if(toothCustom[t]) return;
+      inheritSvcShades(t,name);
+      toothCustom[t]=undefined; delete toothCustom[t];
+      updateToothVisual(t);
+    });
+  }
+
+  // per-tooth override: click the shade label under a tooth → chip menu
+  var popEl=$("#toothPop");
+  function closePop(){ if(popEl) popEl.hidden=true; }
+  function openShadePop(fdi,anchor){
+    if(!popEl) return;
+    var sc=SCALES[scaleName()]||[], scS=STUMP_SCALES[stumpScaleName()]||[];
+    var html='<h5>Зуб '+fdi+' · колір</h5><div class="chips">';
+    sc.forEach(function(s){
+      html+='<button type="button" class="chip'+(s===toothShade[fdi]?" on":"")+'" data-sh="'+s+'">'+s+'</button>';
+    });
+    html+='</div><h5>Культя</h5><div class="chips">';
+    scS.forEach(function(s){
+      html+='<button type="button" class="chip'+(s===toothStump[fdi]?" on":"")+'" data-st="'+s+'">'+s+'</button>';
+    });
+    html+='</div><button type="button" class="ok" id="popOk">Готово</button>';
+    popEl.innerHTML=html;
+    popEl.hidden=false;
+    var tR=$("#teeth").getBoundingClientRect(), aR=anchor.getBoundingClientRect();
+    var x=aR.left-tR.left+aR.width/2-145;
+    x=Math.max(8,Math.min(x,tR.width-300));
+    var y=aR.bottom-tR.top+6;
+    if(y+300>tR.height) y=Math.max(8,aR.top-tR.top-306);
+    popEl.style.left=x+"px"; popEl.style.top=y+"px";
+    popEl.querySelectorAll(".chip[data-sh]").forEach(function(ch){
+      ch.addEventListener("click",function(){
+        toothShade[fdi]=ch.dataset.sh; toothCustom[fdi]=1;
+        popEl.querySelectorAll(".chip[data-sh]").forEach(function(c){c.classList.toggle("on",c===ch);});
+        updateToothVisual(fdi);
+      });
+    });
+    popEl.querySelectorAll(".chip[data-st]").forEach(function(ch){
+      ch.addEventListener("click",function(){
+        toothStump[fdi]=ch.dataset.st; toothCustom[fdi]=1;
+        popEl.querySelectorAll(".chip[data-st]").forEach(function(c){c.classList.toggle("on",c===ch);});
+        updateToothVisual(fdi);
+      });
+    });
+    $("#popOk").addEventListener("click",closePop);
+  }
+  document.addEventListener("click",function(e){
+    if(!popEl||popEl.hidden) return;
+    if(popEl.contains(e.target)) return;
+    closePop();
+  });
 
   // Full Upper / Full Lower — всі зуби 1..7 відповідної щелепи одним тапом.
   // Другий тап знімає ту саму сімку (позначки інших зубів не чіпає).
@@ -569,6 +659,7 @@
       seven.forEach(function(t){
         if(toothSvc[t]) touched[toothSvc[t]]=1;
         selTeeth[t]=true; toothSvc[t]=activeSvc;
+        inheritSvcShades(t,activeSvc);
         updateToothVisual(t);
       });
       touched[activeSvc]=1;
@@ -581,6 +672,15 @@
   }
   $("#fullUpper").addEventListener("click",function(){ fullArc(UPPER,this); });
   $("#fullLower").addEventListener("click",function(){ fullArc(LOWER,this); });
+
+  // corner broom: wipes every mark on the chart, the service rows stay as set
+  $("#teethClear").addEventListener("click",function(){
+    selTeeth={}; toothShade={}; toothStump={}; toothSvc={}; toothCustom={};
+    UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
+    $("#fullUpper").classList.remove("on");
+    $("#fullLower").classList.remove("on");
+    closePop(); renderTeethSel();
+  });
 
   // ── services, grouped by material / construction type ────────────────────
   // Item names are IDENTICAL to the old flat list — drafts, history entries
@@ -636,8 +736,9 @@
     var opSel=r.querySelector('.sopt');
     svcEls[name]={row:r,cb:cb,sh:shSel,st:stSel,op:opSel};
     function armCheck(){ if(!cb.checked){ cb.checked=true; r.classList.add("on"); } }
-    if(shSel) shSel.addEventListener("change",armCheck);
-    if(stSel) stSel.addEventListener("change",armCheck);
+    function shadeChanged(){ armCheck(); propagateSvcShades(name); }
+    if(shSel) shSel.addEventListener("change",shadeChanged);
+    if(stSel) stSel.addEventListener("change",shadeChanged);
     if(opSel) opSel.addEventListener("change",armCheck);
     // the NAME arms the service as the painting tool; the BOX just checks it
     r.querySelector('.name').addEventListener("click",function(){
@@ -885,11 +986,12 @@
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});
     o.teeth=teethList();
-    o.tsh={}; o.tst={}; o.tsvc={};
+    o.tsh={}; o.tst={}; o.tsvc={}; o.tcs={};
     teethList().forEach(function(t){
-      if(toothShade[t]) o.tsh[t]=toothShade[t];
-      if(toothStump[t]) o.tst[t]=toothStump[t];
-      if(toothSvc[t])   o.tsvc[t]=toothSvc[t];
+      if(toothShade[t])  o.tsh[t]=toothShade[t];
+      if(toothStump[t])  o.tst[t]=toothStump[t];
+      if(toothSvc[t])    o.tsvc[t]=toothSvc[t];
+      if(toothCustom[t]) o.tcs[t]=1;
     });
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
@@ -903,11 +1005,12 @@
   function applyAll(o){
     if(!o) return;
     FIELD_IDS.forEach(function(id){ if(o[id]!==undefined) setv(id,o[id]); });
-    selTeeth={}; toothShade={}; toothStump={}; toothSvc={};
+    selTeeth={}; toothShade={}; toothStump={}; toothSvc={}; toothCustom={};
     (o.teeth||[]).forEach(function(t){selTeeth[t]=true;});
     Object.keys(o.tsh||{}).forEach(function(t){toothShade[t]=o.tsh[t];});
     Object.keys(o.tst||{}).forEach(function(t){toothStump[t]=o.tst[t];});
     Object.keys(o.tsvc||{}).forEach(function(t){toothSvc[t]=o.tsvc[t];});
+    Object.keys(o.tcs||{}).forEach(function(t){toothCustom[t]=1;});
     setActiveSvc(null);
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();

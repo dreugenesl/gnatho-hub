@@ -292,7 +292,7 @@
     <p class="block-note">Оберіть вид роботи нижче — кліки по зубах фарбують їх кольором цієї роботи.</p>
     <div class="teeth" id="teeth">
       <div class="arch-wrap">
-        <svg id="archSvg" viewBox="0 0 1000 334" role="group" aria-label="Зубна формула"></svg>
+        <svg id="archSvg" viewBox="0 -18 1000 368" role="group" aria-label="Зубна формула"></svg>
         <div class="arch-ctl">
           <button type="button" class="ac-full" id="fullUpper">Full Upper</button>
           <div class="ac-row"><label for="shadeScale">Розколірка</label>
@@ -556,7 +556,8 @@
         +(G.f?('<path class="fiss" d="'+G.f+'"/>'):'')
         +'<rect x="-56" y="-66" width="112" height="132" fill="transparent"/></g>'
         +'<text x="'+p.x.toFixed(1)+'" y="'+(p.y+5).toFixed(1)+'">'+fdi+'</text>'
-        +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'+(p.y+20).toFixed(1)+'"></text>';
+        +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'
+          +((fdi<30? p.y-60*s-6 : p.y+60*s+14)).toFixed(1)+'"></text>';
       g.addEventListener("click",function(ev){
         ev.stopPropagation();
         if(!activeSvc){

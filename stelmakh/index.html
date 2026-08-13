@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#2D2E32">
 <meta name="description" content="Stelmakh LAB — замовлення-наряд. Реєстрація клініки та формування наряду онлайн.">
 <title>Stelmakh LAB — Замовлення-наряд</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 </head>
 <body>
 <style>
@@ -368,7 +370,8 @@
 
     <div class="actions">
       <button type="submit" class="btn-primary" id="send">Надіслати замовлення</button>
-      <button type="button" class="btn-ghost" id="download">Завантажити наряд</button>
+      <button type="button" class="btn-ghost" id="pdf">Завантажити PDF</button>
+      <button type="button" class="btn-ghost" id="download">Бланк (HTML)</button>
       <button type="button" class="btn-ghost" id="print">Друк / PDF</button>
       <button type="button" class="btn-ghost" id="newOrder">Новий наряд</button>
     </div>
@@ -399,8 +402,9 @@
 
   <footer>
     <div><b>Stelmakh LAB</b> · admin@stelmakhlab.com · +38 067 807 21 22</div>
-    <p class="fine">«Надіслати» зберігає бланк наряду файлом і відкриває пошту з коротким листом —
-      перетягніть файл у лист (пошта сама передає лише текст). «Друк / PDF» друкує той самий бланк.</p>
+    <p class="fine">«Надіслати» готує PDF наряду і відкриває пошту з коротким листом — перетягніть
+      PDF у лист (стандарт пошти не дозволяє вкладати файл автоматично). «Завантажити PDF» — той самий
+      бланк окремо, «Друк / PDF» — друк.</p>
   </footer>
 </div>
 <div id="docView" aria-hidden="true"></div>
@@ -926,8 +930,8 @@
     var s=services();
     if(s.length){ L.push("Роботи:"); s.forEach(function(x){L.push("  • "+x);}); L.push(""); }
     if(v("notes")){ L.push("Важливо для техніка: "+v("notes")); L.push(""); }
-    L.push("До листа додано бланк наряду (файл naryad-"+v("oid")+".html) —");
-    L.push("відкрийте його у браузері: там зубна формула в кольорі та всі деталі.");
+    L.push("До листа додається бланк наряду (naryad-"+v("oid")+".pdf) —");
+    L.push("там зубна формула в кольорі та всі деталі роботи.");
     return L.join("\n");
   }
   function orderText(){
@@ -1053,19 +1057,65 @@
       +'</style></head><body><div id="docView">'+docHtml()+'</div></body></html>';
   }
 
+  // ── PDF ──────────────────────────────────────────────────────────────────
+  // The blank is rendered off-screen at A4 width, rasterised and paged into a
+  // PDF. Rasterising (not text-drawing) is deliberate: jsPDF's built-in fonts
+  // have no Cyrillic, and shipping a Ukrainian font would add ~300 KB to a
+  // page that must stay a single file.
+  function makePdf(cb){
+    var W=window.jspdf&&window.jspdf.jsPDF;
+    if(!window.html2canvas||!W){
+      toast("Бібліотеку PDF не завантажено — скористайтесь «Друк / PDF».","err");
+      if(cb)cb(false); return;
+    }
+    var host=document.createElement("div");
+    host.style.cssText="position:fixed;left:-10000px;top:0;width:860px;background:#fff;z-index:-1;";
+    host.innerHTML=docHtml();
+    document.body.appendChild(host);
+    toast("Готуємо PDF…","");
+    window.html2canvas(host.firstChild,{scale:2,backgroundColor:"#ffffff",useCORS:true})
+      .then(function(canvas){
+        var pdf=new W({unit:"mm",format:"a4",orientation:"portrait"});
+        var pw=pdf.internal.pageSize.getWidth(), ph=pdf.internal.pageSize.getHeight();
+        var iw=pw, ih=canvas.height*pw/canvas.width;
+        var pos=0, left=ih;
+        var img=canvas.toDataURL("image/jpeg",0.92);
+        pdf.addImage(img,"JPEG",0,0,iw,ih);
+        left-=ph;
+        while(left>0.5){ pos-=ph; pdf.addPage(); pdf.addImage(img,"JPEG",0,pos,iw,ih); left-=ph; }
+        pdf.save("naryad-"+v("oid")+".pdf");
+        document.body.removeChild(host);
+        toast("PDF збережено: naryad-"+v("oid")+".pdf — додайте його до листа.","ok");
+        if(cb)cb(true);
+      })
+      .catch(function(){
+        document.body.removeChild(host);
+        toast("Не вдалося зібрати PDF — скористайтесь «Друк / PDF».","err");
+        if(cb)cb(false);
+      });
+  }
+  $("#pdf").addEventListener("click",function(){
+    var miss=validate();
+    if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
+    pushHist(); makePdf();
+  });
+
   $("#form").addEventListener("submit",function(e){
     e.preventDefault();
     var miss=validate();
     if(miss.length){toast("Заповніть обов'язкові поля: "+miss.join(", "),"err"); return;}
     pushHist();
-    // the pretty blank goes down first, so it is already in Downloads when the
-    // mail window opens — the doctor only has to drag it in
-    blobDownload("naryad-"+v("oid")+".html", standaloneDoc(), true);
+    // A PDF of the blank goes down first, so it is already in Downloads when
+    // the mail window opens — mailto: cannot carry attachments by standard,
+    // the file has to be dragged in, and this is the shortest path to it.
     var subj="Наряд "+v("oid")+" · "+(v("patient")||"пацієнт")+" · "+(v("clinic")||"");
     var href="mailto:"+LAB_EMAIL+"?subject="+encodeURIComponent(subj)
             +"&body="+encodeURIComponent(orderBrief());
-    setTimeout(function(){ window.location.href=href; },350);
-    toast("Бланк naryad-"+v("oid")+".html збережено в Завантаження, пошта відкривається — перетягніть файл у лист.","ok");
+    makePdf(function(ok){
+      if(!ok) blobDownload("naryad-"+v("oid")+".html", standaloneDoc(), true);
+      setTimeout(function(){ window.location.href=href; },250);
+      toast("PDF наряду в Завантаженнях, пошта відкривається — перетягніть файл у лист.","ok");
+    });
   });
 
   $("#download").addEventListener("click",function(){

@@ -134,6 +134,11 @@
   .ac-row select{font-family:inherit; font-size:13px; color:var(--ink); background:var(--field);
     border:1px solid var(--line-2); border-radius:3px; padding:4px 8px; min-width:190px;}
   .ac-row select:focus{outline:none; border-color:var(--blue);}
+  .ac-full{font-family:inherit; font-size:12.5px; font-weight:600; letter-spacing:.04em;
+    color:var(--strong); background:var(--field); border:1px solid var(--line-2);
+    border-radius:3px; padding:6px 12px; cursor:pointer; transition:.13s ease;}
+  .ac-full:hover{border-color:var(--blue);}
+  .ac-full.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
   .tooth-g{cursor:pointer;}
   .tooth-g .shape{fill:var(--field); stroke:var(--faint); stroke-width:2; transition:.13s ease;
     vector-effect:non-scaling-stroke;}
@@ -292,6 +297,7 @@
       <div class="arch-wrap">
         <svg id="archSvg" viewBox="0 0 1000 334" role="group" aria-label="Зубна формула"></svg>
         <div class="arch-ctl">
+          <button type="button" class="ac-full" id="fullUpper">Full Upper</button>
           <div class="ac-row"><label for="shadeScale">Розколірка</label>
             <select id="shadeScale">
               <option>VITA classical</option>
@@ -303,6 +309,7 @@
               <option>IPS Natural Die</option>
               <option>VITA classical</option>
             </select></div>
+          <button type="button" class="ac-full" id="fullLower">Full Lower</button>
         </div>
       </div>
       <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
@@ -582,6 +589,21 @@
     if(popEl.contains(e.target)) return;
     closePop();
   });
+
+  // Full Upper / Full Lower — всі зуби 1..7 відповідної щелепи одним тапом.
+  // Другий тап знімає ту саму сімку (позначки інших зубів не чіпає).
+  function fullArc(list,btn){
+    var seven=list.filter(function(t){ return t%10<=7; });
+    var all=seven.every(function(t){ return !!selTeeth[t]; });
+    seven.forEach(function(t){
+      if(all) delete selTeeth[t]; else selTeeth[t]=true;
+      updateToothVisual(t);
+    });
+    btn.classList.toggle("on",!all);
+    renderTeethSel();
+  }
+  $("#fullUpper").addEventListener("click",function(){ fullArc(UPPER,this); });
+  $("#fullLower").addEventListener("click",function(){ fullArc(LOWER,this); });
 
   // ── services, grouped by material / construction type ────────────────────
   // Item names are IDENTICAL to the old flat list — drafts, history entries

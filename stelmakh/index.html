@@ -152,8 +152,6 @@
   /* a marked tooth is PAINTED in its service colour (inline fill) — no black
      default state, no popup: the click IS the assignment */
   .tooth-g.on .fiss{opacity:.55;}
-  .teeth-sel{margin-top:8px; font-size:12.5px; color:var(--muted); text-align:center; min-height:1.2em;}
-  .teeth-sel b{color:var(--strong); font-variant-numeric:tabular-nums;}
   /* services: material/construction groups in two columns */
   .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 30px; align-items:start;}
   @media (max-width:680px){ .svc-grid{grid-template-columns:1fr;} }
@@ -296,7 +294,6 @@
           <button type="button" class="ac-full" id="fullLower">Full Lower</button>
         </div>
       </div>
-      <div class="teeth-sel" id="teethSel">Зуби не позначено</div>
     </div>
 
     <!-- services (restoration parameters live inside their groups) -->
@@ -471,17 +468,7 @@
     var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
     return on;
   }
-  function renderTeethSel(){
-    var on=teethList();
-    if(!on.length){ $("#teethSel").innerHTML="Зуби не позначено"; return; }
-    var parts=on.map(function(t){
-      var b=[];
-      if(toothShade[t]) b.push(toothShade[t]);
-      if(toothStump[t]) b.push("культя "+toothStump[t]);
-      return "<b>"+t+"</b>"+(b.length?(" ("+esc(b.join(", "))+")"):"");
-    });
-    $("#teethSel").innerHTML="Позначено: "+parts.join(", ");
-  }
+  function renderTeethSel(){}   // the painted chart IS the list — no text echo
 
   // The ring: teeth laid ALONG THE ARC LENGTH by their anatomical widths, so
   // the edges touch like in exocad — no even spacing, no gaps. Each tooth is

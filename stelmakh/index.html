@@ -173,9 +173,9 @@
   .svc.armed{background:var(--sc-bg, rgba(0,0,0,.05));}
   .svc.armed .name{font-weight:700;}
   .svc .name{font-size:13px; color:var(--strong); flex:1; cursor:pointer; line-height:1.25;}
-  .svc .note{width:84px; flex:none; font-family:inherit; font-size:12px; color:var(--ink);
-    background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:3px 2px; text-align:right;}
-  .svc .note::placeholder{color:var(--faint);} .svc .note:focus{outline:none; border-color:var(--blue);}
+  .svc select{flex:none; width:84px; font-family:inherit; font-size:12px; color:var(--ink);
+    background:var(--field); border:1px solid var(--line-2); border-radius:3px; padding:4px 5px;}
+  .svc select:focus{outline:none; border-color:var(--blue);}
   .svc input[type=checkbox]{position:absolute; opacity:0; width:0; height:0;}
 
   textarea{width:100%; font-family:inherit; font-size:14px; color:var(--ink); background:var(--field);
@@ -445,14 +445,10 @@
     return UPPER.concat(LOWER).filter(function(t){ return toothSvc[t]===name; });
   }
   function refreshSvcNote(name){
+    // teeth live ON the chart (painted) and in the order text; here we only
+    // keep the checkbox honest when teeth are assigned
     var e=svcEls[name]; if(!e) return;
-    var list=svcTeethOf(name);
-    if(list.length){
-      e.note.value=list.join(", ");
-      e.cb.checked=true; e.row.classList.add("on");
-    } else if(/^[\d ,]*$/.test(e.note.value)){
-      e.note.value="";          // clear only auto-filled numbers, keep manual text
-    }
+    if(svcTeethOf(name).length){ e.cb.checked=true; e.row.classList.add("on"); }
   }
 
   // shade guides (розколірки)
@@ -638,10 +634,15 @@
     r.innerHTML='<label class="box" for="'+id+'">'+CHECK+'</label>'
       +'<input type="checkbox" id="'+id+'" data-svc="'+name.replace(/"/g,"")+'">'
       +'<span class="name">'+name+'</span>'
-      +'<input type="text" class="note" placeholder="№ зубів" aria-label="Зуби або кількість">';
+      +'<select class="ssh" aria-label="Колір зуба"></select>'
+      +'<select class="sst" aria-label="Колір культі"></select>';
     var cb=r.querySelector('input[type=checkbox]');
-    var note=r.querySelector('.note');
-    svcEls[name]={row:r,cb:cb,note:note};
+    var shSel=r.querySelector('.ssh');
+    var stSel=r.querySelector('.sst');
+    svcEls[name]={row:r,cb:cb,sh:shSel,st:stSel};
+    function armCheck(){ if(!cb.checked){ cb.checked=true; r.classList.add("on"); } }
+    shSel.addEventListener("change",armCheck);
+    stSel.addEventListener("change",armCheck);
     // the NAME arms the service as the painting tool; the BOX just checks it
     r.querySelector('.name').addEventListener("click",function(){
       setActiveSvc(activeSvc===name?null:name);
@@ -662,10 +663,23 @@
         refreshSvcNote(name); renderTeethSel();
       }
     });
-    note.addEventListener("input",function(){
-      if(note.value.trim() && !cb.checked){ cb.checked=true; r.classList.add("on"); }
-    });
     return r;
+  }
+  // shade/stump dropdowns in every service row follow the guides chosen in
+  // the ring centre; changing a guide re-fills them, keeping valid picks
+  function fillShadeSelects(){
+    var shOpts=SCALES[scaleName()]||[], stOpts=STUMP_SCALES[stumpScaleName()]||[];
+    function fill(sel,ph,opts){
+      if(!sel) return;
+      var keep=sel.value;
+      sel.innerHTML='<option value="">'+ph+'</option>'
+        +opts.map(function(s){return '<option>'+s+'</option>';}).join("");
+      if(opts.indexOf(keep)>=0) sel.value=keep;
+    }
+    Object.keys(svcEls).forEach(function(n){
+      fill(svcEls[n].sh,"колір",shOpts);
+      fill(svcEls[n].st,"культя",stOpts);
+    });
   }
   SVC_GROUPS.forEach(function(g){
     var gd=document.createElement("div"); gd.className="svc-group";
@@ -690,6 +704,9 @@
     });
     svcGrid.appendChild(gd);
   });
+  fillShadeSelects();
+  $("#shadeScale").addEventListener("change",fillShadeSelects);
+  $("#stumpScale").addEventListener("change",fillShadeSelects);
 
   // ── gather ────────────────────────────────────────────────────────────────
   function v(id){var e=$("#"+id); return e?e.value.trim():"";}
@@ -697,9 +714,15 @@
     var out=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       if(cb.checked){
-        var s=cb.dataset.svc;
-        var note=cb.parentElement.querySelector('.note');
-        if(note && note.value.trim()) s+=" — "+note.value.trim();
+        var name=cb.dataset.svc;
+        var s=name;
+        var teeth=svcTeethOf(name);
+        if(teeth.length) s+=" — зуби: "+teeth.join(", ");
+        var e=svcEls[name]||{};
+        var bits=[];
+        if(e.sh&&e.sh.value) bits.push("колір "+e.sh.value);
+        if(e.st&&e.st.value) bits.push("культя "+e.st.value);
+        if(bits.length) s+=" ("+bits.join(", ")+")";
         out.push(s);
       }
     });
@@ -873,9 +896,10 @@
     });
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
-      var note=cb.parentElement.querySelector('.note');
-      var q=note?note.value.trim():"";
-      if(cb.checked||q) o.svc.push({n:cb.dataset.svc,q:q,c:cb.checked?1:0});
+      var e=svcEls[cb.dataset.svc]||{};
+      var sh=e.sh?e.sh.value:"", st=e.st?e.st.value:"";
+      if(cb.checked||sh||st)
+        o.svc.push({n:cb.dataset.svc,c:cb.checked?1:0,sh:sh,st:st});
     });
     return o;
   }
@@ -890,13 +914,16 @@
     setActiveSvc(null);
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();
+    fillShadeSelects();   // options must match the restored guides first
     var byName={};
     (o.svc||[]).forEach(function(s){byName[s.n]=s;});
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       var s=byName[cb.dataset.svc];
-      var row=cb.parentElement, note=row.querySelector('.note');
-      cb.checked=!!(s&&(s.c||s.q));
-      if(note) note.value=s?(s.q||""):"";
+      var row=cb.parentElement;
+      var e=svcEls[cb.dataset.svc]||{};
+      cb.checked=!!(s&&(s.c||s.q||s.sh||s.st));
+      if(e.sh) e.sh.value=s?(s.sh||""):"";
+      if(e.st) e.st.value=s?(s.st||""):"";
       row.classList.toggle("on",cb.checked);
     });
   }

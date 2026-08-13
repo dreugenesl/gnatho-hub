@@ -595,14 +595,14 @@
   // Item names are IDENTICAL to the old flat list — drafts, history entries
   // and the order text stay compatible (matching is by data-svc name).
   var SVC_GROUPS=[
-    {t:"Кераміка E.max",items:[
+    {t:"Кераміка E.max",shade:true,items:[
       "Коронка / Вінір / e.max CAD",
       "Коронка/вінір з пошаровим нанесенням кераміки",
       "Вінір на рефракторі"]},
-    {t:"Діоксид цирконію ZrO2",items:[
+    {t:"Діоксид цирконію ZrO2",shade:true,items:[
       "Коронка ZrO2 Multilayer",
       "Абатмент ZrO2"]},
-    {t:"Тимчасові конструкції",items:[
+    {t:"Тимчасові конструкції",shade:true,items:[
       "Тимчасова коронка з PMMA",
       "Тимчасова коронка з PMMA + Optiglaze Color",
       "Тимчасова керамічна коронка"]},
@@ -626,7 +626,7 @@
       "POM вкладка"]}
   ];
   var svcGrid=$("#svcGrid");
-  function svcRow(name){
+  function svcRow(name,wantShade){
     var r=document.createElement("div"); r.className="svc";
     var col=SVC_COLOR[name];
     if(col){ r.style.setProperty("--sc",col); r.style.setProperty("--sc-bg",col+"22"); }
@@ -634,15 +634,15 @@
     r.innerHTML='<label class="box" for="'+id+'">'+CHECK+'</label>'
       +'<input type="checkbox" id="'+id+'" data-svc="'+name.replace(/"/g,"")+'">'
       +'<span class="name">'+name+'</span>'
-      +'<select class="ssh" aria-label="Колір зуба"></select>'
-      +'<select class="sst" aria-label="Колір культі"></select>';
+      +(wantShade?('<select class="ssh" aria-label="Колір зуба"></select>'
+                  +'<select class="sst" aria-label="Колір культі"></select>'):'');
     var cb=r.querySelector('input[type=checkbox]');
     var shSel=r.querySelector('.ssh');
     var stSel=r.querySelector('.sst');
     svcEls[name]={row:r,cb:cb,sh:shSel,st:stSel};
     function armCheck(){ if(!cb.checked){ cb.checked=true; r.classList.add("on"); } }
-    shSel.addEventListener("change",armCheck);
-    stSel.addEventListener("change",armCheck);
+    if(shSel) shSel.addEventListener("change",armCheck);
+    if(stSel) stSel.addEventListener("change",armCheck);
     // the NAME arms the service as the painting tool; the BOX just checks it
     r.querySelector('.name').addEventListener("click",function(){
       setActiveSvc(activeSvc===name?null:name);
@@ -684,7 +684,7 @@
   SVC_GROUPS.forEach(function(g){
     var gd=document.createElement("div"); gd.className="svc-group";
     var h=document.createElement("h4"); h.textContent=g.t; gd.appendChild(h);
-    g.items.forEach(function(name){ gd.appendChild(svcRow(name)); });
+    g.items.forEach(function(name){ gd.appendChild(svcRow(name,!!g.shade)); });
     (g.fields||[]).forEach(function(f){
       var p=document.createElement("div"); p.className="svc-param";
       var lb=document.createElement("label"); lb.textContent=f.l; lb.htmlFor=f.id;

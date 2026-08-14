@@ -364,14 +364,15 @@
 
     <div class="row">
       <div class="f wide"><label>Висота капи</label>
-        <input type="number" id="height" min="0" max="15" step="0.5" placeholder="мм"></div>
+        <input type="number" id="height" min="0" max="15" step="0.5" placeholder="мм від першого контакту"></div>
       <div class="f"><label>Термін</label>
         <select id="lead">
           <option>7–10 днів</option>
           <option>Терміново (узгоджується)</option>
         </select></div>
     </div>
-    <p class="block-note">Термін рахується від затвердження проєкту: при узгодженні проєкту —
+    <p class="block-note">Висота капи вказується <b>від першого контакту</b> зубів-антагоністів.
+      Термін рахується від затвердження проєкту: при узгодженні проєкту —
       протягом доби, в інших випадках плюс 3 доби після затвердження.</p>
 
     <h3 class="block">Чи необхідні</h3>
@@ -555,7 +556,7 @@
     if(inb.length){L.push("ВХІДНА ІНФОРМАЦІЯ: "+inb.join(", ")); L.push("");}
     if(radio("reg")){L.push("РЕЄСТРАЦІЯ: "+radio("reg")); L.push("");}
     var s=services(); if(s.length){L.push("ВИДИ РОБІТ"); s.forEach(function(x){L.push("  • "+x);}); L.push("");}
-    if(v("height")) L.push("ВИСОТА КАПИ: "+v("height")+" мм");
+    if(v("height")) L.push("ВИСОТА КАПИ: "+v("height")+" мм від першого контакту");
     if(v("lead"))   L.push("ТЕРМІН: "+v("lead"));
     var ext=checks("ext");
     if(ext.length) L.push("НЕОБХІДНІ: "+ext.join(", "));
@@ -574,7 +575,7 @@
     L.push("Пацієнт: "+(v("patient")||"—")+(v("age")?(", "+v("age")+" р."):""));
     L.push("Дата доставки: "+(v("due")||"—"));
     if(radio("reg")) L.push("Реєстрація: "+radio("reg"));
-    if(v("height")) L.push("Висота капи: "+v("height")+" мм");
+    if(v("height")) L.push("Висота капи: "+v("height")+" мм від першого контакту");
     if(v("lead"))   L.push("Термін: "+v("lead"));
     var inb=checks("inb"); if(inb.length) L.push("Вхідне: "+inb.join(", "));
     var ext=checks("ext"); if(ext.length) L.push("Необхідні: "+ext.join(", "));
@@ -618,7 +619,7 @@
           +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
           +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Реєстрація",radio("reg"))
           +kv("Тел. лікаря",v("dphone"))+kv("Термін",v("lead"))
-          +kv("Висота капи",v("height")?(v("height")+" мм"):"")
+          +kv("Висота капи",v("height")?(v("height")+" мм від першого контакту"):"")
           +kv("Зв'язок",$("#callFirst").checked?"до початку моделювання":"")
         +'</div>'
         +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'

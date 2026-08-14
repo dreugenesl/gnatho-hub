@@ -96,6 +96,12 @@
   .banner{margin:16px clamp(18px,4vw,40px) 0; padding:10px 14px; border:1px solid var(--line-2);
     border-left:2px solid var(--warm); border-radius:2px; font-size:13px; color:var(--muted);
     background:var(--raise); display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  /* Until the clinic registers, the naryad is read-only: a locked form makes
+     the rule obvious without a modal, and the note says what to do. */
+  .lock-note{margin:14px clamp(18px,4vw,40px) 0; font-size:12.5px; color:var(--err);
+    font-weight:600; letter-spacing:.01em;}
+  .lock-note a{color:var(--err); text-decoration:underline; cursor:pointer;}
+  form.locked{opacity:.45; pointer-events:none; filter:saturate(.6);}
   .banner b{color:var(--strong);}
   .banner button{background:transparent; border:0; color:var(--warm); font-size:12.5px; cursor:pointer;
     text-decoration:underline; font-family:inherit; padding:0;}
@@ -335,6 +341,8 @@
   </nav>
 
   <div id="clinicBanner" class="banner" hidden></div>
+  <p class="lock-note" id="lockNote" hidden>Спочатку зареєструйтесь —
+    <a id="lockGo">вкладка «Реєстрація клініки»</a>: клініка, лікар, телефон, email.</p>
 
   <form id="form" class="body view" data-view="order" novalidate>
     <!-- clinic / patient -->
@@ -948,6 +956,20 @@
   document.querySelectorAll(".tab").forEach(function(t){
     t.addEventListener("click",function(){ showView(t.dataset.view); });
   });
+  // ── РЕЄСТРАЦІЯ ВІДМИКАЄ НАРЯД ────────────────────────────────────────────
+  // First visit: no clinic on this device → the order form is locked and a
+  // small red line points to the registration tab. Saving it unlocks the form
+  // and the line disappears; clearing the registration locks it back.
+  function setLocked(on){
+    var f=$("#form"), n=$("#lockNote");
+    if(f) f.classList.toggle("locked", on);
+    if(n) n.hidden=!on;
+  }
+  function refreshLock(){
+    var c=loadClinic();
+    setLocked(!(c && c.clinic && c.doctor));
+  }
+
   function refreshBanner(){
     var c=loadClinic(); var b=$("#clinicBanner");
     if(c&&c.clinic){
@@ -963,21 +985,23 @@
     if(c){ $("#rClinic").value=c.clinic||""; $("#rDoctor").value=c.doctor||"";
            $("#rPhone").value=c.phone||""; $("#rEmail").value=c.email||"";
            applyClinic(c); }
-    refreshBanner();
+    refreshBanner(); refreshLock();
+    var go=$("#lockGo");
+    if(go) go.addEventListener("click",function(){ showView("register"); });
   })();
   $("#rSave").addEventListener("click",function(){
     var o={clinic:($("#rClinic").value||"").trim(),doctor:($("#rDoctor").value||"").trim(),
            phone:($("#rPhone").value||"").trim(),email:($("#rEmail").value||"").trim()};
     var t=$("#rToast");
     if(!o.clinic||!o.doctor){ t.textContent="Вкажіть клініку та лікаря."; t.className="toast show err"; return; }
-    saveClinicRec(o); applyClinic(o); refreshBanner();
+    saveClinicRec(o); applyClinic(o); refreshBanner(); refreshLock();
     t.textContent="Збережено. Дані підставлятимуться в кожен наряд."; t.className="toast show ok";
     setTimeout(function(){ showView("order"); },800);
   });
   $("#rClear").addEventListener("click",function(){
-    clearClinicRec();
+    clearClinicRec(); 
     $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";
-    refreshBanner();
+    refreshBanner(); refreshLock();
     var t=$("#rToast"); t.textContent="Реєстрацію очищено."; t.className="toast show";
   });
 })();

@@ -150,10 +150,9 @@
   .chip:has(input:checked) .dot{background:var(--warm); border-color:var(--warm);}
   .chip:has(input:focus-visible){box-shadow:0 0 0 3px var(--warm-soft);}
   .callchip{margin-top:12px;}
-  /* a chip that carries a clarifying second line */
-  .chip.stack{flex-direction:column; align-items:flex-start; gap:2px; padding:7px 15px 8px;}
-  .chip.stack .ln{display:inline-flex; align-items:center; gap:8px;}
-  .chip .sub{font-size:11px; opacity:.72; letter-spacing:.01em;}
+  /* a chip with a clarifying line centred beneath it */
+  .chip-note{display:inline-flex; flex-direction:column; align-items:center; gap:4px;}
+  .chip-note .sub{font-size:11px; color:var(--muted); letter-spacing:.01em; text-align:center;}
 
   /* services two columns; each = checkbox + label + note line */
   .svc-grid{display:grid; grid-template-columns:1fr 1fr; gap:2px 30px;}
@@ -380,9 +379,10 @@
       <label class="chip"><input type="checkbox" name="ext" value="Кламери"><span class="dot"></span>Кламери</label>
       <label class="chip"><input type="checkbox" name="ext" value="Друкована 3D модель"><span class="dot"></span>Друкована 3D модель</label>
       <label class="chip"><input type="checkbox" name="ext" value="Ретроконтроль"><span class="dot"></span>Ретроконтроль</label>
-      <label class="chip stack"><input type="checkbox" name="ext" value="Гіпсовка в артикулятор">
-        <span class="ln"><span class="dot"></span>Гіпсовка в артикулятор</span>
-        <small class="sub">Цифра → Аналог</small></label>
+      <span class="chip-note">
+        <label class="chip"><input type="checkbox" name="ext" value="Гіпсовка в артикулятор"><span class="dot"></span>Гіпсовка в артикулятор</label>
+        <small class="sub">Цифра → Аналог</small>
+      </span>
     </div>
 
     <!-- important -->

@@ -320,10 +320,6 @@
       <div class="f"><label>Лікар *</label><input type="text" id="doctor"></div>
       <div class="f"><label>Тел. лікаря</label><input type="tel" id="dphone"></div>
       <div class="f"><label>Email</label><input type="email" id="cemail" autocomplete="email"></div>
-      <div class="f"><label>ClinicCards</label>
-        <input type="text" id="cc" placeholder="напр. clinic.cliniccards.com"></div>
-      <div class="f"><label>Картка пацієнта</label>
-        <input type="url" id="ccCard" placeholder="посилання на картку"></div>
     </div>
     <div class="divider"></div>
     <div class="row">
@@ -416,8 +412,6 @@
       <div class="f"><label>Телефон</label><input type="tel" id="rPhone" autocomplete="tel"></div>
       <div class="f"><label>Лікар *</label><input type="text" id="rDoctor"></div>
       <div class="f"><label>Імейл</label><input type="email" id="rEmail" autocomplete="email"></div>
-      <div class="f wide"><label>ClinicCards</label>
-        <input type="text" id="rCC" placeholder="напр. clinic.cliniccards.com"></div>
     </div>
     <div class="actions">
       <button type="button" class="btn-primary" id="rSave">Зберегти реєстрацію</button>
@@ -558,11 +552,9 @@
     L.push("");
     L.push("ПАЦІЄНТ: "+(v("patient")||"—")+(v("age")?("   Вік: "+v("age")):""));
     L.push("  Дата доставки: "+(v("due")||"—")+"    Технік: "+(v("tech")||"—"));
-    if(v("cc")||v("ccCard")) L.push("  ClinicCards: "+(v("cc")||"—")+
-      (v("ccCard")?("    Картка: "+v("ccCard")):""));
     L.push("");
     if($("#callFirst").checked){L.push("! Зв'язатися з лікарем до початку моделювання"); L.push("");}
-    if($("#filesCC").checked){L.push("ФАЙЛИ: у ClinicCards"+(v("cc")?(" — "+v("cc")):"")); L.push("");}
+    if($("#filesCC").checked){L.push("ФАЙЛИ: у ClinicCards"); L.push("");}
     var inb=checks("inb");
     if(inb.length){L.push("ВХІДНА ІНФОРМАЦІЯ: "+inb.join(", ")); L.push("");}
     if(radio("reg")){L.push("РЕЄСТРАЦІЯ: "+radio("reg")); L.push("");}
@@ -591,8 +583,7 @@
     var inb=checks("inb"); if(inb.length) L.push("Вхідне: "+inb.join(", "));
     var ext=checks("ext"); if(ext.length) L.push("Необхідні: "+ext.join(", "));
     if($("#callFirst").checked) L.push("⚠ Зв'язатися з лікарем до початку моделювання");
-    if($("#filesCC").checked) L.push("Файли: у ClinicCards"+(v("cc")?(" — "+v("cc")):""));
-    if(v("ccCard")) L.push("Картка пацієнта: "+v("ccCard"));
+    if($("#filesCC").checked) L.push("Файли: у ClinicCards");
     L.push("");
     var s=services();
     if(s.length){ L.push("Роботи:"); s.forEach(function(x){L.push("  • "+x);}); }
@@ -626,7 +617,6 @@
         +'<h2>Клініка та пацієнт</h2><div class="kv">'
           +kv("Клініка",v("clinic"))+kv("Лікар",v("doctor"))
           +kv("Телефон",v("phone"))+kv("Email",v("cemail"))
-          +kv("ClinicCards",v("cc"))+kv("Картка пацієнта",v("ccCard"))
           +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
           +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
           +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Реєстрація",radio("reg"))
@@ -758,7 +748,7 @@
     return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
   function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
   var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
-    "patient","age","tech","dphone","cc","ccCard","matLab","height","lead","notes"];
+    "patient","age","tech","dphone","matLab","height","lead","notes"];
   function collectAll(){
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});
@@ -880,7 +870,6 @@
     if(c.doctor) $("#doctor").value=c.doctor;
     if(c.phone)  $("#phone").value=c.phone;
     if(c.email)  $("#cemail").value=c.email;
-    if(c.cc)     $("#cc").value=c.cc;
   }
   function showView(v){
     document.querySelectorAll(".view").forEach(function(el){ el.hidden = el.dataset.view!==v; });
@@ -905,13 +894,12 @@
     var c=loadClinic();
     if(c){ $("#rClinic").value=c.clinic||""; $("#rDoctor").value=c.doctor||"";
            $("#rPhone").value=c.phone||""; $("#rEmail").value=c.email||"";
-           $("#rCC").value=c.cc||""; applyClinic(c); }
+           applyClinic(c); }
     refreshBanner();
   })();
   $("#rSave").addEventListener("click",function(){
     var o={clinic:($("#rClinic").value||"").trim(),doctor:($("#rDoctor").value||"").trim(),
-           phone:($("#rPhone").value||"").trim(),email:($("#rEmail").value||"").trim(),
-           cc:($("#rCC").value||"").trim()};
+           phone:($("#rPhone").value||"").trim(),email:($("#rEmail").value||"").trim()};
     var t=$("#rToast");
     if(!o.clinic||!o.doctor){ t.textContent="Вкажіть клініку та лікаря."; t.className="toast show err"; return; }
     saveClinicRec(o); applyClinic(o); refreshBanner();
@@ -921,7 +909,6 @@
   $("#rClear").addEventListener("click",function(){
     clearClinicRec();
     $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";
-    $("#rCC").value="";
     refreshBanner();
     var t=$("#rToast"); t.textContent="Реєстрацію очищено."; t.className="toast show";
   });

@@ -156,6 +156,11 @@
   .cc-mark i{color:#57B278; font-style:normal; font-weight:700;}
   .chip:has(input:checked) .cc-mark b{color:var(--accent-ink);}
   .chip:has(input:checked) .cc-mark i{color:#8FD3A6;}
+  .chip .ic{width:17px; height:17px; margin:0 5px 0 1px; flex:none; vertical-align:-3px;}
+  .gm-mark{font-weight:600; font-size:14px; color:#2A2D33; letter-spacing:-.01em;}
+  .tg-mark{font-weight:600; font-size:14px; color:#2AABEE; letter-spacing:-.01em;}
+  .chip:has(input:checked) .gm-mark{color:var(--accent-ink);}
+  .chip:has(input:checked) .tg-mark{color:#8FD0F0;}
   /* a chip with a clarifying line centred beneath it */
   .chip-note{display:inline-flex; flex-direction:column; align-items:center; gap:4px;}
   .chip-note .sub{font-size:11px; color:var(--muted); letter-spacing:.01em; text-align:center;}
@@ -335,6 +340,10 @@
         Зв'язатися з лікарем до початку моделювання</label>
       <label class="chip"><input type="checkbox" id="filesCC"><span class="dot"></span>
         Файли в <span class="cc-mark"><b>clinic</b><i>cards</i></span></label>
+      <label class="chip"><input type="checkbox" id="filesGM"><span class="dot"></span>
+        Файли на <svg class="ic" viewBox="0 0 48 36" aria-hidden="true"><path fill="#4285F4" d="M4 33h7V17L2 10v20a3 3 0 0 0 3 3z"/><path fill="#34A853" d="M37 33h7a3 3 0 0 0 3-3V10l-9 7v16z"/><path fill="#FBBC04" d="M37 6v11l10-7.5V5.5A3.5 3.5 0 0 0 41.4 2.7L37 6z"/><path fill="#EA4335" d="M11 17V6l13 9.7L37 6v11L24 26.8 11 17z"/><path fill="#C5221F" d="M1 5.5V9.5L11 17V6L6.6 2.7A3.5 3.5 0 0 0 1 5.5z"/></svg><span class="gm-mark">Gmail</span></label>
+      <label class="chip"><input type="checkbox" id="filesTG"><span class="dot"></span>
+        Файли в <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.6 11.7 17 7.3c.6-.2 1.1.1.9 1l-1.9 9.1c-.1.6-.5.8-1 .5l-2.9-2.1-1.4 1.3c-.2.2-.4.3-.7.3l.3-3 5.4-4.9c.2-.2 0-.3-.3-.1l-6.7 4.2-2.9-.9c-.6-.2-.6-.6.1-.9z"/></svg><span class="tg-mark">Telegram</span></label>
     </div>
 
     <!-- what the lab receives -->
@@ -554,7 +563,11 @@
     L.push("  Дата доставки: "+(v("due")||"—")+"    Технік: "+(v("tech")||"—"));
     L.push("");
     if($("#callFirst").checked){L.push("! Зв'язатися з лікарем до початку моделювання"); L.push("");}
-    if($("#filesCC").checked){L.push("ФАЙЛИ: у ClinicCards"); L.push("");}
+    var fsrc=[];
+    if($("#filesCC").checked) fsrc.push("ClinicCards");
+    if($("#filesGM").checked) fsrc.push("Gmail");
+    if($("#filesTG").checked) fsrc.push("Telegram");
+    if(fsrc.length){L.push("ФАЙЛИ: "+fsrc.join(", ")); L.push("");}
     var inb=checks("inb");
     if(inb.length){L.push("ВХІДНА ІНФОРМАЦІЯ: "+inb.join(", ")); L.push("");}
     if(radio("reg")){L.push("РЕЄСТРАЦІЯ: "+radio("reg")); L.push("");}
@@ -583,7 +596,11 @@
     var inb=checks("inb"); if(inb.length) L.push("Вхідне: "+inb.join(", "));
     var ext=checks("ext"); if(ext.length) L.push("Необхідні: "+ext.join(", "));
     if($("#callFirst").checked) L.push("⚠ Зв'язатися з лікарем до початку моделювання");
-    if($("#filesCC").checked) L.push("Файли: у ClinicCards");
+    var fsrc=[];
+    if($("#filesCC").checked) fsrc.push("ClinicCards");
+    if($("#filesGM").checked) fsrc.push("Gmail");
+    if($("#filesTG").checked) fsrc.push("Telegram");
+    if(fsrc.length) L.push("Файли: "+fsrc.join(", "));
     L.push("");
     var s=services();
     if(s.length){ L.push("Роботи:"); s.forEach(function(x){L.push("  • "+x);}); }
@@ -623,7 +640,9 @@
           +kv("Тел. лікаря",v("dphone"))+kv("Термін",v("lead"))
           +kv("Висота капи",v("height")?(v("height")+" мм від першого контакту"):"")
           +kv("Зв'язок",$("#callFirst").checked?"до початку моделювання":"")
-          +kv("Файли",$("#filesCC").checked?"у ClinicCards":"")
+          +kv("Файли",[($("#filesCC").checked?"ClinicCards":""),
+                       ($("#filesGM").checked?"Gmail":""),
+                       ($("#filesTG").checked?"Telegram":"")].filter(Boolean).join(", "))
         +'</div>'
         +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
           +'<th>Реєстрація</th></tr></thead><tbody>'
@@ -757,6 +776,8 @@
     o.inb=checks("inb"); o.ext=checks("ext");
     o.call=$("#callFirst").checked?1:0;
     o.fcc=$("#filesCC").checked?1:0;
+    o.fgm=$("#filesGM").checked?1:0;
+    o.ftg=$("#filesTG").checked?1:0;
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       if(cb.checked) o.svc.push({n:cb.dataset.svc,c:1});
@@ -776,6 +797,8 @@
     });
     $("#callFirst").checked=!!o.call;
     $("#filesCC").checked=!!o.fcc;
+    $("#filesGM").checked=!!o.fgm;
+    $("#filesTG").checked=!!o.ftg;
     var byName={};
     (o.svc||[]).forEach(function(s){byName[s.n]=s;});
     document.querySelectorAll('input[data-svc]').forEach(function(cb){

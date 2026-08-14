@@ -762,9 +762,12 @@
       if(prev) refreshSvcNote(prev);
       refreshSvcNote(activeSvc);
     }
+    // NO setPointerCapture: capturing retargets the following click to the SVG
+    // itself, so the tooth's own click handler never ran and a single tap
+    // selected nothing. The drag needs no capture — the tooth under the
+    // pointer is found by coordinates anyway.
     svg.addEventListener("pointerdown",function(ev){
       dragFrom=toothUnder(ev); dragged=false;
-      if(dragFrom) svg.setPointerCapture(ev.pointerId);
     });
     svg.addEventListener("pointermove",function(ev){
       if(!dragFrom) return;
@@ -779,9 +782,6 @@
       dragFrom=f;
     });
     function endDrag(ev){
-      if(dragFrom&&svg.hasPointerCapture&&ev.pointerId!==undefined){
-        try{ svg.releasePointerCapture(ev.pointerId); }catch(e){}
-      }
       dragFrom=null;
       if(dragged){ ev.preventDefault(); ev.stopPropagation(); }
       setTimeout(function(){ dragged=false; },0);

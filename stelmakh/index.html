@@ -117,6 +117,13 @@
   .chip:has(input:checked) .dot{background:var(--blue); border-color:var(--blue);}
   .chip:has(input:focus-visible){box-shadow:0 0 0 3px var(--blue-soft);}
   .callrow{margin-top:12px;}
+  /* the file-exchange link lives next to its chip and only matters when it is on */
+  .filelink{flex:1 1 260px; min-width:0; font-family:inherit; font-size:13.5px; color:var(--ink);
+    background:transparent; border:0; border-bottom:1px solid var(--line-2); padding:8px 2px;
+    transition:border-color .15s ease, opacity .15s ease;}
+  .filelink:focus{outline:none;}
+  .filelink[disabled]{opacity:.4;}
+  .filelink:focus{border-color:var(--blue);}
   .cc-mark{font-weight:700; letter-spacing:-.02em; font-size:14px;}
   .cc-mark b{color:#2A2D33; font-weight:700;}
   .cc-mark i{color:#57B278; font-style:normal; font-weight:700;}
@@ -289,6 +296,7 @@
     vertical-align:baseline;}
   .doc .chart{border:1px solid #E4E6EB; border-radius:3px; padding:8px; margin-top:4px;}
   .doc .chart svg{display:block; width:100%; height:auto;}
+  .doc a.dl{color:#2F6ED8; text-decoration:underline; word-break:break-all;}
   .doc .note{white-space:pre-wrap; border:1px solid #E4E6EB; border-radius:3px; padding:10px 12px;
     background:#FCFCFD;}
   .doc .fine{margin-top:22px; font-size:10px; color:#A8ACB5; text-align:center;}
@@ -378,6 +386,10 @@
         Файли на <svg class="ic" viewBox="0 0 48 36" aria-hidden="true"><path fill="#4285F4" d="M4 33h7V17L2 10v20a3 3 0 0 0 3 3z"/><path fill="#34A853" d="M37 33h7a3 3 0 0 0 3-3V10l-9 7v16z"/><path fill="#FBBC04" d="M37 6v11l10-7.5V5.5A3.5 3.5 0 0 0 41.4 2.7L37 6z"/><path fill="#EA4335" d="M11 17V6l13 9.7L37 6v11L24 26.8 11 17z"/><path fill="#C5221F" d="M1 5.5V9.5L11 17V6L6.6 2.7A3.5 3.5 0 0 0 1 5.5z"/></svg><span class="gm-mark">Gmail</span></label>
       <label class="chip"><input type="checkbox" id="filesTG"><span class="dot"></span>
         Файли в <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.6 11.7 17 7.3c.6-.2 1.1.1.9 1l-1.9 9.1c-.1.6-.5.8-1 .5l-2.9-2.1-1.4 1.3c-.2.2-.4.3-.7.3l.3-3 5.4-4.9c.2-.2 0-.3-.3-.1l-6.7 4.2-2.9-.9c-.6-.2-.6-.6.1-.9z"/></svg><span class="tg-mark">Telegram</span></label>
+      <label class="chip"><input type="checkbox" id="filesLK"><span class="dot"></span>
+        Файли у файлообміннику</label>
+      <input type="url" id="fileLink" class="filelink" placeholder="посилання на файли"
+             aria-label="Посилання на файли">
     </div>
 
     <!-- materials to return -->
@@ -1067,6 +1079,7 @@
     if($("#filesCC").checked) fsrc.push("ClinicCards");
     if($("#filesGM").checked) fsrc.push("Gmail");
     if($("#filesTG").checked) fsrc.push("Telegram");
+    if($("#filesLK").checked) fsrc.push("файлообмінник"+(v("fileLink")?(" — "+v("fileLink")):""));
     if(fsrc.length) L.push("Файли: "+fsrc.join(", "));
     if($("#callFirst").checked) L.push("⚠ Зв'язатися з лікарем до початку моделювання");
     L.push("");
@@ -1092,6 +1105,7 @@
     if($("#filesCC").checked) fsrcT.push("ClinicCards");
     if($("#filesGM").checked) fsrcT.push("Gmail");
     if($("#filesTG").checked) fsrcT.push("Telegram");
+    if($("#filesLK").checked) fsrcT.push("файлообмінник"+(v("fileLink")?(" — "+v("fileLink")):""));
     if(fsrcT.length) L.push("  Файли: "+fsrcT.join(", "));
     if($("#callFirst").checked) L.push("  ! Зв'язатися з лікарем до початку моделювання");
     L.push("");
@@ -1187,7 +1201,12 @@
           +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Імплант система",v("implant"))
           +kv("Файли",[($("#filesCC").checked?"ClinicCards":""),
                        ($("#filesGM").checked?"Gmail":""),
-                       ($("#filesTG").checked?"Telegram":"")].filter(Boolean).join(", "))
+                       ($("#filesTG").checked?"Telegram":""),
+                       ($("#filesLK").checked?"файлообмінник":"")].filter(Boolean).join(", "))
+          +(($("#filesLK").checked&&v("fileLink"))
+             ? ('<span class="k">Посилання</span><span class="v"><a class="dl" href="'
+                +esc(v("fileLink"))+'" target="_blank" rel="noopener">'+esc(v("fileLink"))+'</a></span>')
+             : "")
           +kv("Зв'язок",$("#callFirst").checked?"до початку моделювання":"")
         +'</div>'
         +'<h2>Зубна формула</h2><div class="chart">'+chartSnapshot()+'</div>'
@@ -1313,6 +1332,19 @@
     }catch(e){ toast("Не вдалося завантажити — скористайтесь «Друк / PDF».","err"); }
   }
 
+  // Посилання на файлообмінник живе разом зі своєю кнопкою: вимкнена — поле
+  // спить, вписали посилання — кнопка вмикається сама.
+  (function(){
+    var chip=$("#filesLK"), link=$("#fileLink");
+    if(!chip||!link) return;
+    function sync(){ link.disabled=!chip.checked; }
+    chip.addEventListener("change",function(){ sync(); if(chip.checked) link.focus(); });
+    link.addEventListener("input",function(){
+      if(link.value.trim() && !chip.checked){ chip.checked=true; sync(); }
+    });
+    sync();
+  })();
+
   // ── Clinic registration (per-device, localStorage) ───────────────────────
   var KEY="slClinic";
   function loadClinic(){ try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;} }
@@ -1371,7 +1403,7 @@
     return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
   function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
   var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
-    "patient","age","tech","matTray","matBow","matTrans","matAbut","matAnal",
+    "patient","age","tech","fileLink","matTray","matBow","matTrans","matAbut","matAnal",
     "matOther","matLab","implant","notes"];
   function collectAll(){
     var o={};
@@ -1389,6 +1421,7 @@
     o.fcc=$("#filesCC").checked?1:0;
     o.fgm=$("#filesGM").checked?1:0;
     o.ftg=$("#filesTG").checked?1:0;
+    o.flk=$("#filesLK").checked?1:0;
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       var e=svcEls[cb.dataset.svc]||{};
@@ -1412,6 +1445,8 @@
     $("#filesCC").checked=!!o.fcc;
     $("#filesGM").checked=!!o.fgm;
     $("#filesTG").checked=!!o.ftg;
+    $("#filesLK").checked=!!o.flk;
+    $("#fileLink").disabled=!o.flk;
     setActiveSvc(null);
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();

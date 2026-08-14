@@ -376,17 +376,6 @@
         <svg id="archSvg" viewBox="0 -34 1000 402" role="group" aria-label="Зубна формула"></svg>
         <div class="arch-ctl">
           <button type="button" class="ac-full" id="fullUpper">Full Upper</button>
-          <div class="ac-row"><label for="shadeScale">Розколірка</label>
-            <select id="shadeScale">
-              <option>VITA classical</option>
-              <option>VITA 3D-Master</option>
-              <option>Ivoclar Chromascop</option>
-            </select></div>
-          <div class="ac-row"><label for="stumpScale">Культі</label>
-            <select id="stumpScale">
-              <option>IPS Natural Die</option>
-              <option>VITA classical</option>
-            </select></div>
           <button type="button" class="ac-full" id="fullLower">Full Lower</button>
         </div>
       </div>
@@ -566,12 +555,14 @@
     "Ivoclar Chromascop":["110","120","130","140","210","220","230","240","310","320","330","340",
                           "410","420","430","440","510","520","530","540"]
   };
-  function scaleName(){ var s=$("#shadeScale"); return (s&&s.value)||"VITA classical"; }
+  // VITA classical for the crowns, IPS Natural Die for the stumps — the guides
+  // the lab works with; the selectors that let a doctor swap them are gone.
+  function scaleName(){ return "VITA classical"; }
   var STUMP_SCALES={
     "IPS Natural Die":["ND1","ND2","ND3","ND4","ND5","ND6","ND7","ND8","ND9"],
     "VITA classical":["A1","A2","A3","A3.5","A4","B1","B2","B3","B4","C1","C2","C3","C4","D2","D3","D4"]
   };
-  function stumpScaleName(){ var s=$("#stumpScale"); return (s&&s.value)||"IPS Natural Die"; }
+  function stumpScaleName(){ return "IPS Natural Die"; }
 
   function teethList(){
     var on=[]; UPPER.concat(LOWER).forEach(function(t){ if(selTeeth[t]) on.push(t); });
@@ -981,8 +972,6 @@
     svcGrid.appendChild(gd);
   });
   fillShadeSelects();
-  $("#shadeScale").addEventListener("change",fillShadeSelects);
-  $("#stumpScale").addEventListener("change",fillShadeSelects);
 
   // ── gather ────────────────────────────────────────────────────────────────
   function v(id){var e=$("#"+id); return e?e.value.trim():"";}
@@ -1148,8 +1137,7 @@
           +kv("Телефон",v("phone"))+kv("Email",v("cemail"))
           +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
           +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
-          +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Розколірка",scaleName())
-          +kv("Культі",stumpScaleName())+kv("Імплант система",v("implant"))
+          +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Імплант система",v("implant"))
         +'</div>'
         +'<h2>Зубна формула</h2><div class="chart">'+chartSnapshot()+'</div>'
         +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
@@ -1333,7 +1321,7 @@
   function setv(id,val){var e=$("#"+id); if(e) e.value=val||"";}
   var FIELD_IDS=["oid","odate","otime","due","clinic","phone","doctor","cemail",
     "patient","age","tech","matTray","matBow","matTrans","matAbut","matAnal",
-    "matOther","matLab","implant","shadeScale","stumpScale","notes"];
+    "matOther","matLab","implant","notes"];
   function collectAll(){
     var o={};
     FIELD_IDS.forEach(function(id){o[id]=v(id);});

@@ -188,8 +188,11 @@
   .tooth-g text{font-size:16px; font-weight:600; fill:var(--strong); text-anchor:middle;
     font-family:var(--sans); font-variant-numeric:tabular-nums; pointer-events:none;
     paint-order:stroke; stroke:var(--raise); stroke-width:4px; stroke-linejoin:round;}
-  .tooth-g .sh{font-size:11.5px; fill:var(--blue-strong); font-weight:700;
-    pointer-events:auto; cursor:pointer;}
+  .tooth-g .lbl{cursor:pointer;}
+  .tooth-g .sh,.tooth-g .st{font-size:11.5px; fill:var(--blue-strong); font-weight:700;
+    pointer-events:auto; cursor:pointer; stroke:none;}
+  .tooth-g .st{fill:var(--muted);}
+  .tooth-g .shsep{stroke:var(--line-2); stroke-width:1; vector-effect:non-scaling-stroke;}
   .tooth-pop{position:absolute; z-index:30; background:var(--raise); border:1px solid var(--line-2);
     border-radius:4px; box-shadow:var(--shadow); padding:12px; width:290px; max-height:320px; overflow:auto;}
   .tooth-pop h5{margin:0 0 8px; font-size:12.5px; color:var(--strong);}
@@ -685,12 +688,15 @@
     var imp=g.querySelector(".imp");
     var isImp=!!(selTeeth[fdi]&&toothSvc[fdi]&&IMPLANT_SVCS[toothSvc[fdi]]);
     if(imp) imp.style.display=isImp?"":"none";
-    var sh=g.querySelector(".sh");
-    if(sh){
-      var lbl=toothShade[fdi]||"";
-      if(toothStump[fdi]) lbl+=(lbl?" / ":"культя ")+toothStump[fdi];
-      sh.textContent=lbl||(selTeeth[fdi]?"—":"");
-      sh.setAttribute("y", g.getAttribute(isImp?"data-ly1":"data-ly0"));
+    var sh=g.querySelector(".sh"), st=g.querySelector(".st"),
+        sep=g.querySelector(".shsep"), lbl=g.querySelector(".lbl");
+    if(sh&&st&&sep&&lbl){
+      var a=toothShade[fdi]||"", b=toothStump[fdi]||"";
+      sh.textContent=a||(selTeeth[fdi]&&!b?"—":"");
+      st.textContent=b;
+      sep.style.display=(a&&b)?"":"none";
+      var dy=isImp?Number(g.getAttribute("data-shift")||0):0;
+      lbl.setAttribute("transform","translate(0 "+dy+")");
     }
   }
   (function buildArch(){
@@ -720,10 +726,18 @@
           +(fdi<30?' rotate(180)':'')+'">'
           +'<path class="impb" d="M-5 0 H5 V3 H-5 Z M-4 3 L4 3 L2.5 15 C1.5 18.6 -1.5 18.6 -2.5 15 Z"/>'
           +'<path class="impt" d="M-3.6 6 H3.6 M-3.1 9 H3.1 M-2.6 12 H2.6"/></g>'
-        +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'
-          +((fdi<30? p.y-60*s-8 : p.y+60*s+14)).toFixed(1)+'"></text>';
-      g.setAttribute("data-ly0",(fdi<30? p.y-60*s-8 : p.y+60*s+14).toFixed(1));
-      g.setAttribute("data-ly1",(fdi<30? p.y-60*s-28 : p.y+60*s+34).toFixed(1));
+        // shade over stump, parted by a hairline — «A2 / ND1» on one line ran
+        // into its neighbours and read as a fraction
+        +'<g class="lbl">'
+          +'<text class="sh" x="'+p.x.toFixed(1)+'" y="'
+            +(fdi<30 ? (p.y-60*s-27) : (p.y+60*s+16)).toFixed(1)+'"></text>'
+          +'<line class="shsep" x1="'+(p.x-11).toFixed(1)+'" x2="'+(p.x+11).toFixed(1)+'" y1="'
+            +(fdi<30 ? (p.y-60*s-21) : (p.y+60*s+22)).toFixed(1)+'" y2="'
+            +(fdi<30 ? (p.y-60*s-21) : (p.y+60*s+22)).toFixed(1)+'"/>'
+          +'<text class="st" x="'+p.x.toFixed(1)+'" y="'
+            +(fdi<30 ? (p.y-60*s-8) : (p.y+60*s+33)).toFixed(1)+'"></text>'
+        +'</g>';
+      g.setAttribute("data-shift",(fdi<30?-20:20));
       g.addEventListener("click",function(ev){
         ev.stopPropagation();
         if(!activeSvc){
@@ -744,7 +758,7 @@
         }
         renderTeethSel();
       });
-      var shLbl=g.querySelector(".sh");
+      var shLbl=g.querySelector(".lbl");
       if(shLbl) shLbl.addEventListener("click",function(ev){
         ev.stopPropagation();
         if(selTeeth[fdi]) openShadePop(fdi,shLbl);
@@ -1158,8 +1172,11 @@
         if(t){ t.setAttribute("stroke","#FFFFFF"); t.setAttribute("fill","none");
                t.setAttribute("stroke-width","1.1"); }
       }
+      var sep2=g.querySelector(".shsep");
+      if(sep2){ sep2.setAttribute("stroke","#C6C9D0"); sep2.setAttribute("stroke-width","1"); }
       g.querySelectorAll("text").forEach(function(tx){
-        var isSh=tx.getAttribute("class")==="sh";
+        var cls=tx.getAttribute("class")||"";
+        var isSh=(cls==="sh"||cls==="st");
         tx.setAttribute("fill",isSh?"#5F7BA6":(col?"#FFFFFF":"#2A2D33"));
         tx.setAttribute("font-size",isSh?"11":"15");
         tx.setAttribute("font-weight",isSh?"700":"600");

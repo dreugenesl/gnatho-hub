@@ -149,7 +149,13 @@
   .chip:has(input:checked){background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
   .chip:has(input:checked) .dot{background:var(--warm); border-color:var(--warm);}
   .chip:has(input:focus-visible){box-shadow:0 0 0 3px var(--warm-soft);}
-  .callchip{margin-top:12px;}
+  .callrow{margin-top:12px;}
+  /* the ClinicCards wordmark, drawn in type: dark «clinic» + green «cards» */
+  .cc-mark{font-weight:700; letter-spacing:-.02em; font-size:14px;}
+  .cc-mark b{color:#2A2D33; font-weight:700;}
+  .cc-mark i{color:#57B278; font-style:normal; font-weight:700;}
+  .chip:has(input:checked) .cc-mark b{color:var(--accent-ink);}
+  .chip:has(input:checked) .cc-mark i{color:#8FD3A6;}
   /* a chip with a clarifying line centred beneath it */
   .chip-note{display:inline-flex; flex-direction:column; align-items:center; gap:4px;}
   .chip-note .sub{font-size:11px; color:var(--muted); letter-spacing:.01em; text-align:center;}
@@ -328,8 +334,12 @@
       <div class="f wide"><label>Дата замовлення</label><input type="date" id="odate"></div>
       <div class="f"><label>Час</label><input type="text" id="otime" placeholder="—"></div>
     </div>
-    <label class="chip callchip"><input type="checkbox" id="callFirst"><span class="dot"></span>
-      Зв'язатися з лікарем до початку моделювання</label>
+    <div class="chips callrow">
+      <label class="chip"><input type="checkbox" id="callFirst"><span class="dot"></span>
+        Зв'язатися з лікарем до початку моделювання</label>
+      <label class="chip"><input type="checkbox" id="filesCC"><span class="dot"></span>
+        Файли в <span class="cc-mark"><b>clinic</b><i>cards</i></span></label>
+    </div>
 
     <!-- what the lab receives -->
     <h3 class="block">Вхідна інформація</h3>
@@ -552,6 +562,7 @@
       (v("ccCard")?("    Картка: "+v("ccCard")):""));
     L.push("");
     if($("#callFirst").checked){L.push("! Зв'язатися з лікарем до початку моделювання"); L.push("");}
+    if($("#filesCC").checked){L.push("ФАЙЛИ: у ClinicCards"+(v("cc")?(" — "+v("cc")):"")); L.push("");}
     var inb=checks("inb");
     if(inb.length){L.push("ВХІДНА ІНФОРМАЦІЯ: "+inb.join(", ")); L.push("");}
     if(radio("reg")){L.push("РЕЄСТРАЦІЯ: "+radio("reg")); L.push("");}
@@ -580,6 +591,7 @@
     var inb=checks("inb"); if(inb.length) L.push("Вхідне: "+inb.join(", "));
     var ext=checks("ext"); if(ext.length) L.push("Необхідні: "+ext.join(", "));
     if($("#callFirst").checked) L.push("⚠ Зв'язатися з лікарем до початку моделювання");
+    if($("#filesCC").checked) L.push("Файли: у ClinicCards"+(v("cc")?(" — "+v("cc")):""));
     if(v("ccCard")) L.push("Картка пацієнта: "+v("ccCard"));
     L.push("");
     var s=services();
@@ -621,6 +633,7 @@
           +kv("Тел. лікаря",v("dphone"))+kv("Термін",v("lead"))
           +kv("Висота капи",v("height")?(v("height")+" мм від першого контакту"):"")
           +kv("Зв'язок",$("#callFirst").checked?"до початку моделювання":"")
+          +kv("Файли",$("#filesCC").checked?"у ClinicCards":"")
         +'</div>'
         +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
           +'<th>Реєстрація</th></tr></thead><tbody>'
@@ -753,6 +766,7 @@
     o.deprog=radio("deprog_method");
     o.inb=checks("inb"); o.ext=checks("ext");
     o.call=$("#callFirst").checked?1:0;
+    o.fcc=$("#filesCC").checked?1:0;
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       if(cb.checked) o.svc.push({n:cb.dataset.svc,c:1});
@@ -771,6 +785,7 @@
         c.checked=want.indexOf(c.value)>=0; });
     });
     $("#callFirst").checked=!!o.call;
+    $("#filesCC").checked=!!o.fcc;
     var byName={};
     (o.svc||[]).forEach(function(s){byName[s.n]=s;});
     document.querySelectorAll('input[data-svc]').forEach(function(cb){

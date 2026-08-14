@@ -236,7 +236,7 @@
   #docView{display:none;}
   body.doc-mode .wrap{display:none;}
   body.doc-mode #docView{display:block;}
-  .doc{max-width:860px; margin:0 auto; padding:0 0 40px; background:#fff; color:#1E2025;
+  .doc{max-width:860px; margin:0 auto; padding:0 0 40px; background:#fff; color:#1B1A18;
     font-family:var(--sans); font-size:13px; line-height:1.45;}
   /* the blank wears the same masthead as the site: splint photo under the
      gradient, so a printed naryad is recognisably Gnatho Hub */
@@ -255,26 +255,26 @@
   .doc-head .r{text-align:right; font-size:10.5px; line-height:1.65; color:#BCC0C8;}
   .doc-head .r .no{font-size:14px; color:#fff; font-weight:700; letter-spacing:.06em; margin-bottom:5px;}
   .doc-body{padding:20px 26px 0;}
-  .doc h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#5F7BA6;
-    font-weight:700; margin:20px 0 7px; border-bottom:1px solid #E4E6EB; padding-bottom:5px;}
+  .doc h2{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8A6F4E;
+    font-weight:700; margin:20px 0 7px; border-bottom:1px solid #E7E1D6; padding-bottom:5px;}
   .doc h2:first-child{margin-top:0;}
   .kv{display:grid; grid-template-columns:repeat(4,auto 1fr); gap:5px 10px; align-items:baseline;}
-  .kv .k{color:#787D87; font-size:11px; white-space:nowrap;}
-  .kv .v{font-weight:600; border-bottom:1px dotted #D4D8DF; min-width:60px;}
+  .kv .k{color:#8B8377; font-size:11px; white-space:nowrap;}
+  .kv .v{font-weight:600; border-bottom:1px dotted #D9D2C6; min-width:60px;}
   .doc table{width:100%; border-collapse:collapse; margin-top:2px;}
-  .doc th{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#787D87;
-    text-align:left; font-weight:600; padding:5px 8px; border-bottom:1px solid #D4D8DF;}
-  .doc td{padding:7px 8px; border-bottom:1px solid #EDEFF3; vertical-align:top;}
+  .doc th{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#8B8377;
+    text-align:left; font-weight:600; padding:5px 8px; border-bottom:1px solid #D9D2C6;}
+  .doc td{padding:7px 8px; border-bottom:1px solid #F0EBE1; vertical-align:top;}
   .doc td.w{font-weight:600;}
   .doc td.t{font-variant-numeric:tabular-nums;}
   .doc .sw{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;
     vertical-align:baseline;}
-  .doc .chart{border:1px solid #E4E6EB; border-radius:3px; padding:8px; margin-top:4px;}
+  .doc .chart{border:1px solid #E7E1D6; border-radius:3px; padding:8px; margin-top:4px;}
   .doc .chart svg{display:block; width:100%; height:auto;}
-  .doc a.dl{color:#2F6ED8; text-decoration:underline; word-break:break-all;}
-  .doc .note{white-space:pre-wrap; border:1px solid #E4E6EB; border-radius:3px; padding:10px 12px;
-    background:#FCFCFD;}
-  .doc .fine{margin-top:22px; font-size:10px; color:#A8ACB5; text-align:center;}
+  .doc a.dl{color:#8A6F4E; text-decoration:underline; word-break:break-all;}
+  .doc .note{white-space:pre-wrap; border:1px solid #E7E1D6; border-radius:3px; padding:10px 12px;
+    background:#FBFAF7;}
+  .doc .fine{margin-top:22px; font-size:10px; color:#B0A897; text-align:center;}
   @media print{
     body.doc-mode #docView{display:block;}
     .doc-head{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
@@ -674,8 +674,7 @@
                 +esc(v("fileLink"))+'" target="_blank" rel="noopener">'+esc(v("fileLink"))+'</a></span>')
              : "")
         +'</div>'
-        +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
-          +'<th>Реєстрація</th></tr></thead><tbody>'
+        +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th></tr></thead><tbody>'
           +(rows||'<tr><td>—</td></tr>')+'</tbody></table>'
         +(checks("inb").length?('<h2>Вхідна інформація</h2><div class="note">'
           +esc(checks("inb").join(" · "))+'</div>'):'')

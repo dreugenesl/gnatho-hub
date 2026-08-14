@@ -105,6 +105,29 @@
   .f input:focus, .f select:focus{outline:none; border-color:var(--blue);}
   select{appearance:none;}
 
+  /* pick-one-or-more chips: call first, and where the files are */
+  .chips{display:flex; flex-wrap:wrap; align-items:flex-start; gap:9px; margin-top:2px;}
+  .chip{position:relative; display:inline-flex; align-items:center; gap:8px; padding:9px 15px;
+    border:1px solid var(--line-2); border-radius:var(--radius); background:var(--field);
+    cursor:pointer; font-size:13.5px; color:var(--strong); transition:.14s ease; user-select:none;}
+  .chip:hover{border-color:var(--muted);}
+  .chip input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer;}
+  .chip .dot{width:9px; height:9px; border-radius:50%; border:1px solid var(--line-2); flex:none; transition:.14s ease;}
+  .chip:has(input:checked){background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+  .chip:has(input:checked) .dot{background:var(--blue); border-color:var(--blue);}
+  .chip:has(input:focus-visible){box-shadow:0 0 0 3px var(--blue-soft);}
+  .callrow{margin-top:12px;}
+  .cc-mark{font-weight:700; letter-spacing:-.02em; font-size:14px;}
+  .cc-mark b{color:#2A2D33; font-weight:700;}
+  .cc-mark i{color:#57B278; font-style:normal; font-weight:700;}
+  .chip:has(input:checked) .cc-mark b{color:var(--accent-ink);}
+  .chip:has(input:checked) .cc-mark i{color:#8FD3A6;}
+  .chip .ic{width:17px; height:17px; margin:0 5px 0 1px; flex:none; vertical-align:-3px;}
+  .gm-mark{font-weight:600; font-size:14px; color:#2A2D33; letter-spacing:-.01em;}
+  .tg-mark{font-weight:600; font-size:14px; color:#2AABEE; letter-spacing:-.01em;}
+  .chip:has(input:checked) .gm-mark{color:var(--accent-ink);}
+  .chip:has(input:checked) .tg-mark{color:#8FD0F0;}
+
   h3.block{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-strong);
     font-weight:600; margin:30px 0 4px;}
   .block-note{font-size:12px; color:var(--faint); margin:0 0 14px;}
@@ -345,6 +368,16 @@
       <div class="f"><label>Технік</label><input type="text" id="tech"></div>
       <div class="f wide"><label>Дата замовлення</label><input type="date" id="odate"></div>
       <div class="f"><label>Час</label><input type="text" id="otime" placeholder="—"></div>
+    </div>
+    <div class="chips callrow">
+      <label class="chip"><input type="checkbox" id="callFirst"><span class="dot"></span>
+        Зв'язатися з лікарем до початку моделювання</label>
+      <label class="chip"><input type="checkbox" id="filesCC"><span class="dot"></span>
+        Файли в <span class="cc-mark"><b>clinic</b><i>cards</i></span></label>
+      <label class="chip"><input type="checkbox" id="filesGM"><span class="dot"></span>
+        Файли на <svg class="ic" viewBox="0 0 48 36" aria-hidden="true"><path fill="#4285F4" d="M4 33h7V17L2 10v20a3 3 0 0 0 3 3z"/><path fill="#34A853" d="M37 33h7a3 3 0 0 0 3-3V10l-9 7v16z"/><path fill="#FBBC04" d="M37 6v11l10-7.5V5.5A3.5 3.5 0 0 0 41.4 2.7L37 6z"/><path fill="#EA4335" d="M11 17V6l13 9.7L37 6v11L24 26.8 11 17z"/><path fill="#C5221F" d="M1 5.5V9.5L11 17V6L6.6 2.7A3.5 3.5 0 0 0 1 5.5z"/></svg><span class="gm-mark">Gmail</span></label>
+      <label class="chip"><input type="checkbox" id="filesTG"><span class="dot"></span>
+        Файли в <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE"/><path fill="#fff" d="M5.6 11.7 17 7.3c.6-.2 1.1.1.9 1l-1.9 9.1c-.1.6-.5.8-1 .5l-2.9-2.1-1.4 1.3c-.2.2-.4.3-.7.3l.3-3 5.4-4.9c.2-.2 0-.3-.3-.1l-6.7 4.2-2.9-.9c-.6-.2-.6-.6.1-.9z"/></svg><span class="tg-mark">Telegram</span></label>
     </div>
 
     <!-- materials to return -->
@@ -1030,6 +1063,12 @@
     L.push("Клініка: "+(v("clinic")||"—")+" · Лікар: "+(v("doctor")||"—"));
     L.push("Пацієнт: "+(v("patient")||"—")+(v("age")?(", "+v("age")+" р."):""));
     L.push("Дата доставки: "+(v("due")||"—"));
+    var fsrc=[];
+    if($("#filesCC").checked) fsrc.push("ClinicCards");
+    if($("#filesGM").checked) fsrc.push("Gmail");
+    if($("#filesTG").checked) fsrc.push("Telegram");
+    if(fsrc.length) L.push("Файли: "+fsrc.join(", "));
+    if($("#callFirst").checked) L.push("⚠ Зв'язатися з лікарем до початку моделювання");
     L.push("");
     var s=services();
     if(s.length){ L.push("Роботи:"); s.forEach(function(x){L.push("  • "+x);}); L.push(""); }
@@ -1049,6 +1088,12 @@
     L.push("");
     L.push("ПАЦІЄНТ: "+(v("patient")||"—")+(v("age")?("   Вік: "+v("age")):""));
     L.push("  Дата доставки: "+(v("due")||"—")+"    Технік: "+(v("tech")||"—"));
+    var fsrcT=[];
+    if($("#filesCC").checked) fsrcT.push("ClinicCards");
+    if($("#filesGM").checked) fsrcT.push("Gmail");
+    if($("#filesTG").checked) fsrcT.push("Telegram");
+    if(fsrcT.length) L.push("  Файли: "+fsrcT.join(", "));
+    if($("#callFirst").checked) L.push("  ! Зв'язатися з лікарем до початку моделювання");
     L.push("");
     var teeth=teethDetailed();
     if(teeth.length){
@@ -1140,6 +1185,10 @@
           +kv("Пацієнт",v("patient"))+kv("Вік",v("age"))
           +kv("Технік",v("tech"))+kv("Дата доставки",v("due"))
           +kv("Замовлено",v("odate")+" "+v("otime"))+kv("Імплант система",v("implant"))
+          +kv("Файли",[($("#filesCC").checked?"ClinicCards":""),
+                       ($("#filesGM").checked?"Gmail":""),
+                       ($("#filesTG").checked?"Telegram":"")].filter(Boolean).join(", "))
+          +kv("Зв'язок",$("#callFirst").checked?"до початку моделювання":"")
         +'</div>'
         +'<h2>Зубна формула</h2><div class="chart">'+chartSnapshot()+'</div>'
         +'<h2>Види робіт</h2><table><thead><tr><th>Робота</th><th>Зуби</th>'
@@ -1336,6 +1385,10 @@
       if(toothCustom[t]) o.tcs[t]=1;
     });
     o.conns=Object.keys(conns);
+    o.call=$("#callFirst").checked?1:0;
+    o.fcc=$("#filesCC").checked?1:0;
+    o.fgm=$("#filesGM").checked?1:0;
+    o.ftg=$("#filesTG").checked?1:0;
     o.svc=[];
     document.querySelectorAll('input[data-svc]').forEach(function(cb){
       var e=svcEls[cb.dataset.svc]||{};
@@ -1355,6 +1408,10 @@
     Object.keys(o.tsvc||{}).forEach(function(t){toothSvc[t]=o.tsvc[t];});
     Object.keys(o.tcs||{}).forEach(function(t){toothCustom[t]=1;});
     conns={}; (o.conns||[]).forEach(function(k){conns[k]=1;}); drawConns();
+    $("#callFirst").checked=!!o.call;
+    $("#filesCC").checked=!!o.fcc;
+    $("#filesGM").checked=!!o.fgm;
+    $("#filesTG").checked=!!o.ftg;
     setActiveSvc(null);
     UPPER.concat(LOWER).forEach(function(t){ updateToothVisual(t); });
     renderTeethSel();

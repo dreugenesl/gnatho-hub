@@ -459,6 +459,7 @@
       <button type="button" class="btn-ghost" id="rClear">Очистити</button>
     </div>
     <div class="toast" id="rToast" role="status"></div>
+    <div id="rState" style="margin-top:12px;font-size:13px;color:#666;"></div>
   </section>
 
   <section id="viewHistory" class="body view" data-view="history" hidden>
@@ -1010,7 +1011,7 @@
     if(c){ $("#rClinic").value=c.clinic||""; $("#rDoctor").value=c.doctor||"";
            $("#rPhone").value=c.phone||""; $("#rEmail").value=c.email||"";
            applyClinic(c); }
-    refreshBanner(); refreshLock();
+    refreshBanner(); refreshLock(); refreshState();
     var go=$("#lockGo");
     if(go) go.addEventListener("click",function(){ showView("register"); });
   })();
@@ -1019,10 +1020,36 @@
            phone:($("#rPhone").value||"").trim(),email:($("#rEmail").value||"").trim()};
     var t=$("#rToast");
     if(!o.clinic||!o.doctor){ t.textContent="Вкажіть клініку та лікаря."; t.className="toast show err"; return; }
-    saveClinicRec(o); applyClinic(o); refreshBanner(); refreshLock();
+    saveClinicRec(o); applyClinic(o); refreshBanner(); refreshLock(); refreshState();
     t.textContent="Збережено. Дані підставлятимуться в кожен наряд."; t.className="toast show ok";
     setTimeout(function(){ showView("order"); },800);
   });
+  // ── ЧИ ТРИМАЄ ЦЕЙ БРАУЗЕР РЕЄСТРАЦІЮ ────────────────────────────────────
+  // Реєстрація живе в тому браузері, де її зробили. Відкрити наряд в іншому
+  // браузері (Safari ⇄ Chrome), у приватному вікні або у вбудованому браузері
+  // месенджера — це фактично інший пристрій, і запису там немає. Рядок нижче
+  // каже це прямо, замість мовчазної порожньої форми.
+  function storageOk(){
+    try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return true; }
+    catch(e){ return false; }
+  }
+  function refreshState(){
+    var el=$("#rState"); if(!el) return;
+    var c=loadClinic();
+    if(!storageOk()){
+      el.innerHTML='<b style="color:#b23">Браузер не дозволяє зберігати дані</b> — '
+        +'приватне вікно або заборонені дані сайтів. Реєстрація не переживе закриття вкладки.';
+      return;
+    }
+    if(c&&c.clinic){
+      el.innerHTML='✓ Збережено в цьому браузері: <b>'+c.clinic+'</b>'
+        +(c.doctor?(' · '+c.doctor):'')
+        +'<br><span style="color:#888">Відкривайте наряд саме в ньому — в іншому браузері '
+        +'чи в приватному вікні запису немає.</span>';
+    } else {
+      el.innerHTML='<span style="color:#888">У цьому браузері реєстрації ще немає.</span>';
+    }
+  }
   var elLink=$("#rLink");
   if(elLink) elLink.addEventListener("click",function(){
     var c=loadClinic();
@@ -1043,7 +1070,7 @@
   $("#rClear").addEventListener("click",function(){
     clearClinicRec(); 
     $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";
-    refreshBanner(); refreshLock();
+    refreshBanner(); refreshLock(); refreshState();
     var t=$("#rToast"); t.textContent="Реєстрацію очищено."; t.className="toast show";
   });
 })();

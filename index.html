@@ -455,6 +455,7 @@
     </div>
     <div class="actions">
       <button type="button" class="btn-primary" id="rSave">Зберегти реєстрацію</button>
+      <button type="button" class="btn-ghost" id="rLink">Особисте посилання</button>
       <button type="button" class="btn-ghost" id="rClear">Очистити</button>
     </div>
     <div class="toast" id="rToast" role="status"></div>
@@ -937,9 +938,33 @@
 
   // ── Clinic registration (per-device, localStorage) ───────────────────────
   var KEY="ghClinic";
-  function loadClinic(){ try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;} }
-  function saveClinicRec(o){ try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){} }
-  function clearClinicRec(){ try{localStorage.removeItem(KEY);}catch(e){} }
+  function loadClinic(){
+    var raw=null;
+    try{ raw=localStorage.getItem(KEY); }catch(e){}
+    if(!raw) raw=ckGet(KEY);                 // сховище стерли / інший вбудований браузер
+    try{ return JSON.parse(raw||"null"); }catch(e){ return null; }
+  }
+  function saveClinicRec(o){
+    var s=JSON.stringify(o);
+    try{ localStorage.setItem(KEY,s); }catch(e){}
+    ckSet(KEY,s,365);                        // дубль у cookie на рік
+  }
+  function clearClinicRec(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    ckSet(KEY,"",-1);
+  }
+
+  // Особисте посилання: #c=<base64> одразу реєструє клініку на цьому пристрої.
+  (function(){
+    var h=String(location.hash||"");
+    var m=h.match(/[#&]c=([^&]+)/);
+    if(!m) return;
+    var o=null; try{ o=JSON.parse(b64dec(m[1])); }catch(e){}
+    if(o && o.clinic){
+      saveClinicRec(o);
+      try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+    }
+  })();
   function applyClinic(c){
     if(!c) return;
     if(c.clinic) $("#clinic").value=c.clinic;
@@ -998,6 +1023,23 @@
     t.textContent="Збережено. Дані підставлятимуться в кожен наряд."; t.className="toast show ok";
     setTimeout(function(){ showView("order"); },800);
   });
+  var elLink=$("#rLink");
+  if(elLink) elLink.addEventListener("click",function(){
+    var c=loadClinic();
+    var t=$("#rToast");
+    if(!(c&&c.clinic&&c.doctor)){
+      t.textContent="Спершу збережіть реєстрацію."; t.className="toast show err"; return;
+    }
+    var url=location.origin+location.pathname+"#c="+b64enc(JSON.stringify(c));
+    var done=function(){
+      t.textContent="Посилання скопійовано. Збережіть його — воно саме заповнює наряд на будь-якому пристрої.";
+      t.className="toast show ok";
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done,function(){ window.prompt("Скопіюйте посилання:",url); });
+    } else { window.prompt("Скопіюйте посилання:",url); }
+  });
+
   $("#rClear").addEventListener("click",function(){
     clearClinicRec(); 
     $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";

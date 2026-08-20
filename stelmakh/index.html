@@ -468,17 +468,6 @@
       <button type="button" class="btn-ghost" id="rClear">Очистити</button>
     </div>
     <div class="toast" id="rToast" role="status"></div>
-    <div id="rMyLink" hidden style="margin-top:14px;padding:12px 14px;border:1px solid #e2e2e2;border-radius:8px;background:#fafafa;">
-      <div style="font-size:13px;color:#555;margin-bottom:6px;">
-        <b>Ваше особисте посилання.</b> Звичайне посилання на наряд нічого не памʼятає
-        на новому пристрої — памʼять живе в браузері, де ви реєструвались.
-        Це посилання несе реєстрацію в собі: збережіть його собі (закладка,
-        закріплене повідомлення) і відкривайте наряд саме з нього — на будь-якому
-        пристрої форма буде вже заповнена.
-      </div>
-      <input id="rMyLinkVal" type="text" readonly
-             style="width:100%;font-size:12px;padding:8px;border:1px solid #ddd;border-radius:6px;background:#fff;">
-    </div>
   </section>
 
   <section id="viewHistory" class="body view" data-view="history" hidden>
@@ -1479,7 +1468,7 @@
     if(c){ $("#rClinic").value=c.clinic||""; $("#rDoctor").value=c.doctor||"";
            $("#rPhone").value=c.phone||""; $("#rEmail").value=c.email||"";
            applyClinic(c); }
-    refreshBanner(); refreshLock(); showMyLink(c);
+    refreshBanner(); refreshLock();
     var go=$("#lockGo");
     if(go) go.addEventListener("click",function(){ showView("register"); });
   })();
@@ -1488,16 +1477,10 @@
            phone:($("#rPhone").value||"").trim(),email:($("#rEmail").value||"").trim()};
     var t=$("#rToast");
     if(!o.clinic||!o.doctor){ t.textContent="Вкажіть клініку та лікаря."; t.className="toast show err"; return; }
-    saveClinicRec(o); applyClinic(o); refreshBanner(); refreshLock(); showMyLink(o);
+    saveClinicRec(o); applyClinic(o); refreshBanner(); refreshLock();
     t.textContent="Збережено. Дані підставлятимуться в кожен наряд."; t.className="toast show ok";
     setTimeout(function(){ showView("order"); },800);
   });
-  function showMyLink(c){
-    var box=$("#rMyLink"), inp=$("#rMyLinkVal");
-    if(!box||!inp||!c||!c.clinic) return;
-    inp.value=location.origin+location.pathname+"#c="+b64enc(JSON.stringify(c));
-    box.hidden=false;
-  }
   var elLink=$("#rLink");
   if(elLink) elLink.addEventListener("click",function(){
     var c=loadClinic();
@@ -1505,7 +1488,6 @@
     if(!(c&&c.clinic&&c.doctor)){
       t.textContent="Спершу збережіть реєстрацію."; t.className="toast show err"; return;
     }
-    showMyLink(c);
     var url=location.origin+location.pathname+"#c="+b64enc(JSON.stringify(c));
     var done=function(){
       t.textContent="Посилання скопійовано. Збережіть його — воно саме заповнює наряд на будь-якому пристрої.";
@@ -1520,7 +1502,6 @@
     clearClinicRec(); 
     $("#rClinic").value=""; $("#rDoctor").value=""; $("#rPhone").value=""; $("#rEmail").value="";
     refreshBanner(); refreshLock();
-    var box=$("#rMyLink"); if(box) box.hidden=true;
     var t=$("#rToast"); t.textContent="Реєстрацію очищено."; t.className="toast show";
   });
 

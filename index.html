@@ -938,6 +938,20 @@
   })();
 
   // ── Clinic registration (per-device, localStorage) ───────────────────────
+  // Cookie duplicate: some in-app browsers (Telegram, Instagram) hand out a
+  // localStorage that is wiped the moment the webview closes, while cookies
+  // survive. Whichever of the two still holds the record wins on load.
+  function ckSet(name, val, days){
+    var d=new Date(); d.setTime(d.getTime()+days*864e5);
+    try{ document.cookie=name+"="+encodeURIComponent(val)+";expires="+d.toUTCString()+";path=/;SameSite=Lax"; }catch(e){}
+  }
+  function ckGet(name){
+    var m=String(document.cookie||"").match(new RegExp("(?:^|; )"+name+"=([^;]*)"));
+    return m?decodeURIComponent(m[1]):null;
+  }
+  function b64enc(s){ try{ return btoa(unescape(encodeURIComponent(s))).replace(/=+$/,""); }catch(e){ return ""; } }
+  function b64dec(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return ""; } }
+
   var KEY="ghClinic";
   function loadClinic(){
     var raw=null;

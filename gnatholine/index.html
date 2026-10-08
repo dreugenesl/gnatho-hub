@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><title>GnathoLine — GnathoHUB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="GnathoHUB — функціональна стоматологія: капи, GnathoLine, IOScan Transfer, функціональні реабілітації. Спільний проєкт зі Stelmakh LAB.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+</head><body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="../"><b>Gnatho</b><b>HUB</b></a>
+    <nav id="nav" aria-label="Sections"><a href="../about/" lang-ua>Про нас</a><a href="../about/" lang-en>About</a><a href="../directions/" lang-ua>Напрямки</a><a href="../directions/" lang-en>Directions</a><a href="../gnatholine/" aria-current="page">GnathoLine</a><a href="../ioscan-transfer/">IOScan Transfer</a><a href="../materials/" lang-ua>Корисні матеріали</a><a href="../materials/" lang-en>Materials</a><a href="../contacts/" lang-ua>Контакти</a><a href="../contacts/" lang-en>Contacts</a></nav>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-ua" aria-pressed="true">UA</button>
+        <button type="button" id="lang-en" aria-pressed="false">EN</button>
+      </div>
+      <button class="menu-btn" id="menu" type="button" aria-expanded="false" aria-controls="nav">Меню</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><div class="wrap">
+  <h1 lang-ua>GnathoLine</h1><h1 lang-en>GnathoLine</h1>
+  <p lang-ua>Артикулятор пацієнта, зібраний зі сканів, які ви вже робите.</p><p lang-en>The patient's articulator, built from the scans you already take.</p>
+</div></div><section class="band dark" id="gnatholine">
+    <div class="wrap">
+      <div class="gl">
+        <div>
+          <p class="lead" lang-ua>GnathoLine монтує інтраоральні скани у віртуальний артикулятор на шарнірній осі пацієнта, задає суглобові шляхи за реєстратами прикусу або записами рухів і показує оклюзійні контакти наживо, поки щелепа рухається. КПКТ, записи рухів і лабораторні кейси працюють у тій самій сцені. Кожен модуль — окремий робочий процес зі своїм завантаженням, інструментами та експортом; меші передаються між модулями без повторного імпорту.</p>
+          <p class="lead" lang-en>GnathoLine mounts intraoral scans in a virtual articulator on the patient's own hinge axis, sets the condylar guidance from bite registrations or recorded movements, and shows occlusal contacts live while the jaw moves. CBCT, motion recordings and lab cases work in the same scene. Each module is a self-contained workflow with its own loading, tools and export; meshes pass between modules without re-import.</p>
+          <dl class="facts">
+            <div><dt lang-ua>Платформи</dt><dt lang-en>Platforms</dt><dd lang-ua>macOS (Apple Silicon), Windows 10/11</dd><dd lang-en>macOS (Apple Silicon), Windows 10/11</dd></div>
+            <div><dt lang-ua>Скани</dt><dt lang-en>Scans</dt><dd>PLY · OBJ · STL</dd></div>
+            <div><dt lang-ua>КПКТ</dt><dt lang-en>CBCT</dt><dd lang-ua>DICOM, сегментація локально</dd><dd lang-en>DICOM, segmentation runs locally</dd></div>
+            <div><dt lang-ua>Рухи щелепи</dt><dt lang-en>Jaw motion</dt><dd>Modjaw · Zebris · Itaka · Medit</dd></div>
+            <div><dt lang-ua>Кондилографія</dt><dt lang-en>Condylography</dt><dd>Cadiax PDF</dd></div>
+            <div><dt lang-ua>Статус</dt><dt lang-en>Status</dt><dd lang-ua>Пілотні ліцензії, Україна · комерційний випуск — I квартал 2027</dd><dd lang-en>Pilot licences, Ukraine · commercial release Q1 2027</dd></div>
+          </dl>
+        </div>
+        <div class="mods">
+          <div class="mod"><span class="dot" style="background:var(--m2)"></span><div><b>IOScan Transfer</b><span lang-ua>монтаж, SCI/Беннет, контакти, рухи, звіт</span><span lang-en>mounting, SCI/Bennett, contacts, movements, report</span></div></div>
+          <div class="mod"><span class="dot" style="background:var(--m6)"></span><div><b lang-ua>КТ</b><b lang-en>CT</b><span lang-ua>DICOM, ШІ-сегментація, суміщення зі сканом</span><span lang-en>DICOM, AI segmentation, registration to scans</span></div></div>
+          <div class="mod"><span class="dot" style="background:var(--m3)"></span><div><b>Jaw Movement</b><span lang-ua>відтворення записаних рухів зі слідами</span><span lang-en>playback of recorded motion with traces</span></div></div>
+          <div class="mod"><span class="dot" style="background:var(--m7)"></span><div><b>Splint</b><span lang-ua>дизайн капи на змонтованому кейсі</span><span lang-en>splint design on the mounted case</span></div></div>
+          <div class="mod"><span class="dot" style="background:#9b59b6"></span><div><b>CADIAX</b><span lang-ua>імпорт звітів кондилографії</span><span lang-en>condylography report import</span></div></div>
+          <div class="mod"><span class="dot" style="background:var(--m1)"></span><div><b>Curve of Spee &amp; Wilson</b><span lang-ua>компенсаційні криві, орієнтири</span><span lang-en>compensating curves, landmarks</span></div></div>
+          <div class="mod"><span class="dot" style="background:var(--m8)"></span><div><b lang-ua>Імпорт кейсу</b><b lang-en>Case Import</b><span lang-ua>перегляд кейсів інших CAD-систем</span><span lang-en>viewer for other CAD systems' cases</span></div></div>
+          <div class="mod"><span class="dot" style="background:var(--m5)"></span><div><b>AxioDentograph Line</b><span lang-ua>електронна аксіографія · у розробці</span><span lang-en>electronic axiography · in development</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section><section class="band light"><div class="wrap">
+  <div class="head"><h2 lang-ua>Дані</h2><h2 lang-en>Data</h2><p lang-ua>Що заходить і що виходить.</p><p lang-en>What goes in, what comes out.</p></div>
+  <div class="tbl"><table>
+    <tr><th lang-ua>Інтраоральні скани</th><th lang-en>Intraoral scans</th><td lang-ua>PLY та OBJ із текстурою, STL. Теки експорту Medit розпізнаються автоматично.</td><td lang-en>PLY and OBJ with texture, STL. Medit export folders are recognised automatically.</td></tr>
+    <tr><th lang-ua>КПКТ</th><th lang-en>CBCT</th><td lang-ua>Серії DICOM; сегментація виконується локально вбудованим рантаймом, без хмари.</td><td lang-en>DICOM series; segmentation runs locally with an embedded runtime, no cloud upload.</td></tr>
+    <tr><th lang-ua>Рухи щелепи</th><th lang-en>Jaw motion</th><td lang-ua>Експорти записів Modjaw, Zebris, Itaka, Medit.</td><td lang-en>Modjaw, Zebris, Itaka and Medit recording exports.</td></tr>
+    <tr><th lang-ua>Кондилографія</th><th lang-en>Condylography</th><td lang-ua>PDF-звіти Cadiax.</td><td lang-en>Cadiax PDF reports.</td></tr>
+    <tr><th lang-ua>Лабораторні кейси</th><th lang-en>Lab cases</th><td lang-ua>Експорти веб-переглядача сторонніх стоматологічних CAD-систем.</td><td lang-en>Web-viewer exports of third-party dental CAD systems.</td></tr>
+    <tr><th lang-ua>Результат</th><th lang-en>Output</th><td lang-ua>Змонтовані щелепи у STL/PLY у системі координат артикулятора, налаштування артикулятора, PDF-звіти, тіла кап, пакет кейсу для лабораторії, вивантаження в систему обліку клініки.</td><td lang-en>Mounted jaws as STL/PLY in the articulator coordinate system, articulator settings, PDF reports, splint solids, a case package for the lab, upload to the clinic's record system.</td></tr>
+    <tr><th lang-ua>Платформи</th><th lang-en>Platforms</th><td lang-ua>macOS (Apple Silicon) і Windows 10/11 64-біт. Офлайн-інсталятори; ШІ-сегментація використовує GPU на картах NVIDIA та Apple Silicon, є запасний режим на CPU.</td><td lang-en>macOS (Apple Silicon) and Windows 10/11 64-bit. Offline installers; AI segmentation uses the GPU on NVIDIA cards and Apple Silicon, with CPU fallback.</td></tr>
+    <tr><th lang-ua>Доступність</th><th lang-en>Availability</th><td lang-ua>Пілотні ліцензії на робоче місце в Україні; оцінна збірка з обмеженим терміном для клінік і лабораторій. Комерційний випуск планується на I квартал 2027 року: спочатку Україна, потім ЄС.</td><td lang-en>Pilot per-workstation licences in Ukraine; a time-limited evaluation build for clinics and labs. Commercial release planned for Q1 2027, Ukraine first, then the EU.</td></tr>
+  </table></div>
+</div></section>
+</main>
+<footer>
+    <div class="wrap">
+      <p class="tag" lang-ua>Ми відтворюємо функцію</p><p class="tag" lang-en>We restore function</p>
+      <p>© 2026 GnathoHUB · Stelmakh LAB</p>
+      <p lang-ua>Medit, Artex, Amann Girrbach, GAMMA, Cadiax, Modjaw, Zebris, Itaka та exocad — торгові марки їхніх власників; назви вжито лише для опису сумісності файлів. GnathoHUB не пов'язаний із цими компаніями. GnathoLine — інструмент планування й аналізу для стоматологів; він не замінює клінічного рішення.</p>
+      <p lang-en>Medit, Artex, Amann Girrbach, GAMMA, Cadiax, Modjaw, Zebris, Itaka and exocad are trademarks of their respective owners; the names are used only to describe file compatibility. GnathoHUB is not affiliated with these companies. GnathoLine is a planning and analysis tool for dental professionals; it does not replace clinical judgement.</p>
+    </div>
+  </footer>
+<script src="../assets/site.js"></script>
+</body></html>

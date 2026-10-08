@@ -1,169 +1,25 @@
 <!doctype html>
-<html lang="uk"><head><meta charset="utf-8"><title>GnathoHUB</title><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="GnathoHUB — функціональна стоматологія: капи, GnathoLine, IOScan Transfer, функціональні реабілітації. Спільний проєкт зі Stelmakh LAB."><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
-<title>GnathoHUB</title>
+<html lang="uk"><head><meta charset="utf-8"><title>GnathoHUB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="GnathoHUB — функціональна стоматологія: капи, GnathoLine, IOScan Transfer, функціональні реабілітації. Спільний проєкт зі Stelmakh LAB.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
-<style>
-/* Layout: the Stelmakh LAB one-pager format — full-width bands that alternate
-   white / light grey / charcoal, anchor navigation, big uppercase headings,
-   geometric sans (Gilroy there, Manrope here). Monochrome; module colours only as marks. */
-:root{
-  --bg:#ffffff; --bg-2:#edf0f4; --dark:#262a30; --dark-2:#1a1d21; --ink:#262a30; --ink-2:#4b4e54; --ink-3:#72767b;
-  --on-dark:#ffffff; --on-dark-2:#b7bcc4; --rule:#d7dce3; --rule-dark:rgba(255,255,255,.14);
-  --m1:#1e6bc5; --m2:#27ae60; --m3:#e67e22; --m5:#16a085; --m6:#00acc1; --m7:#6a5acd; --m8:#d4a017;
-  --sans:Manrope,"Gilroy",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#15171a; --bg-2:#1d2024; --dark:#0f1113; --dark-2:#0b0c0e; --ink:#eceef1; --ink-2:#b9bec6; --ink-3:#848a93;
-  --rule:#2c3137; color-scheme:dark } }
-:root[data-theme="dark"]{
-  --bg:#15171a; --bg-2:#1d2024; --dark:#0f1113; --dark-2:#0b0c0e; --ink:#eceef1; --ink-2:#b9bec6; --ink-3:#848a93;
-  --rule:#2c3137; color-scheme:dark }
-
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1140px;margin:0 auto;padding-inline:20px;padding-block:0}
-a{color:inherit;text-decoration:none}
-a:hover,a:focus-visible{text-decoration:underline}
-:focus-visible{outline:2px solid currentColor;outline-offset:3px}
-h1,h2,h3{margin:0;font-weight:700;letter-spacing:-0.01em;text-wrap:balance}
-h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.08;text-transform:uppercase;font-weight:800}
-h2{font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.15;text-transform:uppercase}
-h3{font-size:1.1rem;line-height:1.3}
-p{margin:0}
-.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
-.dark .eyebrow{color:var(--on-dark-2)}
-[lang-ua]{display:none}
-html[data-lang="ua"] [lang-en]{display:none}
-html[data-lang="ua"] [lang-ua]{display:revert}
-
-/* bands */
-.band{padding-block:96px;border-bottom:1px solid var(--rule)}
-.band.grey{background:var(--bg-2)}
-.band.dark{background:var(--dark);color:var(--on-dark);border-bottom:0}
-.band.dark .muted{color:var(--on-dark-2)}
-.muted{color:var(--ink-2)}
-.head{text-align:center;max-width:46em;margin:0 auto 48px}
-.head p{margin-top:14px;color:var(--ink-2);font-size:1.05rem}
-.dark .head p{color:var(--on-dark-2)}
-
-/* header */
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--dark);color:var(--on-dark)}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
-.brand{font-weight:800;font-size:1.3rem;letter-spacing:.02em}
-.brand b{font-weight:800;color:#fff}
-.brand span{font-weight:500;color:var(--on-dark-2)}
-nav{display:flex;gap:22px;flex-wrap:wrap;font-size:.92rem;font-weight:600}
-nav a{color:var(--on-dark-2)}
-nav a:hover{color:#fff;text-decoration:none}
-.lang{display:flex;border:1px solid var(--rule-dark);border-radius:999px;overflow:hidden;font-family:var(--mono);font-size:.72rem}
-.lang button{all:unset;cursor:pointer;padding:5px 11px;color:var(--on-dark-2)}
-.lang button[aria-pressed="true"]{background:#fff;color:var(--dark)}
-
-/* hero */
-.hero{background:var(--dark-2);color:var(--on-dark);padding-block:72px 64px}
-.hero .top{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
-.hero h1{color:#fff}
-.hero .lede{margin-top:18px;font-size:1.1rem;color:var(--on-dark-2);max-width:32em}
-.hero .cta{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-block;padding:12px 20px;border-radius:6px;font-weight:700;font-size:.95rem;border:1px solid #fff;color:#fff}
-.btn.solid{background:#fff;color:var(--dark-2)}
-.btn:hover{text-decoration:none;opacity:.9}
-.light .btn{border-color:var(--ink);color:var(--ink)}
-.light .btn.solid{background:var(--ink);color:var(--bg)}
-.pillars{margin-top:64px;display:grid;grid-template-columns:repeat(4,1fr);gap:28px;border-top:1px solid var(--rule-dark);padding-top:36px}
-.pillar b{display:block;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:#fff}
-.pillar span{display:block;margin-top:6px;color:var(--on-dark-2);font-size:.95rem}
-.fig svg{display:block;width:100%;height:auto;max-width:100%}
-
-/* directions */
-.dirs{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
-.dir{background:var(--bg);border-radius:10px;padding:28px 28px 24px;display:flex;flex-direction:column;gap:12px;min-width:0;box-shadow:0 1px 0 var(--rule)}
-.grey .dir{background:var(--bg)}
-.dir .num{font-family:var(--mono);font-size:.75rem;color:var(--ink-3)}
-.dir h3{font-size:1.45rem;text-transform:uppercase;font-weight:800}
-.dir p{color:var(--ink-2)}
-.dir ul{margin:4px 0 0;padding-left:18px;color:var(--ink-2)}
-.dir li+li{margin-top:4px}
-.dir .more{margin-top:auto;padding-top:10px;font-weight:700;font-size:.92rem}
-.dir .more::after{content:" →"}
-
-/* GnathoLine section */
-.gl{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}
-.gl .lead{font-size:1.15rem;line-height:1.5}
-.gl .facts{margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px 24px}
-.gl .facts div{min-width:0}
-.gl .facts dt{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--on-dark-2);margin-bottom:3px}
-.gl .facts dd{margin:0;font-weight:600}
-.mods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mod{display:flex;gap:10px;align-items:flex-start;padding:12px 12px 12px 0;border-top:1px solid var(--rule-dark);min-width:0}
-.mod .dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:8px}
-.mod b{display:block;font-weight:700}
-.mod span{display:block;font-size:.86rem;color:var(--on-dark-2);margin-top:2px}
-
-/* steps */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;counter-reset:s}
-.step{border-top:3px solid var(--ink);padding-top:14px}
-.step::before{counter-increment:s;content:"0" counter(s);font-family:var(--mono);font-size:.75rem;color:var(--ink-3);display:block;margin-bottom:8px}
-.step h3{font-size:1.05rem;text-transform:uppercase;font-weight:800}
-.step p{margin-top:8px;color:var(--ink-2);font-size:.95rem}
-
-/* materials */
-.mats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.mat{background:var(--bg);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 0 var(--rule)}
-.mat h3{font-size:1rem;text-transform:uppercase}
-.mat p{color:var(--ink-2);font-size:.92rem}
-.mat a.go{margin-top:auto;padding-top:8px;font-weight:700;font-size:.92rem}
-.mat a.go::after{content:" →"}
-
-/* contacts */
-.contacts{display:grid;grid-template-columns:1fr 1fr;gap:40px}
-.contacts h2{text-align:left}
-.cline{display:flex;flex-direction:column;gap:14px;margin-top:18px}
-.cline .k{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--on-dark-2)}
-.cline .v{font-size:1.1rem;font-weight:600;user-select:all;word-break:break-word}
-.copy{all:unset;cursor:pointer;border:1px solid var(--rule-dark);border-radius:6px;padding:7px 12px;font-size:.85rem;color:var(--on-dark-2);width:max-content}
-.copy:hover{color:#fff;border-color:#fff}
-footer{background:var(--dark-2);color:var(--on-dark-2);padding-block:28px 40px;font-size:.8rem}
-footer p+p{margin-top:8px}
-footer .tag{font-weight:800;color:#fff;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
-
-@media (max-width:900px){
-  .pillars{grid-template-columns:repeat(2,1fr)}
-  .gl{grid-template-columns:1fr}
-  .steps{grid-template-columns:repeat(2,1fr)}
-  .mats{grid-template-columns:1fr 1fr}
-}
-@media (max-width:640px){
-  .band{padding-block:64px}
-  .hero{padding-block:48px 44px}
-  .hero .top{grid-template-columns:1fr;gap:28px}
-  .pillars{grid-template-columns:1fr;gap:18px;margin-top:40px}
-  .dirs,.steps,.mats,.contacts,.mods,.gl .facts{grid-template-columns:1fr}
-  nav{display:none}
-}
-</style>
-
+<link rel="stylesheet" href="assets/site.css">
+</head><body>
 <header>
   <div class="wrap bar">
-    <a class="brand" href="#top"><b>Gnatho</b><b>HUB</b></a>
-    <nav aria-label="Sections">
-      <a href="#about" lang-en>About</a><a href="#about" lang-ua>Про нас</a>
-      <a href="#directions" lang-en>Directions</a><a href="#directions" lang-ua>Напрямки</a>
-      <a href="#gnatholine">GnathoLine</a>
-      <a href="#transfer">IOScan Transfer</a>
-      <a href="#materials" lang-en>Materials</a><a href="#materials" lang-ua>Корисні матеріали</a>
-      <a href="#contacts" lang-en>Contacts</a><a href="#contacts" lang-ua>Контакти</a>
-    </nav>
-    <div class="lang" role="group" aria-label="Language">
-      <button type="button" id="lang-ua" aria-pressed="true">UA</button>
-      <button type="button" id="lang-en" aria-pressed="false">EN</button>
+    <a class="brand" href="./"><b>Gnatho</b><b>HUB</b></a>
+    <nav id="nav" aria-label="Sections"><a href="about/" lang-ua>Про нас</a><a href="about/" lang-en>About</a><a href="directions/" lang-ua>Напрямки</a><a href="directions/" lang-en>Directions</a><a href="gnatholine/">GnathoLine</a><a href="ioscan-transfer/">IOScan Transfer</a><a href="materials/" lang-ua>Корисні матеріали</a><a href="materials/" lang-en>Materials</a><a href="contacts/" lang-ua>Контакти</a><a href="contacts/" lang-en>Contacts</a></nav>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-ua" aria-pressed="true">UA</button>
+        <button type="button" id="lang-en" aria-pressed="false">EN</button>
+      </div>
+      <button class="menu-btn" id="menu" type="button" aria-expanded="false" aria-controls="nav">Меню</button>
     </div>
   </div>
 </header>
-
-<main id="top">
-  <div class="hero">
+<main>
+<div class="hero">
     <div class="wrap">
       <div class="top">
         <div>
@@ -174,8 +30,8 @@ footer .tag{font-weight:800;color:#fff;letter-spacing:.08em;text-transform:upper
           <p class="lede" lang-ua>GnathoHUB об'єднує лікаря, лабораторію та програмне забезпечення навколо одного: оклюзії, побудованої в артикуляторі пацієнта. Капи, монтаж за інтраоральним сканом, функціональні реабілітації та GnathoLine — у спільному проєкті зі Stelmakh LAB.</p>
           <p class="lede" lang-en>GnathoHUB brings the clinician, the laboratory and the software together around one thing: occlusion built in the patient's own articulator. Splints, mounting from intraoral scans, functional rehabilitations and GnathoLine, in a joint project with Stelmakh LAB.</p>
           <div class="cta">
-            <a class="btn solid" href="#directions" lang-ua>Напрямки</a><a class="btn solid" href="#directions" lang-en>Directions</a>
-            <a class="btn" href="#gnatholine" lang-ua>Програма GnathoLine</a><a class="btn" href="#gnatholine" lang-en>GnathoLine software</a>
+            <a class="btn solid" href="directions/" lang-ua>Напрямки</a><a class="btn solid" href="directions/" lang-en>Directions</a>
+            <a class="btn" href="gnatholine/" lang-ua>Програма GnathoLine</a><a class="btn" href="gnatholine/" lang-en>GnathoLine software</a>
           </div>
         </div>
         <figure class="fig">
@@ -217,9 +73,15 @@ footer .tag{font-weight:800;color:#fff;letter-spacing:.08em;text-transform:upper
         <div class="pillar"><b lang-ua>Навчання</b><b lang-en>Teaching</b><span lang-ua>курси й майстер-класи з функціональної оклюзії</span><span lang-en>courses and workshops on functional occlusion</span></div>
       </div>
     </div>
+  </div><section class="band grey"><div class="wrap">
+  <div class="head"><h2 lang-ua>Напрямки</h2><h2 lang-en>Directions</h2><p lang-ua>Чотири напрямки, одна методика.</p><p lang-en>Four directions, one method.</p></div>
+  <div class="teasers">
+    <article class="teaser"><h3 lang-ua>Капи</h3><h3 lang-en>Splints</h3><p lang-ua>Консультація в плануванні, моделювання на змонтованому кейсі, фрезерування у Stelmakh LAB.</p><p lang-en>Planning consultation, design on the mounted case, milling at Stelmakh LAB.</p><a href="directions/#splints" lang-ua>Детальніше</a><a href="directions/#splints" lang-en>Read more</a></article>
+    <article class="teaser"><h3>GnathoLine</h3><p lang-ua>Наша програма функціонального аналізу оклюзії для macOS і Windows.</p><p lang-en>Our functional occlusion software for macOS and Windows.</p><a href="gnatholine/" lang-ua>Про програму</a><a href="gnatholine/" lang-en>About the software</a></article>
+    <article class="teaser"><h3>IOScan Transfer</h3><p lang-ua>Монтаж щелеп в артикулятор за інтраоральним сканом — без лицьової дуги та гіпсу.</p><p lang-en>Mounting the jaws in the articulator from an intraoral scan, without face-bow or plaster.</p><a href="ioscan-transfer/" lang-ua>Як це працює</a><a href="ioscan-transfer/" lang-en>How it works</a></article>
+    <article class="teaser"><h3 lang-ua>Функціональні реабілітації</h3><h3 lang-en>Functional rehabilitations</h3><p lang-ua>Планування і супровід реабілітацій зі зміною висоти прикусу чи оклюзійної схеми.</p><p lang-en>Planning and support of rehabilitations that change the vertical dimension or the occlusal scheme.</p><a href="directions/#rehab" lang-ua>Детальніше</a><a href="directions/#rehab" lang-en>Read more</a></article>
   </div>
-
-  <section class="band light" id="about">
+</div></section><section class="band light" id="about">
     <div class="wrap">
       <div class="head">
         <h2 lang-ua>Про нас</h2><h2 lang-en>About</h2>
@@ -228,168 +90,8 @@ footer .tag{font-weight:800;color:#fff;letter-spacing:.08em;text-transform:upper
       </div>
     </div>
   </section>
-
-  <section class="band grey" id="directions">
-    <div class="wrap">
-      <div class="head">
-        <h2 lang-ua>Напрямки</h2><h2 lang-en>Directions</h2>
-        <p lang-ua>Чотири напрямки, одна методика.</p>
-        <p lang-en>Four directions, one method.</p>
-      </div>
-      <div class="dirs">
-        <article class="dir" id="splints">
-          <span class="num">01</span>
-          <h3 lang-ua>Капи</h3><h3 lang-en>Splints</h3>
-          <p lang-ua>Оклюзійні капи, спроєктовані на змонтованому кейсі пацієнта і виготовлені фрезеруванням у Stelmakh LAB.</p>
-          <p lang-en>Occlusal splints designed on the patient's mounted case and milled at Stelmakh LAB.</p>
-          <ul lang-ua>
-            <li><b>Консультація в плануванні</b> — лікар лікареві: аналіз кейсу в артикуляторі, вибір типу капи, висота й оклюзійна схема.</li>
-            <li><b>Моделювання</b> — дизайн у модулі Splint GnathoLine: посадка з блокуванням піднутрень, стінка сталої товщини, оклюзійний стіл під рухи пацієнта.</li>
-            <li><b>Фрезерування</b> — виготовлення в лабораторії, контроль посадки й оклюзії за цифровою моделлю.</li>
-          </ul>
-          <ul lang-en>
-            <li><b>Planning consultation</b> — clinician to clinician: case analysis in the articulator, choice of splint type, vertical dimension and occlusal scheme.</li>
-            <li><b>Design</b> — in the GnathoLine Splint module: blocked-out seating, uniform wall, occlusal table adapted to the patient's movements.</li>
-            <li><b>Milling</b> — manufactured at the laboratory, fit and occlusion checked against the digital model.</li>
-          </ul>
-          <a class="more" href="#contacts" lang-ua>Замовити капу</a><a class="more" href="#contacts" lang-en>Order a splint</a>
-        </article>
-        <article class="dir">
-          <span class="num">02</span>
-          <h3>GnathoLine</h3>
-          <p lang-ua>Наша програма функціонального аналізу оклюзії: віртуальний артикулятор на шарнірній осі пацієнта, контакти наживо під час руху, КПКТ із ШІ-сегментацією, записи рухів щелепи, дизайн кап.</p>
-          <p lang-en>Our functional occlusion software: a virtual articulator on the patient's hinge axis, live contacts during movement, CBCT with AI segmentation, jaw-motion recordings, splint design.</p>
-          <ul lang-ua><li>macOS і Windows, офлайн-інсталятори</li><li>Вісім модулів в одній сцені</li><li>Ліцензії на робоче місце, оцінна збірка для клінік і лабораторій</li></ul>
-          <ul lang-en><li>macOS and Windows, offline installers</li><li>Eight modules in one scene</li><li>Per-workstation licences, evaluation build for clinics and labs</li></ul>
-          <a class="more" href="#gnatholine" lang-ua>Про програму</a><a class="more" href="#gnatholine" lang-en>About the software</a>
-        </article>
-        <article class="dir">
-          <span class="num">03</span>
-          <h3>IOScan Transfer</h3>
-          <p lang-ua>Система перенесення положення щелеп в артикулятор без лицьової дуги та гіпсу: трансферна планка, яку сканують у роті інтраоральним сканером, протокол сканування й монтаж одним кліком у GnathoLine.</p>
-          <p lang-en>A system for transferring the jaw position into the articulator without a face-bow or plaster: a transfer plate scanned in the mouth with the intraoral scanner, a scanning protocol, and one-click mounting in GnathoLine.</p>
-          <ul lang-ua><li>Геометрія планок Artex і GAMMA SL</li><li>Реєстрати прикусу задають нахил суглобового шляху і кут Беннета</li><li>Для клінік зі сканерами Medit і іншими системами з експортом PLY/OBJ/STL</li></ul>
-          <ul lang-en><li>Artex and GAMMA SL plate geometry</li><li>Check-bites set condylar inclination and Bennett</li><li>For clinics with Medit scanners and other systems exporting PLY/OBJ/STL</li></ul>
-          <a class="more" href="#transfer" lang-ua>Як це працює</a><a class="more" href="#transfer" lang-en>How it works</a>
-        </article>
-        <article class="dir" id="rehab">
-          <span class="num">04</span>
-          <h3 lang-ua>Функціональні реабілітації</h3><h3 lang-en>Functional rehabilitations</h3>
-          <p lang-ua>Планування і супровід комплексних реабілітацій, де змінюється висота прикусу або оклюзійна схема: діагностика в артикуляторі пацієнта, етап кап, перенесення перевіреної оклюзії у тимчасові й постійні реставрації разом із лабораторією.</p>
-          <p lang-en>Planning and support of comprehensive rehabilitations where the vertical dimension or the occlusal scheme changes: diagnosis in the patient's articulator, a splint stage, and transfer of the verified occlusion into provisional and final restorations together with the laboratory.</p>
-          <ul lang-ua><li>Діагностика з КПКТ і записом рухів щелепи</li><li>Терапевтична позиція, перевірена капою</li><li>Спільне ведення кейсу лікар — лабораторія</li></ul>
-          <ul lang-en><li>Diagnosis with CBCT and recorded jaw motion</li><li>Therapeutic position verified with a splint</li><li>Joint clinician–laboratory case management</li></ul>
-          <a class="more" href="#contacts" lang-ua>Обговорити кейс</a><a class="more" href="#contacts" lang-en>Discuss a case</a>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="band dark" id="gnatholine">
-    <div class="wrap">
-      <div class="head">
-        <p class="eyebrow" lang-ua>Програмне забезпечення</p><p class="eyebrow" lang-en>Software</p>
-        <h2>GnathoLine</h2>
-        <p lang-ua>Артикулятор пацієнта, зібраний зі сканів, які ви вже робите.</p>
-        <p lang-en>The patient's articulator, built from the scans you already take.</p>
-      </div>
-      <div class="gl">
-        <div>
-          <p class="lead" lang-ua>GnathoLine монтує інтраоральні скани у віртуальний артикулятор на шарнірній осі пацієнта, задає суглобові шляхи за реєстратами прикусу або записами рухів і показує оклюзійні контакти наживо, поки щелепа рухається. КПКТ, записи рухів і лабораторні кейси працюють у тій самій сцені. Кожен модуль — окремий робочий процес зі своїм завантаженням, інструментами та експортом; меші передаються між модулями без повторного імпорту.</p>
-          <p class="lead" lang-en>GnathoLine mounts intraoral scans in a virtual articulator on the patient's own hinge axis, sets the condylar guidance from bite registrations or recorded movements, and shows occlusal contacts live while the jaw moves. CBCT, motion recordings and lab cases work in the same scene. Each module is a self-contained workflow with its own loading, tools and export; meshes pass between modules without re-import.</p>
-          <dl class="facts">
-            <div><dt lang-ua>Платформи</dt><dt lang-en>Platforms</dt><dd lang-ua>macOS (Apple Silicon), Windows 10/11</dd><dd lang-en>macOS (Apple Silicon), Windows 10/11</dd></div>
-            <div><dt lang-ua>Скани</dt><dt lang-en>Scans</dt><dd>PLY · OBJ · STL</dd></div>
-            <div><dt lang-ua>КПКТ</dt><dt lang-en>CBCT</dt><dd lang-ua>DICOM, сегментація локально</dd><dd lang-en>DICOM, segmentation runs locally</dd></div>
-            <div><dt lang-ua>Рухи щелепи</dt><dt lang-en>Jaw motion</dt><dd>Modjaw · Zebris · Itaka · Medit</dd></div>
-            <div><dt lang-ua>Кондилографія</dt><dt lang-en>Condylography</dt><dd>Cadiax PDF</dd></div>
-            <div><dt lang-ua>Статус</dt><dt lang-en>Status</dt><dd lang-ua>Пілотні ліцензії, Україна · комерційний випуск — I квартал 2027</dd><dd lang-en>Pilot licences, Ukraine · commercial release Q1 2027</dd></div>
-          </dl>
-        </div>
-        <div class="mods">
-          <div class="mod"><span class="dot" style="background:var(--m2)"></span><div><b>IOScan Transfer</b><span lang-ua>монтаж, SCI/Беннет, контакти, рухи, звіт</span><span lang-en>mounting, SCI/Bennett, contacts, movements, report</span></div></div>
-          <div class="mod"><span class="dot" style="background:var(--m6)"></span><div><b lang-ua>КТ</b><b lang-en>CT</b><span lang-ua>DICOM, ШІ-сегментація, суміщення зі сканом</span><span lang-en>DICOM, AI segmentation, registration to scans</span></div></div>
-          <div class="mod"><span class="dot" style="background:var(--m3)"></span><div><b>Jaw Movement</b><span lang-ua>відтворення записаних рухів зі слідами</span><span lang-en>playback of recorded motion with traces</span></div></div>
-          <div class="mod"><span class="dot" style="background:var(--m7)"></span><div><b>Splint</b><span lang-ua>дизайн капи на змонтованому кейсі</span><span lang-en>splint design on the mounted case</span></div></div>
-          <div class="mod"><span class="dot" style="background:#9b59b6"></span><div><b>CADIAX</b><span lang-ua>імпорт звітів кондилографії</span><span lang-en>condylography report import</span></div></div>
-          <div class="mod"><span class="dot" style="background:var(--m1)"></span><div><b>Curve of Spee &amp; Wilson</b><span lang-ua>компенсаційні криві, орієнтири</span><span lang-en>compensating curves, landmarks</span></div></div>
-          <div class="mod"><span class="dot" style="background:var(--m8)"></span><div><b lang-ua>Імпорт кейсу</b><b lang-en>Case Import</b><span lang-ua>перегляд кейсів інших CAD-систем</span><span lang-en>viewer for other CAD systems' cases</span></div></div>
-          <div class="mod"><span class="dot" style="background:var(--m5)"></span><div><b>AxioDentograph Line</b><span lang-ua>електронна аксіографія · у розробці</span><span lang-en>electronic axiography · in development</span></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="band light" id="transfer">
-    <div class="wrap">
-      <div class="head">
-        <h2>IOScan Transfer</h2>
-        <p lang-ua>Від сканера до артикулятора за чотири кроки. Без лицьової дуги та гіпсу: планка сканується в роті тим самим сканером, що й щелепи.</p>
-        <p lang-en>From scanner to articulator in four steps. No face-bow and no plaster: the plate is scanned in the mouth with the same scanner as the jaws.</p>
-      </div>
-      <div class="steps">
-        <div class="step"><h3 lang-ua>Сканування</h3><h3 lang-en>Scan</h3>
-          <p lang-ua>Верхня щелепа, нижня, прикус, скан із трансферною планкою і за потреби реєстрати: центральне співвідношення, протрузія, ліва й права латеротрузія.</p>
-          <p lang-en>Upper jaw, lower jaw, bite, a scan with the transfer plate, and optional check-bites: centric relation, protrusion, left and right laterotrusion.</p></div>
-        <div class="step"><h3 lang-ua>Завантаження</h3><h3 lang-en>Load</h3>
-          <p lang-ua>GnathoLine отримує теку експорту, розпізнає скани за роллю і кладе їх у слоти; текстури зберігаються.</p>
-          <p lang-en>GnathoLine takes the export folder, recognises the scans by role and places them into slots; textures are kept.</p></div>
-        <div class="step"><h3 lang-ua>Монтаж</h3><h3 lang-en>Mount</h3>
-          <p lang-ua>Один клік суміщує скан планки з її моделлю і монтує обидві щелепи на шарнірній осі пацієнта. Реєстрати автоматично задають SCI і кут Беннета.</p>
-          <p lang-en>One click matches the plate scan to its model and mounts both jaws on the patient's hinge axis. Check-bites set SCI and Bennett automatically.</p></div>
-        <div class="step"><h3 lang-ua>Аналіз і експорт</h3><h3 lang-en>Analyse and export</h3>
-          <p lang-ua>Рухи, контакти, КТ, капа. Експорт змонтованих STL/PLY, PDF-звіт, пакет кейсу для лабораторії.</p>
-          <p lang-en>Movements, contacts, CT, splint. Export of mounted STL/PLY, a PDF report, a case package for the laboratory.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="band grey" id="materials">
-    <div class="wrap">
-      <div class="head">
-        <h2 lang-ua>Корисні матеріали</h2><h2 lang-en>Materials</h2>
-        <p lang-ua>Форми для співпраці з лабораторією та матеріали для лікарів.</p>
-        <p lang-en>Forms for working with the laboratory and materials for clinicians.</p>
-      </div>
-      <div class="mats">
-        <article class="mat"><h3 lang-ua>Замовлення-наряд GnathoHUB</h3><h3 lang-en>GnathoHUB order form</h3>
-          <p lang-ua>Онлайн-наряд на капу: клініка, пацієнт, тип реєстрації рухів, матеріали на повернення, примітки технікам. Надсилання й PDF.</p>
-          <p lang-en>Online order form for a splint: clinic, patient, type of motion registration, items to return, notes to technicians. Send and PDF.</p>
-          <a class="go" href="https://dreugenesl.github.io/gnatho-hub-nar/" lang-ua>Відкрити форму</a><a class="go" href="https://dreugenesl.github.io/gnatho-hub-nar/" lang-en>Open the form</a></article>
-        <article class="mat"><h3 lang-ua>Замовлення-наряд Stelmakh LAB</h3><h3 lang-en>Stelmakh LAB order form</h3>
-          <p lang-ua>Повний бланк лабораторії із зубною формулою та переліком видів робіт.</p>
-          <p lang-en>The laboratory's full order form with tooth chart and list of work types.</p>
-          <a class="go" href="https://dreugenesl.github.io/gnatho-hub-nar/stelmakh/" lang-ua>Відкрити форму</a><a class="go" href="https://dreugenesl.github.io/gnatho-hub-nar/stelmakh/" lang-en>Open the form</a></article>
-        <article class="mat"><h3 lang-ua>Протокол сканування IOScan Transfer</h3><h3 lang-en>IOScan Transfer scanning protocol</h3>
-          <p lang-ua>Послідовність сканів із планкою та реєстратами для монтажу в GnathoLine. Надсилаємо на запит разом з оцінною збіркою.</p>
-          <p lang-en>The sequence of scans with the plate and check-bites for mounting in GnathoLine. Sent on request together with the evaluation build.</p>
-          <a class="go" href="#contacts" lang-ua>Запросити</a><a class="go" href="#contacts" lang-en>Request</a></article>
-      </div>
-    </div>
-  </section>
-
-  <section class="band dark" id="contacts">
-    <div class="wrap contacts">
-      <div>
-        <h2 lang-ua>Контакти</h2><h2 lang-en>Contacts</h2>
-        <div class="cline">
-          <div><div class="k" lang-ua>GnathoHUB · лікар, GnathoLine, ліцензії, інтеграції</div><div class="k" lang-en>GnathoHUB · clinician, GnathoLine, licences, integrations</div><div class="v" id="mail">dr.eugenesl@gmail.com</div></div>
-          <button class="copy" type="button" id="copy"><span lang-ua>Скопіювати адресу</span><span lang-en>Copy address</span></button>
-          <div><div class="k" lang-ua>Місто</div><div class="k" lang-en>City</div><div class="v" lang-ua>Київ, Україна</div><div class="v" lang-en>Kyiv, Ukraine</div></div>
-        </div>
-      </div>
-      <div>
-        <h2 lang-ua>Лабораторія</h2><h2 lang-en>Laboratory</h2>
-        <div class="cline">
-          <div><div class="k">Stelmakh LAB</div><div class="v"><a href="https://www.stelmakhlab.com/">stelmakhlab.com</a></div></div>
-          <div><div class="k" lang-ua>Адреса</div><div class="k" lang-en>Address</div><div class="v" lang-ua>м. Київ, вул. В. Липківського, 37В, офіс 1001</div><div class="v" lang-en>37V V. Lypkivskoho St., office 1001, Kyiv</div></div>
-          <div><div class="k" lang-ua>Пошта лабораторії</div><div class="k" lang-en>Laboratory e-mail</div><div class="v">admin@stelmakhlab.com</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
+</main>
+<footer>
     <div class="wrap">
       <p class="tag" lang-ua>Ми відтворюємо функцію</p><p class="tag" lang-en>We restore function</p>
       <p>© 2026 GnathoHUB · Stelmakh LAB</p>
@@ -397,32 +99,5 @@ footer .tag{font-weight:800;color:#fff;letter-spacing:.08em;text-transform:upper
       <p lang-en>Medit, Artex, Amann Girrbach, GAMMA, Cadiax, Modjaw, Zebris, Itaka and exocad are trademarks of their respective owners; the names are used only to describe file compatibility. GnathoHUB is not affiliated with these companies. GnathoLine is a planning and analysis tool for dental professionals; it does not replace clinical judgement.</p>
     </div>
   </footer>
-</main>
-
-<script>
-(function(){
-  var root=document.documentElement;
-  var bEn=document.getElementById('lang-en'), bUa=document.getElementById('lang-ua');
-  function setLang(l){
-    if(l==='ua'){root.setAttribute('data-lang','ua');}else{root.removeAttribute('data-lang');l='en';}
-    root.lang = l==='ua'?'uk':'en';
-    bEn.setAttribute('aria-pressed', l==='en'); bUa.setAttribute('aria-pressed', l==='ua');
-    try{localStorage.setItem('gh-lang',l);}catch(e){}
-  }
-  bEn.addEventListener('click',function(){setLang('en');});
-  bUa.addEventListener('click',function(){setLang('ua');});
-  var saved=null; try{saved=localStorage.getItem('gh-lang');}catch(e){}
-  if(saved==='en' || (!saved && !/^(uk|ru)/i.test(navigator.language||''))) setLang('en'); else setLang('ua');
-
-  var copy=document.getElementById('copy'), mail=document.getElementById('mail');
-  var en=copy.querySelector('[lang-en]'), ua=copy.querySelector('[lang-ua]');
-  function done(){ en.textContent='Copied'; ua.textContent='Скопійовано'; setTimeout(function(){ en.textContent='Copy address'; ua.textContent='Скопіювати адресу'; },1500); }
-  function selectMail(){ var r=document.createRange(); r.selectNodeContents(mail); var s=window.getSelection(); s.removeAllRanges(); s.addRange(r); }
-  copy.addEventListener('click',function(){
-    var t=mail.textContent;
-    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done, selectMail); } else { selectMail(); }
-  });
-})();
-</script>
-
+<script src="assets/site.js"></script>
 </body></html>

@@ -1,11 +1,50 @@
 {
   "product": "GnathoLine",
-  "version": "1.0.2",
-  "published": "2026-10-04",
-  "notes": "Windows: повний офлайн-інсталятор із вбудованим Python/CUDA, ШІ-моделями та навчальними моделями.",
+  "version": "1.0.3",
+  "published": "2026-10-13",
+  "notes": "Перша збірка з автооновленням: програма сама перевіряє gnathohub.com і пропонує нову версію. Бічний канал стилуса на датчику Холла (MLX90393), Bites на зібраних щелепах, виправлення MSVC-збірки.",
   "notes_url": "https://gnathohub.com/gnatholine/download/",
-  "downloads": {},
+  "downloads": {
+    "win64": {
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.3/GnathoLine-1.0.3-win64-Setup.exe",
+      "size": 108659156,
+      "sha256": "cfcb55ea503576af02889f69c611d6db8bb8a6c52090dcc5e1ebeefce8729ecd"
+    },
+    "mac-arm64": {
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.3/GnathoLine-1.0.3-mac.pkg",
+      "size": 751810426,
+      "sha256": "60e789db510d156981e83f5f24c12156c7c66cb4da5442e2e582184a14dd739d"
+    },
+    "win64-full": {
+      "note": "Завантажити ВСІ файли в одну теку, запустити Setup.exe",
+      "files": [
+        {
+          "name": "GnathoLine-1.0.3-win64-Full-Setup-1.bin",
+          "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.3/GnathoLine-1.0.3-win64-Full-Setup-1.bin",
+          "size": 1893608192,
+          "sha256": "ae83261893e3df565eef7670e238a60accc35aa2a5e093040f8b24e5ba75d8d2"
+        },
+        {
+          "name": "GnathoLine-1.0.3-win64-Full-Setup-2.bin",
+          "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.3/GnathoLine-1.0.3-win64-Full-Setup-2.bin",
+          "size": 272113210,
+          "sha256": "8a14ce23d18eda11d395902db3ac8337fb37ceb8632c1e1f33ed5d29fadd4f5d"
+        },
+        {
+          "name": "GnathoLine-1.0.3-win64-Full-Setup.exe",
+          "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.3/GnathoLine-1.0.3-win64-Full-Setup.exe",
+          "size": 6391734,
+          "sha256": "83cdff9bfc09e69ee7cff06fab84798118a7719cc4915851271d367e05eabb20"
+        }
+      ]
+    }
+  },
   "history": [
+    {
+      "version": "1.0.3",
+      "published": "2026-10-13",
+      "notes": "Перша збірка з автооновленням: програма сама перевіряє gnathohub.com і пропонує нову версію. Бічний канал стилуса на датчику Холла (MLX90393), Bites на зібраних щелепах, виправлення MSVC-збірки."
+    },
     {
       "version": "1.0.2",
       "published": "2026-10-04",

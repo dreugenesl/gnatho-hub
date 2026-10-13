@@ -45,10 +45,14 @@
   <div class="dl">
     <div class="card">
       <h3>Windows 10/11 · 64-bit</h3>
-      <div class="meta" id="win-meta">—</div>
-      <a class="btn solid" id="win-url" href="#" lang-ua>Завантажити .exe</a><a class="btn solid" id="win-url-en" href="#" lang-en>Download .exe</a>
-      <p class="note" lang-ua>Інсталятор оновлення (лише програма). Для першого встановлення на чистий ПК потрібен повний офлайн-інсталятор із Python/ШІ — за запитом.</p>
-      <p class="note" lang-en>Update installer (app only). A clean PC needs the full offline installer with Python/AI — on request.</p>
+      <div class="meta" id="winfull-meta">—</div>
+      <div id="winfull-files"></div>
+      <p class="note" lang-ua><b>Перше встановлення:</b> повний офлайн-інсталятор (програма + Python/CUDA + ШІ-моделі, ~2 ГБ). Завантажте <b>усі</b> файли в одну теку й запустіть Setup.exe. На картах NVIDIA сегментація йде на GPU.</p>
+      <p class="note" lang-en><b>First install:</b> full offline installer (app + Python/CUDA + AI models, ~2 GB). Download <b>all</b> files into one folder and run Setup.exe.</p>
+      <div class="meta" id="win-meta" style="margin-top:14px">—</div>
+      <a class="btn" id="win-url" href="#" lang-ua>Оновлення (лише програма)</a><a class="btn" id="win-url-en" href="#" lang-en>Update only (app)</a>
+      <p class="note" lang-ua>Якщо GnathoLine уже встановлено — цей файл ставиться поверх і зберігає вбудований Python. Його ж програма завантажує сама через «Оновити».</p>
+      <p class="note" lang-en>Already installed? This installs over the top and keeps the embedded Python; it is what the in-app updater downloads.</p>
     </div>
     <div class="card">
       <h3>macOS · Apple Silicon</h3>
@@ -86,6 +90,16 @@
     document.getElementById('ver').textContent=j.version+(j.published?' · '+j.published:'');
     document.getElementById('notes').textContent=j.notes||'';
     fill('win-url', j.downloads && j.downloads.win64);
+    (function(){
+      var f=j.downloads && j.downloads['win64-full'], m=document.getElementById('winfull-meta'), box=document.getElementById('winfull-files');
+      if(!f||!f.files||!f.files.length){ m.textContent='—'; return; }
+      var total=f.files.reduce(function(a,x){return a+(x.size||0);},0);
+      m.textContent=f.files.length+' '+(f.files.length===1?'файл':'файли(ів)')+' · '+size(total);
+      f.files.forEach(function(x){
+        var a=document.createElement('a'); a.className='btn solid'; a.href=x.url; a.textContent=x.name; a.style.margin='0 8px 8px 0'; a.style.fontSize='.8rem'; a.style.padding='9px 14px';
+        box.appendChild(a);
+      });
+    })();
     fill('mac-url', j.downloads && (j.downloads['mac-arm64']||j.downloads.mac));
     var h=document.getElementById('hist');
     (j.history||[]).forEach(function(e){

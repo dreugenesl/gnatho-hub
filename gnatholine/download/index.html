@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><title>Завантажити GnathoLine — GnathoHUB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Завантаження GnathoLine для macOS і Windows: поточна версія, історія змін. Програма перевіряє оновлення автоматично.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+.dl{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+.dl .card{border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:22px}
+.dl .card h3{margin:0 0 6px;font-size:1.15rem}
+.dl .card .meta{font-family:var(--mono);font-size:.78rem;color:var(--on-dark-2);margin-bottom:16px}
+.dl .card .btn{margin-right:8px}
+.ver{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--on-dark-2)}
+.ver b{color:#fff;font-size:1.6rem;letter-spacing:0;text-transform:none;display:block;margin-top:4px}
+.hist{margin-top:10px}
+.hist li{padding:12px 0;border-bottom:1px solid var(--line)}
+.hist li b{font-family:var(--mono);font-weight:500;margin-right:10px}
+.hist li span{color:var(--ink-2);font-size:.85rem;margin-right:10px}
+.note{margin-top:18px;color:var(--on-dark-2);font-size:.92rem;max-width:46em}
+@media(max-width:720px){.dl{grid-template-columns:1fr}}
+</style>
+</head><body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="../../"><b>Gnatho</b><b>HUB</b></a>
+    <nav id="nav" aria-label="Sections"><a href="../../about/" lang-ua>Про нас</a><a href="../../about/" lang-en>About</a><a href="../../directions/" lang-ua>Напрямки</a><a href="../../directions/" lang-en>Directions</a><a href="../" aria-current="page">GnathoLine</a><a href="../../ioscan-transfer/">IOScan Transfer</a><a href="../../materials/" lang-ua>Корисні матеріали</a><a href="../../materials/" lang-en>Materials</a><a href="../../contacts/" lang-ua>Контакти</a><a href="../../contacts/" lang-en>Contacts</a></nav>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-ua" aria-pressed="true">UA</button>
+        <button type="button" id="lang-en" aria-pressed="false">EN</button>
+      </div>
+      <button class="menu-btn" id="menu" type="button" aria-expanded="false" aria-controls="nav">Меню</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><div class="wrap">
+  <h1 lang-ua>Завантажити GnathoLine</h1><h1 lang-en>Download GnathoLine</h1>
+  <p lang-ua>Пілотні збірки для тестових робочих місць. Програма сама перевіряє цю сторінку й пропонує оновлення.</p>
+  <p lang-en>Pilot builds for test workstations. The app checks this page itself and offers the update.</p>
+</div></div>
+<section class="band dark"><div class="wrap">
+  <div class="ver"><span lang-ua>Поточна версія</span><span lang-en>Current version</span><b id="ver">…</b></div>
+  <p class="note" id="notes"></p>
+  <div class="dl">
+    <div class="card">
+      <h3>Windows 10/11 · 64-bit</h3>
+      <div class="meta" id="win-meta">—</div>
+      <a class="btn solid" id="win-url" href="#" lang-ua>Завантажити .exe</a><a class="btn solid" id="win-url-en" href="#" lang-en>Download .exe</a>
+      <p class="note" lang-ua>Інсталятор оновлення (лише програма). Для першого встановлення на чистий ПК потрібен повний офлайн-інсталятор із Python/ШІ — за запитом.</p>
+      <p class="note" lang-en>Update installer (app only). A clean PC needs the full offline installer with Python/AI — on request.</p>
+    </div>
+    <div class="card">
+      <h3>macOS · Apple Silicon</h3>
+      <div class="meta" id="mac-meta">—</div>
+      <a class="btn solid" id="mac-url" href="#" lang-ua>Завантажити .pkg</a><a class="btn solid" id="mac-url-en" href="#" lang-en>Download .pkg</a>
+      <p class="note" lang-ua>Встановлює GnathoLine.app у «Програми». Якщо macOS каже, що розробника не підтверджено: правий клік → Відкрити.</p>
+      <p class="note" lang-en>Installs GnathoLine.app into Applications. If macOS reports an unverified developer: right-click → Open.</p>
+    </div>
+  </div>
+  <p class="note" lang-ua>Маніфест для автооновлення: <code>https://gnathohub.com/gnatholine/latest.json</code>. Усі дані пацієнтів лишаються на вашому комп'ютері — програма надсилає лише запит версії.</p>
+  <p class="note" lang-en>Auto-update manifest: <code>https://gnathohub.com/gnatholine/latest.json</code>. Patient data never leaves your computer — the app only requests the version.</p>
+</div></section>
+<section class="band light"><div class="wrap">
+  <div class="head"><h2 lang-ua>Історія версій</h2><h2 lang-en>Release history</h2></div>
+  <ul class="hist" id="hist" style="list-style:none;padding:0"></ul>
+</div></section>
+</main>
+<footer>
+    <div class="wrap">
+      <p class="tag" lang-ua>Ми відтворюємо функцію</p><p class="tag" lang-en>We restore function</p>
+      <p>© 2026 GnathoHUB · Stelmakh LAB</p>
+    </div>
+  </footer>
+<script src="../../assets/site.js"></script>
+<script>
+(function(){
+  function size(b){ if(!b) return ''; return b<1048576 ? Math.round(b/1024)+' KB' : b<1073741824 ? Math.round(b/1048576)+' MB' : (b/1073741824).toFixed(2)+' GB'; }
+  function fill(id, d){
+    var a=document.getElementById(id), aen=document.getElementById(id+'-en'), m=document.getElementById(id.replace('-url','-meta'));
+    if(!d||!d.url){ a.style.display='none'; aen.style.display='none'; m.textContent='—'; return; }
+    a.href=d.url; aen.href=d.url;
+    m.textContent=(d.url.split('/').pop())+(d.size?' · '+size(d.size):'');
+  }
+  fetch('../latest.json?t='+Date.now()).then(function(r){return r.json();}).then(function(j){
+    document.getElementById('ver').textContent=j.version+(j.published?' · '+j.published:'');
+    document.getElementById('notes').textContent=j.notes||'';
+    fill('win-url', j.downloads && j.downloads.win64);
+    fill('mac-url', j.downloads && (j.downloads['mac-arm64']||j.downloads.mac));
+    var h=document.getElementById('hist');
+    (j.history||[]).forEach(function(e){
+      var li=document.createElement('li');
+      li.innerHTML='<b>'+e.version+'</b><span>'+(e.published||'')+'</span>'+(e.notes?e.notes:'');
+      h.appendChild(li);
+    });
+  }).catch(function(){ document.getElementById('ver').textContent='—'; });
+})();
+</script>
+</body></html>

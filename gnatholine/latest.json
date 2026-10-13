@@ -1,0 +1,15 @@
+{
+  "product": "GnathoLine",
+  "version": "1.0.2",
+  "published": "2026-10-04",
+  "notes": "Windows: повний офлайн-інсталятор із вбудованим Python/CUDA, ШІ-моделями та навчальними моделями.",
+  "notes_url": "https://gnathohub.com/gnatholine/download/",
+  "downloads": {},
+  "history": [
+    {
+      "version": "1.0.2",
+      "published": "2026-10-04",
+      "notes": "Windows: повний офлайн-інсталятор із вбудованим Python/CUDA, ШІ-моделями та навчальними моделями."
+    }
+  ]
+}

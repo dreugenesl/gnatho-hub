@@ -1,19 +1,19 @@
 {
   "product": "GnathoLine",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "published": "2026-10-14",
-  "notes": "Windows: скани/DICOM у кириличних теках відкриваються; без дубльованої папки пацієнта; сегментація КТ на GPU, стан (GPU/CPU) у статусі. Код машини на стартовому екрані для ліцензії.",
+  "notes": "Компоненти як у Blender for Dental: малий інсталятор з усіма модулями, пакет «ШІ для КТ» (Python/CUDA + моделі) програма довантажує сама при вході в КТ або зі стартового екрана.",
   "notes_url": "https://gnathohub.com/gnatholine/download/",
   "downloads": {
     "win64": {
-      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.4/GnathoLine-1.0.4-win64-Setup.exe",
-      "size": 108713531,
-      "sha256": "2b74a0aad4a308790296afacb125385c51cdd4d898cd4e92137a3d5b2d39c650"
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.5/GnathoLine-1.0.5-win64-Setup.exe",
+      "size": 108729447,
+      "sha256": "57f6bec97a0de172879b56731cbbe4e377cbd607f8c39c46c9422019b0a26028"
     },
     "mac-arm64": {
-      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.4/GnathoLine-1.0.4-mac.pkg",
-      "size": 751827446,
-      "sha256": "b4122a6381236ab68226bddb7cdcf1412fe567058601be58658346fadb1c97cd"
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.5/GnathoLine-1.0.5-mac.pkg",
+      "size": 751844331,
+      "sha256": "cba2573fa7a0e051e4c48a61f8fc7fba2af8a9b146d505b04f5b4ff9378d6cd0"
     },
     "win64-full": {
       "note": "Завантажити ВСІ файли в одну теку, запустити Setup.exe",
@@ -40,6 +40,11 @@
     }
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "published": "2026-10-14",
+      "notes": "Компоненти як у Blender for Dental: малий інсталятор з усіма модулями, пакет «ШІ для КТ» (Python/CUDA + моделі) програма довантажує сама при вході в КТ або зі стартового екрана."
+    },
     {
       "version": "1.0.4",
       "published": "2026-10-14",

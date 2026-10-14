@@ -45,14 +45,14 @@
   <div class="dl">
     <div class="card">
       <h3>Windows 10/11 · 64-bit</h3>
-      <div class="meta" id="winfull-meta">—</div>
+      <div class="meta" id="win-meta">—</div>
+      <a class="btn solid" id="win-url" href="#" lang-ua>Встановити GnathoLine</a><a class="btn solid" id="win-url-en" href="#" lang-en>Install GnathoLine</a>
+      <p class="note" lang-ua>Один малий інсталятор з усіма модулями. Компонент «ШІ для КТ» (Python/CUDA + моделі, ~1,9 ГБ) програма завантажить сама при першому вході в модуль КТ — як add-on'и в Blender for Dental. На картах NVIDIA сегментація йде на GPU, без NVIDIA — на процесорі (повільно). Той самий файл програма ставить і як оновлення.</p>
+      <p class="note" lang-en>One small installer with every module. The “AI for CT” component (Python/CUDA + models, ~1.9 GB) is downloaded by the app itself the first time you open the CT module — like add-ons in Blender for Dental. Segmentation runs on the GPU on NVIDIA cards, otherwise on the CPU (slow). The same file is what the in-app updater installs.</p>
+      <div class="meta" id="winfull-meta" style="margin-top:14px">—</div>
       <div id="winfull-files"></div>
-      <p class="note" lang-ua><b>Перше встановлення:</b> повний офлайн-інсталятор одним файлом (програма + Python/CUDA + ШІ-моделі, ~2 ГБ). Запустіть Setup.exe. На картах NVIDIA сегментація йде на GPU; без NVIDIA — на процесорі, повільно.</p>
-      <p class="note" lang-en><b>First install:</b> full offline installer, a single file (app + Python/CUDA + AI models, ~2 GB). Run Setup.exe. AI segmentation uses the GPU on NVIDIA cards, otherwise the CPU (slow).</p>
-      <div class="meta" id="win-meta" style="margin-top:14px">—</div>
-      <a class="btn" id="win-url" href="#" lang-ua>Оновлення (лише програма)</a><a class="btn" id="win-url-en" href="#" lang-en>Update only (app)</a>
-      <p class="note" lang-ua>Якщо GnathoLine уже встановлено — цей файл ставиться поверх і зберігає вбудований Python. Його ж програма завантажує сама через «Оновити».</p>
-      <p class="note" lang-en>Already installed? This installs over the top and keeps the embedded Python; it is what the in-app updater downloads.</p>
+      <p class="note" id="winfull-note" lang-ua><b>Офлайн-варіант:</b> повний інсталятор з уже вбудованим компонентом ШІ — для клінік без швидкого інтернету. Якщо файлів кілька, завантажте <b>усі</b> в одну теку й запустіть Setup.exe.</p>
+      <p class="note" lang-en><b>Offline option:</b> full installer with the AI component already embedded — for clinics without fast internet. If there are several files, download <b>all</b> of them into one folder and run Setup.exe.</p>
     </div>
     <div class="card">
       <h3>macOS · Apple Silicon</h3>
@@ -96,7 +96,7 @@
       var total=f.files.reduce(function(a,x){return a+(x.size||0);},0);
       m.textContent=f.files.length+' '+(f.files.length===1?'файл':'файли(ів)')+' · '+size(total);
       f.files.forEach(function(x){
-        var a=document.createElement('a'); a.className='btn solid'; a.href=x.url; a.textContent=x.name; a.style.margin='0 8px 8px 0'; a.style.fontSize='.8rem'; a.style.padding='9px 14px';
+        var a=document.createElement('a'); a.className='btn'; a.href=x.url; a.textContent=x.name; a.style.margin='0 8px 8px 0'; a.style.fontSize='.8rem'; a.style.padding='9px 14px';
         box.appendChild(a);
       });
     })();

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><title>Мій акаунт — GnathoHUB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Акаунт GnathoLine: модулі, підписки, ключі для ваших комп'ютерів.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+.acc{display:grid;grid-template-columns:1fr;gap:18px;margin-top:26px;max-width:760px}
+.card{border:1px solid var(--rule);border-radius:10px;padding:22px;background:var(--bg)}
+.card h3{margin:0 0 10px;font-size:1.1rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text],input[type=email],input[type=password],select{font:inherit;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--ink);min-width:0;flex:1 1 220px}
+input.mono{font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.b{display:inline-block;padding:10px 16px;border-radius:6px;font-weight:700;font-size:.92rem;border:1px solid var(--ink);color:var(--ink);background:transparent;cursor:pointer;font-family:inherit}
+.b.solid{background:var(--ink);color:var(--bg)}
+.b:disabled{opacity:.5;cursor:default}
+.muted{color:var(--ink-3);font-size:.9rem}
+.msg{margin-top:10px;font-size:.92rem;min-height:1.2em}
+.msg.err{color:#c0392b}.msg.ok{color:#1e8449}
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.mod{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;border-left:4px solid var(--c,#888)}
+.mod b{display:block;margin-bottom:4px}
+.mod .st{font-size:.85rem;color:var(--ink-2);margin-bottom:8px}
+.mod .st.on{color:#1e8449;font-weight:600}.mod .st.wait{color:#b9770e;font-weight:600}
+.key{font-family:var(--mono);font-size:.74rem;word-break:break-all;background:var(--bg-2);border-radius:6px;padding:8px 10px;margin:6px 0}
+.keyrow{border-top:1px solid var(--rule);padding:10px 0}
+.keyrow:first-child{border-top:0}
+.hidden{display:none}
+.tabs{display:flex;gap:16px;margin-bottom:12px}
+.tabs a{font-weight:700;color:var(--ink-3);cursor:pointer}.tabs a.on{color:var(--ink);text-decoration:underline}
+</style>
+</head><body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="../"><b>Gnatho</b><b>HUB</b></a>
+    <nav id="nav" aria-label="Sections"><a href="../about/" lang-ua>Про нас</a><a href="../about/" lang-en>About</a><a href="../directions/" lang-ua>Напрямки</a><a href="../directions/" lang-en>Directions</a><a href="../gnatholine/">GnathoLine</a><a href="../ioscan-transfer/">IOScan Transfer</a><a href="../materials/" lang-ua>Корисні матеріали</a><a href="../materials/" lang-en>Materials</a><a href="../contacts/" lang-ua>Контакти</a><a href="../contacts/" lang-en>Contacts</a><a href="./" aria-current="page" lang-ua>Акаунт</a><a href="./" aria-current="page" lang-en>Account</a></nav>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-ua" aria-pressed="true">UA</button>
+        <button type="button" id="lang-en" aria-pressed="false">EN</button>
+      </div>
+      <button class="menu-btn" id="menu" type="button" aria-expanded="false" aria-controls="nav">Меню</button>
+    </div>
+  </div>
+</header>
+<main>
+<div class="page-head"><div class="wrap">
+  <h1 lang-ua>Мій акаунт</h1><h1 lang-en>My account</h1>
+  <p lang-ua>Модулі GnathoLine вмикаються ключами, прив'язаними до комп'ютера. Тут ви оформлюєте модулі й отримуєте ключі для своїх машин.</p>
+  <p lang-en>GnathoLine modules are unlocked with keys bound to a computer. Here you subscribe to modules and get keys for your machines.</p>
+</div></div>
+<section class="band"><div class="wrap">
+
+  <!-- ВХІД / РЕЄСТРАЦІЯ -->
+  <div class="acc" id="auth">
+    <div class="card">
+      <div class="tabs"><a id="tab-in" class="on">Вхід</a><a id="tab-up">Реєстрація</a></div>
+      <div class="row"><input type="email" id="email" placeholder="E-mail" autocomplete="email"></div>
+      <div class="row" style="margin-top:8px"><input type="password" id="pass" placeholder="Пароль (мін. 8 символів)" autocomplete="current-password"></div>
+      <div class="row" id="up-extra" style="margin-top:8px"><input type="text" id="up-name" placeholder="Ім'я та прізвище"><input type="text" id="up-clinic" placeholder="Клініка / лабораторія"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="b solid" id="btn-in">Увійти</button>
+        <button class="b solid hidden" id="btn-up">Зареєструватися</button>
+        <button class="b" id="btn-magic">Надіслати посилання для входу</button>
+        <a class="muted" id="btn-forgot" href="#" style="margin-left:auto">Забули пароль?</a>
+      </div>
+      <div class="msg" id="auth-msg"></div>
+    </div>
+  </div>
+
+  <!-- КАБІНЕТ -->
+  <div class="acc hidden" id="cab">
+    <div class="card">
+      <div class="row"><h3 style="margin:0">Профіль</h3><span class="muted" id="who" style="margin-left:auto"></span><button class="b" id="btn-out">Вийти</button></div>
+      <div class="row" style="margin-top:10px"><input type="text" id="p-name" placeholder="Ім'я та прізвище"><input type="text" id="p-clinic" placeholder="Клініка / лабораторія"><input type="text" id="p-phone" placeholder="Телефон"><button class="b" id="btn-save">Зберегти</button></div>
+      <div class="msg" id="p-msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Модулі</h3>
+      <p class="muted">Оформіть модуль — після оплати він стане активним, і ви зможете отримати ключ. Поки що оплата вручну: після запиту ми надішлемо рахунок на ваш e-mail.</p>
+      <div class="mods" id="mods"></div>
+      <div class="msg" id="m-msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Ключі для комп'ютера</h3>
+      <p class="muted">Код машини показано на стартовому екрані GnathoLine (внизу) і у вікні «Встановлення модуля». Один запит видає ключі на всі ваші активні модулі для цього комп'ютера.</p>
+      <div class="row" style="margin-top:10px"><input type="text" class="mono" id="machine" placeholder="GL-XXXX-XXXX-XXXX-XXXX" maxlength="22"><input type="text" id="mlabel" placeholder="Назва (кабінет 1, ноутбук…)"><button class="b solid" id="btn-key">Отримати ключі</button></div>
+      <div class="msg" id="k-msg"></div>
+      <div id="newkeys"></div>
+    </div>
+
+    <div class="card">
+      <h3>Мої ключі</h3>
+      <div id="keys" class="muted">—</div>
+    </div>
+  </div>
+
+</div></section>
+</main>
+<footer>
+    <div class="wrap">
+      <p class="tag" lang-ua>Ми відтворюємо функцію</p><p class="tag" lang-en>We restore function</p>
+      <p>© 2026 GnathoHUB · Stelmakh LAB</p>
+    </div>
+  </footer>
+<script src="../assets/site.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../assets/supabase-config.js"></script>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var MODS={1:['Curve of Spee & Wilson','#1e6bc5'],2:['IOScan Transfer','#27ae60'],3:['Jaw Movement','#e67e22'],4:['CADIAX','#9b59b6'],5:['AxioDentograph Line','#16a085'],6:['КТ','#00acc1'],7:['Splint','#6a5acd'],8:['Імпорт кейсу','#d4a017']};
+  if(!window.GH_SUPABASE||!GH_SUPABASE.url){ $('auth-msg').textContent='Сервіс акаунтів ще не підключено.'; return; }
+  var sb=supabase.createClient(GH_SUPABASE.url, GH_SUPABASE.anon);
+  var user=null;
+
+  function msg(id,t,cls){var e=$(id);e.textContent=t||'';e.className='msg'+(cls?' '+cls:'');}
+  function fmtDate(d){ if(!d) return 'безстроково'; var p=d.split('-'); return p[2]+'.'+p[1]+'.'+p[0]; }
+
+  // ── auth ──
+  var mode='in';
+  function setMode(m){ mode=m; $('tab-in').className=m==='in'?'on':''; $('tab-up').className=m==='up'?'on':'';
+    $('btn-in').classList.toggle('hidden',m!=='in'); $('btn-up').classList.toggle('hidden',m!=='up'); $('up-extra').classList.toggle('hidden',m!=='up'); }
+  $('tab-in').onclick=function(){setMode('in');}; $('tab-up').onclick=function(){setMode('up');}; setMode('in');
+  $('btn-in').onclick=async function(){
+    msg('auth-msg','Вхід…');
+    var r=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('pass').value});
+    if(r.error) return msg('auth-msg','✗ '+r.error.message,'err');
+  };
+  $('btn-up').onclick=async function(){
+    var em=$('email').value.trim(), pw=$('pass').value;
+    if(pw.length<8) return msg('auth-msg','Пароль — мінімум 8 символів','err');
+    msg('auth-msg','Реєстрація…');
+    var r=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:location.origin+'/account/',data:{name:$('up-name').value.trim(),clinic:$('up-clinic').value.trim()}}});
+    if(r.error) return msg('auth-msg','✗ '+r.error.message,'err');
+    msg('auth-msg','✓ Перевірте пошту: ми надіслали лист для підтвердження e-mail.','ok');
+  };
+  $('btn-magic').onclick=async function(){
+    var em=$('email').value.trim(); if(!em) return msg('auth-msg','Введіть e-mail','err');
+    var r=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.origin+'/account/'}});
+    if(r.error) return msg('auth-msg','✗ '+r.error.message,'err');
+    msg('auth-msg','✓ Посилання для входу надіслано на '+em,'ok');
+  };
+  $('btn-forgot').onclick=async function(e){
+    e.preventDefault(); var em=$('email').value.trim(); if(!em) return msg('auth-msg','Введіть e-mail','err');
+    var r=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin+'/account/'});
+    msg('auth-msg', r.error?'✗ '+r.error.message:'✓ Лист для зміни пароля надіслано', r.error?'err':'ok');
+  };
+  $('btn-out').onclick=function(){ sb.auth.signOut(); };
+
+  sb.auth.onAuthStateChange(function(ev,session){
+    user=session?session.user:null;
+    $('auth').classList.toggle('hidden',!!user); $('cab').classList.toggle('hidden',!user);
+    if(user) loadAll();
+    if(ev==='PASSWORD_RECOVERY'){ var np=prompt('Новий пароль (мін. 8 символів):'); if(np&&np.length>=8) sb.auth.updateUser({password:np}); }
+  });
+
+  // ── cabinet ──
+  async function loadAll(){
+    $('who').textContent=user.email;
+    var p=await sb.from('profiles').select('*').eq('id',user.id).single();
+    if(p.data){ $('p-name').value=p.data.name||user.user_metadata.name||''; $('p-clinic').value=p.data.clinic||user.user_metadata.clinic||''; $('p-phone').value=p.data.phone||''; }
+    await loadMods(); await loadKeys();
+  }
+  $('btn-save').onclick=async function(){
+    var r=await sb.from('profiles').update({name:$('p-name').value.trim(),clinic:$('p-clinic').value.trim(),phone:$('p-phone').value.trim()}).eq('id',user.id);
+    msg('p-msg', r.error?'✗ '+r.error.message:'✓ Збережено', r.error?'err':'ok');
+  };
+
+  async function loadMods(){
+    var r=await sb.from('subscriptions').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
+    var subs=r.data||[], box=$('mods'); box.innerHTML='';
+    var today=new Date().toISOString().slice(0,10);
+    Object.keys(MODS).forEach(function(m){
+      m=+m; var s=subs.filter(function(x){return x.module===m;});
+      var act=s.find(function(x){return x.status==='active'&&(!x.expires_at||x.expires_at>=today);});
+      var pend=s.find(function(x){return x.status==='pending';});
+      var d=document.createElement('div'); d.className='mod'; d.style.setProperty('--c',MODS[m][1]);
+      var st= act?'<div class="st on">Активний до '+fmtDate(act.expires_at)+' · '+act.max_machines+' комп.</div>'
+             : pend?'<div class="st wait">Очікує оплати ('+(pend.period==='year'?'рік':'місяць')+')</div>'
+             : '<div class="st">Не оформлено</div>';
+      d.innerHTML='<b>'+m+'. '+MODS[m][0]+'</b>'+st+
+        (act||pend?'':'<div class="row"><select id="per'+m+'"><option value="month">на місяць</option><option value="year">на рік</option></select><button class="b" data-m="'+m+'">Оформити</button></div>');
+      box.appendChild(d);
+    });
+    box.querySelectorAll('button[data-m]').forEach(function(b){ b.onclick=async function(){
+      var m=+b.dataset.m, per=$('per'+m).value;
+      var r=await sb.from('subscriptions').insert({user_id:user.id,module:m,period:per,status:'pending'});
+      if(r.error) return msg('m-msg','✗ '+r.error.message,'err');
+      msg('m-msg','✓ Запит на модуль «'+MODS[m][0]+'» прийнято — рахунок надійде на '+user.email+'. Після оплати модуль стане активним.','ok');
+      loadMods();
+    };});
+  }
+
+  $('btn-key').onclick=async function(){
+    var code=$('machine').value.trim(); if(!code) return msg('k-msg','Введіть код машини','err');
+    $('btn-key').disabled=true; msg('k-msg','Генерація ключів…');
+    var s=await sb.auth.getSession();
+    var resp=await fetch(GH_SUPABASE.url+'/functions/v1/issue-key',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.data.session.access_token,'apikey':GH_SUPABASE.anon},body:JSON.stringify({machine:code,label:$('mlabel').value.trim()})});
+    var j=await resp.json().catch(function(){return {error:'помилка сервера'};});
+    $('btn-key').disabled=false;
+    if(!resp.ok||j.error) return msg('k-msg','✗ '+(j.error||resp.status),'err');
+    msg('k-msg','✓ Ключі для '+j.machine+' — вставте їх у GnathoLine (вікно «Встановлення модуля»; можна всі разом).','ok');
+    var all=j.keys.map(function(k){return k.key;}).join('\n');
+    $('newkeys').innerHTML=j.keys.map(function(k){return '<div class="keyrow"><b>'+k.moduleName+'</b> <span class="muted">'+k.id+' · до '+fmtDate(k.expires)+'</span><div class="key">'+k.key+'</div></div>';}).join('')+
+      '<button class="b solid" id="copy-all">Скопіювати всі ключі</button>';
+    $('copy-all').onclick=function(){ navigator.clipboard.writeText(all); $('copy-all').textContent='Скопійовано ✓'; };
+    loadKeys();
+  };
+
+  async function loadKeys(){
+    var r=await sb.from('keys').select('*').eq('user_id',user.id).eq('revoked',false).order('created_at',{ascending:false});
+    var ks=r.data||[]; if(!ks.length){ $('keys').textContent='—'; return; }
+    $('keys').innerHTML=ks.map(function(k){return '<div class="keyrow"><b>'+(MODS[k.module]||['?'])[0]+'</b> · <span class="mono">'+k.machine+'</span>'+(k.machine_label?' ('+k.machine_label+')':'')+' <span class="muted">'+k.id+' · до '+fmtDate(k.expires_at)+'</span><div class="key">'+k.key+'</div></div>';}).join('');
+  }
+
+  // З програми: ?machine=GL-…&module=6 — підставити код машини
+  var q=new URLSearchParams(location.search);
+  if(q.get('machine')) $('machine').value=q.get('machine');
+  // магічне посилання / підтвердження e-mail повертають сюди з токеном у hash — supabase-js обробить сам
+})();
+</script>
+</body></html>

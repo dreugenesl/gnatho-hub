@@ -18,9 +18,13 @@ input.mono{font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase
 .msg{margin-top:10px;font-size:.92rem;min-height:1.2em}
 .msg.err{color:#c0392b}.msg.ok{color:#1e8449}
 .mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
-.mod{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;border-left:4px solid var(--c,#888)}
-.mod b{display:block;margin-bottom:4px}
-.mod .st{font-size:.85rem;color:var(--ink-2);margin-bottom:8px}
+.mod{border:1px solid var(--rule);border-radius:8px;padding:12px 14px;border-left:4px solid var(--c,#888);display:flex;flex-direction:column;gap:6px;min-width:0}
+.mod b{display:block}
+.mod .st{font-size:.85rem;color:var(--ink-2)}
+.mod .ctl{display:flex;gap:8px;margin-top:auto}
+.mod .ctl select{flex:1 1 auto;min-width:0;width:100%}
+.mod .ctl .b{flex:0 0 auto;padding:8px 12px}
+.acc .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .mod .st.on{color:#1e8449;font-weight:600}.mod .st.wait{color:#b9770e;font-weight:600}
 .key{font-family:var(--mono);font-size:.74rem;word-break:break-all;background:var(--bg-2);border-radius:6px;padding:8px 10px;margin:6px 0}
 .keyrow{border-top:1px solid var(--rule);padding:10px 0}
@@ -182,7 +186,7 @@ input.mono{font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase
              : pend?'<div class="st wait">Очікує оплати ('+(pend.period==='year'?'рік':'місяць')+')</div>'
              : '<div class="st">Не оформлено</div>';
       d.innerHTML='<b>'+m+'. '+MODS[m][0]+'</b>'+st+
-        (act||pend?'':'<div class="row"><select id="per'+m+'"><option value="month">на місяць</option><option value="year">на рік</option></select><button class="b" data-m="'+m+'">Оформити</button></div>');
+        (act||pend?'':'<div class="ctl"><select id="per'+m+'"><option value="month">на місяць</option><option value="year">на рік</option></select><button class="b" data-m="'+m+'">Оформити</button></div>');
       box.appendChild(d);
     });
     box.querySelectorAll('button[data-m]').forEach(function(b){ b.onclick=async function(){

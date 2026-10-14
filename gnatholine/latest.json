@@ -56,5 +56,29 @@
       "notes": "Windows: повний офлайн-інсталятор із вбудованим Python/CUDA, ШІ-моделями та навчальними моделями."
     }
   ],
-  "revoked": []
+  "revoked": [],
+  "components": {
+    "ai": {
+      "title": "ШІ для КТ",
+      "win64": {
+        "version": 1,
+        "size": 3089326066,
+        "uncompressed": 5341446017,
+        "files": [
+          {
+            "name": "gnatholine-ai-win64-v1-part1.zip",
+            "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/components-ai-win64-v1/gnatholine-ai-win64-v1-part1.zip",
+            "size": 1886191535,
+            "sha256": "f68e778403d42437c01e43d0b2674b9dbbe957d3520321ea8368f1ec846ddb05"
+          },
+          {
+            "name": "gnatholine-ai-win64-v1-part2.zip",
+            "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/components-ai-win64-v1/gnatholine-ai-win64-v1-part2.zip",
+            "size": 1203134531,
+            "sha256": "ac724960892f918774d5014224ac72bc38a3a90dc401aa823226d55c04d8b5ed"
+          }
+        ]
+      }
+    }
+  }
 }

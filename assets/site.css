@@ -46,9 +46,13 @@ html[data-lang="ua"] [lang-ua]{display:revert}
 /* header */
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--dark);color:var(--on-dark)}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
-.brand{font-weight:800;font-size:1.3rem;letter-spacing:.02em}
+/* Лого: вузол-хаб (SVG) + розріджений «GNATHO · HUB» у теплому кремовому, як у знаку */
+.brand{display:inline-flex;align-items:center;gap:12px;font-weight:600;font-size:1.22rem;letter-spacing:.2em;text-transform:uppercase;color:#efe9dc}
+.brand img{display:block;width:34px;height:34px}
+.brand .wm{white-space:nowrap}
+.brand .wm i{font-style:normal;color:#c9a884;margin:0 .1em}
 .brand b{font-weight:800;color:#fff}
-.brand span{font-weight:500;color:var(--on-dark-2)}
+.brand span{font-weight:600}
 nav{display:flex;gap:22px;flex-wrap:wrap;font-size:.92rem;font-weight:600}
 nav a{color:var(--on-dark-2)}
 nav a:hover{color:#fff;text-decoration:none}

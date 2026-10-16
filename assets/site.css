@@ -9,9 +9,7 @@
   --sans:Manrope,"Gilroy",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#15171a; --bg-2:#1d2024; --dark:#0f1113; --dark-2:#0b0c0e; --ink:#eceef1; --ink-2:#b9bec6; --ink-3:#848a93;
-  --rule:#2c3137; color-scheme:dark } }
+/* Світла тема за замовчуванням (продуктовий сайт, як medit.com); темна — лише явним data-theme="dark". */
 :root[data-theme="dark"]{
   --bg:#15171a; --bg-2:#1d2024; --dark:#0f1113; --dark-2:#0b0c0e; --ink:#eceef1; --ink-2:#b9bec6; --ink-3:#848a93;
   --rule:#2c3137; color-scheme:dark }

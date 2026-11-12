@@ -1,19 +1,14 @@
 {
   "product": "GnathoLine",
-  "version": "1.0.5",
-  "published": "2026-10-14",
-  "notes": "Компоненти як у Blender for Dental: малий інсталятор з усіма модулями, пакет «ШІ для КТ» (Python/CUDA + моделі) програма довантажує сама при вході в КТ або зі стартового екрана.",
+  "version": "1.0.7",
+  "published": "2026-11-12",
+  "notes": "Модулі без ключа активації замкнені (ключ — під один комп'ютер). Сплінт: віск додає й знімає рівно по діаметру пензля і росте, коли миша стоїть; стінки, що зайшли одна в одну, зливаються в одне тіло; нова побудова капи від краю стрічки (одне тіло з сепарейтом), рівномірна сітка.",
   "notes_url": "https://gnathohub.com/gnatholine/download/",
   "downloads": {
-    "win64": {
-      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.5/GnathoLine-1.0.5-win64-Setup.exe",
-      "size": 108729447,
-      "sha256": "57f6bec97a0de172879b56731cbbe4e377cbd607f8c39c46c9422019b0a26028"
-    },
     "mac-arm64": {
-      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.5/GnathoLine-1.0.5-mac.pkg",
-      "size": 751844331,
-      "sha256": "cba2573fa7a0e051e4c48a61f8fc7fba2af8a9b146d505b04f5b4ff9378d6cd0"
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.7/GnathoLine-1.0.7-mac.pkg",
+      "size": 979477863,
+      "sha256": "67cc06f32ef415aa8846b00156683104e1619503f70653edd2df8956355cd91d"
     },
     "win64-full": {
       "note": "Завантажити ВСІ файли в одну теку, запустити Setup.exe",
@@ -40,6 +35,11 @@
     }
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "published": "2026-11-12",
+      "notes": "Модулі без ключа активації замкнені (ключ — під один комп'ютер). Сплінт: віск додає й знімає рівно по діаметру пензля і росте, коли миша стоїть; стінки, що зайшли одна в одну, зливаються в одне тіло; нова побудова капи від краю стрічки (одне тіло з сепарейтом), рівномірна сітка."
+    },
     {
       "version": "1.0.5",
       "published": "2026-10-14",

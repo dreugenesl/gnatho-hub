@@ -222,3 +222,8 @@ td{color:var(--ink-2)}
 .why-fig svg{display:block;width:100%;height:auto}
 .about2{padding-block:72px}
 @media(max-width:900px){.prod-grid{grid-template-columns:1fr}.wn,.why-grid{grid-template-columns:1fr}.stats-list{margin-left:0}}
+
+/* Слоган «Естетика · М'язи · Суглоб · Баланс · Постура · Ментальність» — шість слів, як шість крапок знака (2026-11-15) */
+.six{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 0;margin:0 0 18px;font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.six i{display:inline-block;width:7px;height:7px;margin:0 8px;border-radius:50%;background:var(--warm);flex:none}
+.six.foot{justify-content:flex-start;margin:10px 0 14px;color:var(--on-dark-2)}

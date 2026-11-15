@@ -49,6 +49,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 /* Лого: вузол-хаб (SVG) + розріджений «GNATHO · HUB» у теплому кремовому, як у знаку */
 .brand{display:inline-flex;align-items:center;gap:12px;font-weight:600;font-size:1.22rem;letter-spacing:.2em;text-transform:uppercase;color:var(--on-dark)}
 .brand img{display:block;width:34px;height:34px}
+.brand img.lockup{width:auto;height:34px}   /* лок-ап із «Лого Gnatho Hub.pdf» (перший варіант) */
 .brand .wm{white-space:nowrap}
 .brand .wm i{font-style:normal;color:var(--warm);margin:0 .1em}
 .brand b{font-weight:800;color:var(--on-dark)}

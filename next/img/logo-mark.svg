@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 333" width="330" height="333" aria-hidden="true">
+  <!-- Gnatho Hub — знак із «Лого Gnatho Hub.pdf» (перший варіант): вузол зі спицями, кремові лінії, бежеві крапки -->
+  <g stroke="#EDE5DA" stroke-width="9" stroke-linecap="round" fill="none">
+    <line x1="165.0" y1="184.5" x2="165" y2="39"/>
+    <line x1="165.0" y1="184.5" x2="68" y2="128"/>
+    <line x1="165.0" y1="184.5" x2="262" y2="128"/>
+    <line x1="165.0" y1="184.5" x2="39" y2="257"/>
+    <line x1="165.0" y1="184.5" x2="291" y2="257"/>
+    <line x1="165.0" y1="184.5" x2="165" y2="296"/>
+  </g>
+  <g fill="#C4A47D">
+    <circle cx="165" cy="39" r="19.5"/>
+    <circle cx="68" cy="128" r="16.5"/>
+    <circle cx="262" cy="128" r="16.5"/>
+    <circle cx="39" cy="257" r="20"/>
+    <circle cx="291" cy="257" r="20"/>
+    <circle cx="165" cy="296" r="16.5"/>
+  </g>
+  <circle cx="165.0" cy="184.5" r="29.5" fill="#EDE5DA"/>
+</svg>

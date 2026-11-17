@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* Дизайн-токени: палітра чинного gnathohub.com — графітовий фон, кремовий текст, пісочний акцент. */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Фони */
+  --color-base: #1f2024;
+  --color-surface: #232529;
+  --color-panel: #272a2f;
+  --color-deep: #191a1d;
+  --color-line: #3a3d44;
+
+  /* Текст: від заголовків (950) до приглушеного (300) */
+  --color-ink-950: #ffffff;
+  --color-ink-900: #eee9dd;
+  --color-ink-700: #d3d5d9;
+  --color-ink-500: #b8bcc3;
+  --color-ink-300: #8a8e96;
+
+  /* Пісочний акцент */
+  --color-brand-600: #b49c7f;
+  --color-brand-700: #c4a989;
+  --color-brand-800: #d6c0a4;
+  --color-on-brand: #1f2024;
+
+  --color-sand-50: #302d29;
+  --color-sand-100: #4a4338;
+  --color-sand-400: #eee9dd;
+  --color-sand-500: #c4a989;
+  --color-sand-700: #c4a989;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-base);
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-700);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition: none !important;
+  }
+}

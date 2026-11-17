@@ -1,0 +1,7 @@
+:HL["/next/_next/static/chunks/1dywdhtzdg03g.css","style"]
+:HC["/",""]
+4:[["children",{"s":"__PAGE__","h":160}]]
+3:[["children",{"s":{"n":"slug","t":"d","k":"yak-dohliadaty-za-kapoiu","s":["category"]},"h":96,"c":"$Q4"}]]
+2:[["children",{"s":"blog","h":64,"c":"$Q3"}]]
+1:[["children",{"s":{"n":"locale","t":"d","k":"uk","s":[]},"h":48,"c":"$Q2"}]]
+0:{"b":"WQ7sAyt-0SJh9x2Ri8YxZ","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

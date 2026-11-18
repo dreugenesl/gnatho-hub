@@ -228,4 +228,8 @@ td{color:var(--ink-2)}
 .six i{display:inline-block;width:7px;height:7px;margin:0 8px;border-radius:50%;background:var(--warm);flex:none}
 .six.foot{justify-content:flex-start;margin:10px 0 14px;color:var(--on-dark-2)}
 .stats .six{margin:0}
+.stats.slogan{padding-block:30px}
+.stats.slogan .wrap{justify-content:center}
+.stats.slogan .six{color:var(--on-dark);font-size:clamp(.82rem,1.6vw,1.15rem);letter-spacing:.18em}
+.stats.slogan .six i{width:9px;height:9px;margin:0 14px}
 .page-head+.stats{padding-top:0}

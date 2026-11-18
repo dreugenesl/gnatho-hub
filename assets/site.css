@@ -174,7 +174,7 @@ td{color:var(--ink-2)}
 
 
 /* ── Головна у стилі «продуктового» сайту (Medit-like): світло, великі кадри, картки з тінню ── */
-.stats{background:linear-gradient(90deg,#161513,#2A241C 60%,#1D1C1A);color:var(--on-dark);padding-block:22px}
+.stats{background:var(--dark);border-top:1px solid var(--rule-dark);color:var(--on-dark);padding-block:22px}
 .stats .wrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
 .stats-lead{display:flex;flex-direction:column;gap:2px;min-width:260px}
 .stats-lead b{font-size:1.9rem;font-weight:800;letter-spacing:-.01em}

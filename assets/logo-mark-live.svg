@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 333" width="330" height="333" aria-hidden="true">
+  <!-- Gnatho Hub — живий знак для шапки: товщі спиці, більші вузли, хвиля пульсу від центру -->
+  <style>
+    .sp line{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s cubic-bezier(.2,.7,.2,1) forwards}
+    .nd circle{transform-box:fill-box;transform-origin:center;opacity:0;animation:pop .5s ease-out forwards, pulse 6s ease-in-out infinite}
+    .hub{transform-box:fill-box;transform-origin:center;animation:breathe 6s ease-in-out infinite}
+    .ring{transform-box:fill-box;transform-origin:center;fill:none;stroke:#C9A87F;stroke-width:5;opacity:0;animation:ring 6s ease-out infinite}
+    .n1{animation-delay:.55s,1.6s}.n2{animation-delay:.65s,2.0s}.n3{animation-delay:.75s,2.4s}
+    .n4{animation-delay:.85s,2.8s}.n5{animation-delay:.95s,3.2s}.n6{animation-delay:1.05s,3.6s}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+    @keyframes pulse{0%,12%,100%{transform:scale(1);filter:brightness(1)}6%{transform:scale(1.28);filter:brightness(1.25)}}
+    @keyframes breathe{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(1)}}
+    @keyframes ring{0%,20%{opacity:0;transform:scale(1)}24%{opacity:.7}50%,100%{opacity:0;transform:scale(4.6)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}.sp line{stroke-dashoffset:0}.nd circle{opacity:1}}
+  </style>
+  <circle class="ring" cx="165" cy="184.5" r="30"/>
+  <g class="sp" stroke="#F4EDE2" stroke-width="15" stroke-linecap="round" fill="none">
+    <line pathLength="1" x1="165" y1="184.5" x2="165" y2="39"/>
+    <line pathLength="1" x1="165" y1="184.5" x2="68" y2="128"/>
+    <line pathLength="1" x1="165" y1="184.5" x2="262" y2="128"/>
+    <line pathLength="1" x1="165" y1="184.5" x2="39" y2="257"/>
+    <line pathLength="1" x1="165" y1="184.5" x2="291" y2="257"/>
+    <line pathLength="1" x1="165" y1="184.5" x2="165" y2="296"/>
+  </g>
+  <g class="nd" fill="#C9A87F">
+    <circle class="n1" cx="165" cy="39" r="25"/>
+    <circle class="n2" cx="262" cy="128" r="22"/>
+    <circle class="n3" cx="291" cy="257" r="26"/>
+    <circle class="n4" cx="165" cy="296" r="22"/>
+    <circle class="n5" cx="39" cy="257" r="26"/>
+    <circle class="n6" cx="68" cy="128" r="22"/>
+  </g>
+  <circle class="hub" cx="165" cy="184.5" r="36" fill="#F4EDE2"/>
+</svg>

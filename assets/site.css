@@ -50,6 +50,10 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var
 .brand{display:inline-flex;align-items:center;gap:12px;font-weight:600;font-size:1.22rem;letter-spacing:.2em;text-transform:uppercase;color:var(--on-dark)}
 .brand img{display:block;width:34px;height:34px}
 .brand img.lockup{width:auto;height:34px}   /* лок-ап із «Лого Gnatho Hub.pdf» (перший варіант) */
+.brand img.mark{width:44px;height:44px;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.brand:hover{text-decoration:none}
+.brand:hover img.mark{transform:rotate(60deg) scale(1.06)}
+@media (prefers-reduced-motion:reduce){.brand img.mark{transition:none}.brand:hover img.mark{transform:none}}
 .brand .wm{white-space:nowrap}
 .brand .wm i{font-style:normal;color:var(--warm);margin:0 .1em}
 .brand b{font-weight:800;color:var(--on-dark)}

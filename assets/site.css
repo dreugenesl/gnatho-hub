@@ -227,4 +227,5 @@ td{color:var(--ink-2)}
 .six{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 0;margin:0 0 18px;font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
 .six i{display:inline-block;width:7px;height:7px;margin:0 8px;border-radius:50%;background:var(--warm);flex:none}
 .six.foot{justify-content:flex-start;margin:10px 0 14px;color:var(--on-dark-2)}
-.stats .six{flex-basis:100%;margin:0 0 -6px}
+.stats .six{margin:0}
+.page-head+.stats{padding-top:0}

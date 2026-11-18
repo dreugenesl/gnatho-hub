@@ -24,7 +24,28 @@
   <h1 lang-ua>GnathoLine</h1><h1 lang-en>GnathoLine</h1>
   <p lang-ua>Артикулятор пацієнта, зібраний зі сканів, які ви вже робите.</p><p lang-en>The patient's articulator, built from the scans you already take.</p>
   <p style="margin-top:18px"><a class="btn solid" href="download/" lang-ua>Завантажити · поточна версія</a><a class="btn solid" href="download/" lang-en>Download · current version</a></p>
-</div></div><section class="band dark" id="gnatholine">
+</div></div>
+<section class="stats"><div class="wrap">
+  <div class="stats-lead"><b>1 <span class="acc">сцена</span></b><span lang-ua>скани · КТ · рухи щелепи — в артикуляторі пацієнта</span><span lang-en>scans · CBCT · jaw motion — in the patient's articulator</span></div>
+  <ul class="stats-list">
+    <li><i>8</i><span lang-ua>модулів GnathoLine</span><span lang-en>GnathoLine modules</span></li>
+    <li><i>2</i><span lang-ua>платформи · macOS, Windows</span><span lang-en>platforms · macOS, Windows</span></li>
+  </ul>
+</div></section>
+
+<!-- Що нового: з latest.json -->
+<section class="wn-band"><div class="wrap">
+  <div class="wn">
+    <div class="wn-text">
+      <p class="eyebrow" lang-ua>Що нового</p><p class="eyebrow" lang-en>What's new</p>
+      <h2>GnathoLine <span id="wn-ver">…</span></h2>
+      <p class="wn-notes" id="wn-notes"></p>
+      <a class="btn2 solid" href="download/" lang-ua>Докладніше й завантажити</a><a class="btn2 solid" href="download/" lang-en>Details and download</a>
+    </div>
+    <figure class="wn-fig"><img src="../assets/img/gnatholine-splash.jpg" alt="Стартовий екран GnathoLine: вісім модулів" width="1600" height="564" loading="lazy"></figure>
+  </div>
+</div></section>
+<section class="band dark" id="gnatholine">
     <div class="wrap">
       <div class="gl">
         <div>
@@ -75,4 +96,10 @@
     </div>
   </footer>
 <script src="../assets/site.js"></script>
+<script>
+fetch('latest.json?t='+Date.now()).then(function(r){return r.json();}).then(function(j){
+  document.getElementById('wn-ver').textContent=j.version;
+  document.getElementById('wn-notes').textContent=(j.notes||'')+(j.published?' · '+j.published:'');
+}).catch(function(){ document.getElementById('wn-ver').textContent=''; });
+</script>
 </body></html>

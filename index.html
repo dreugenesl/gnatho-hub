@@ -20,13 +20,10 @@
   </div>
 </header>
 <main>
-<!-- Смуга з цифрами (як у Medit «100,000,000+ cases») -->
+<!-- Смуга під шапкою: слоган + загальні факти -->
 <section class="stats"><div class="wrap">
   <p class="six foot" lang-ua aria-label="Естетика · М'язи · Суглоб · Баланс · Постура · Ментальність"><span>Естетика</span><i></i><span>М'язи</span><i></i><span>Суглоб</span><i></i><span>Баланс</span><i></i><span>Постура</span><i></i><span>Ментальність</span></p><p class="six foot" lang-en aria-label="Aesthetics · Muscles · TMJ · Balance · Posture · Mind"><span>Aesthetics</span><i></i><span>Muscles</span><i></i><span>TMJ</span><i></i><span>Balance</span><i></i><span>Posture</span><i></i><span>Mind</span></p>
-  <div class="stats-lead"><b>1 <span class="acc">сцена</span></b><span lang-ua>скани · КТ · рухи щелепи — в артикуляторі пацієнта</span><span lang-en>scans · CBCT · jaw motion — in the patient's articulator</span></div>
   <ul class="stats-list">
-    <li><i>8</i><span lang-ua>модулів GnathoLine</span><span lang-en>GnathoLine modules</span></li>
-    <li><i>2</i><span lang-ua>платформи · macOS, Windows</span><span lang-en>platforms · macOS, Windows</span></li>
     <li><i>4</i><span lang-ua>напрямки · капи, монтаж, реабілітації, навчання</span><span lang-en>directions · splints, mounting, rehab, teaching</span></li>
     <li><i>Київ</i><span lang-ua>разом зі Stelmakh LAB</span><span lang-en>with Stelmakh LAB</span></li>
   </ul>
@@ -38,20 +35,7 @@
   <h1 lang-ua>Оклюзія в артикуляторі пацієнта</h1><h1 lang-en>Occlusion in the patient's articulator</h1>
   <p class="sub" lang-ua><span>Ми відтворюємо функцію.</span> Лікар планує, лабораторія виготовляє, між ними — одна цифрова модель.</p>
   <p class="sub" lang-en><span>We restore function.</span> The clinician plans, the laboratory manufactures, one digital model in between.</p>
-  <div class="cta"><a class="btn2 solid" href="gnatholine/download/" lang-ua>Завантажити GnathoLine</a><a class="btn2 solid" href="gnatholine/download/" lang-en>Download GnathoLine</a><a class="btn2" href="directions/" lang-ua>Напрямки</a><a class="btn2" href="directions/" lang-en>Directions</a></div>
-</div></section>
-
-<!-- Що нового: з latest.json -->
-<section class="wn-band"><div class="wrap">
-  <div class="wn">
-    <div class="wn-text">
-      <p class="eyebrow" lang-ua>Що нового</p><p class="eyebrow" lang-en>What's new</p>
-      <h2>GnathoLine <span id="wn-ver">…</span></h2>
-      <p class="wn-notes" id="wn-notes"></p>
-      <a class="btn2 solid" href="gnatholine/download/" lang-ua>Докладніше й завантажити</a><a class="btn2 solid" href="gnatholine/download/" lang-en>Details and download</a>
-    </div>
-    <figure class="wn-fig"><img src="assets/img/gnatholine-splash.jpg" alt="Стартовий екран GnathoLine: вісім модулів" width="1600" height="564" loading="lazy"></figure>
-  </div>
+  <div class="cta"><a class="btn2 solid" href="directions/" lang-ua>Напрямки</a><a class="btn2 solid" href="directions/" lang-en>Directions</a><a class="btn2" href="contacts/" lang-ua>Зв'язатися</a><a class="btn2" href="contacts/" lang-en>Get in touch</a></div>
 </div></section>
 
 <!-- Три продукти (як картки Scanners / Software / Lab у Medit) -->
@@ -150,10 +134,4 @@
     </div>
   </footer>
 <script src="assets/site.js"></script>
-<script>
-fetch('gnatholine/latest.json?t='+Date.now()).then(function(r){return r.json();}).then(function(j){
-  document.getElementById('wn-ver').textContent=j.version;
-  document.getElementById('wn-notes').textContent=(j.notes||'')+(j.published?' · '+j.published:'');
-}).catch(function(){ document.getElementById('wn-ver').textContent=''; });
-</script>
 </body></html>

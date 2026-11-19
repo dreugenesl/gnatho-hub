@@ -87,9 +87,11 @@
 <script src="../assets/site.js"></script>
 <script>
 (function(){var ds=[].slice.call(document.querySelectorAll('.disc'));
+var blur=document.createElement('div');blur.className='disc-blur';blur.setAttribute('aria-hidden','true');document.body.appendChild(blur);
 function set(d,on){d.classList.toggle('open',on);d.querySelector('.disc-btn').setAttribute('aria-expanded',on?'true':'false')}
-ds.forEach(function(d){d.querySelector('.disc-btn').addEventListener('click',function(e){e.stopPropagation();var on=!d.classList.contains('open');ds.forEach(function(x){set(x,false)});set(d,on)})});
-document.addEventListener('click',function(e){if(!e.target.closest('.disc'))ds.forEach(function(x){set(x,false)})});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')ds.forEach(function(x){set(x,false)})});})();
+function closeAll(){ds.forEach(function(x){set(x,false)});blur.classList.remove('on')}
+ds.forEach(function(d){d.querySelector('.disc-btn').addEventListener('click',function(e){e.stopPropagation();var on=!d.classList.contains('open');closeAll();if(on){set(d,true);blur.classList.add('on')}})});
+document.addEventListener('click',function(e){if(!e.target.closest('.disc.open'))closeAll()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll()});})();
 </script>
 </body></html>

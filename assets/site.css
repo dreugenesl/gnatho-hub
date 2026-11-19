@@ -257,7 +257,9 @@ td{color:var(--ink-2)}
 .discs + .discs-h{margin-top:56px}
 .discs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
 .disc{position:relative}
-.disc.open{z-index:5}
+.disc.open{z-index:41}
+.disc-blur{position:fixed;inset:0;z-index:40;background:rgba(29,28,26,.22);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
+.disc-blur.on{opacity:1;visibility:visible;transition-delay:0s}
 .disc-btn{display:flex;flex-direction:column;width:100%;height:100%;padding:0;text-align:left;font:inherit;cursor:pointer;background:#fff;border:1px solid var(--rule);border-radius:14px;overflow:hidden;color:#1B1A18;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 .disc-btn:hover,.disc-btn:focus-visible,.disc.open .disc-btn{box-shadow:0 14px 34px rgba(0,0,0,.10);border-color:var(--warm)}
 .disc-btn:hover{transform:translateY(-3px)}
@@ -288,4 +290,4 @@ td{color:var(--ink-2)}
   .disc-desc-in{min-height:0;height:auto;padding:0 22px;overflow:hidden}
   .disc.open .disc-desc-in{padding:22px}
 }
-@media (prefers-reduced-motion:reduce){.disc-desc,.disc-btn{transition:none}}
+@media (prefers-reduced-motion:reduce){.disc-desc,.disc-btn,.disc-blur{transition:none}}

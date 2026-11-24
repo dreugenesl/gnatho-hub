@@ -1,14 +1,14 @@
 {
   "product": "GnathoLine",
-  "version": "1.0.8",
-  "published": "2026-11-12",
-  "notes": "Виправлено: на новому Mac не запускався вбудований ШІ (torch) — сегментація зубів і зон йшла мимо. Модулі без ключа активації замкнені (ключ — під один комп'ютер). Сплінт: віск рівно по діаметру, росте коли миша стоїть, стінки зливаються в одне тіло.",
+  "version": "1.0.9",
+  "published": "2026-11-24",
+  "notes": "Лінійні значки замість емодзі по всій програмі; КТ: значки на плитках боксів, кнопки на темній палітрі; сплінт: розділи «Сегментація» і «Корекція FDI», повторна сегментація зубів; Cadiax: розрізи перенесено в оверлей на сцені.",
   "notes_url": "https://gnathohub.com/gnatholine/download/",
   "downloads": {
     "mac-arm64": {
-      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.8/GnathoLine-1.0.8-mac.pkg",
-      "size": 1072721487,
-      "sha256": "bff67354855f6ca4b17234d24e6a2b13893415fbb309e994ae7fb5a677b0e7b4"
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.9/GnathoLine-1.0.9-mac.pkg",
+      "size": 1073625167,
+      "sha256": "28c09cbf4b2bee202b48ac259835d48664c62a2f6882ca47395553da44a4fdcd"
     },
     "win64-full": {
       "note": "Завантажити ВСІ файли в одну теку, запустити Setup.exe",
@@ -32,9 +32,19 @@
           "sha256": "83cdff9bfc09e69ee7cff06fab84798118a7719cc4915851271d367e05eabb20"
         }
       ]
+    },
+    "win64": {
+      "url": "https://github.com/dreugenesl/gnatho-hub/releases/download/gnatholine-v1.0.9/GnathoLine-1.0.9-win64-Setup.exe",
+      "size": 109937032,
+      "sha256": "8b3074edf00ba056b338c7bcf08a975fe18d5361c7cab5eb99456a68843fa8e1"
     }
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "published": "2026-11-24",
+      "notes": "Лінійні значки замість емодзі по всій програмі; КТ: значки на плитках боксів, кнопки на темній палітрі; сплінт: розділи «Сегментація» і «Корекція FDI», повторна сегментація зубів; Cadiax: розрізи перенесено в оверлей на сцені."
+    },
     {
       "version": "1.0.8",
       "published": "2026-11-12",
